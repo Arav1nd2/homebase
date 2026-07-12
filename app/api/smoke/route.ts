@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { desc } from "drizzle-orm";
+import { withDb } from "@/lib/db";
+import { smokeTest } from "@/db/schema";
 import { smokeTestInputSchema } from "@/lib/validation/smoke";
 import { errorResponse } from "@/lib/api-response";
 
@@ -9,10 +11,10 @@ import { errorResponse } from "@/lib/api-response";
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const latest = await prisma.smokeTest.findFirst({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json({ data: latest ?? null });
+    const latest = await withDb((db) =>
+      db.select().from(smokeTest).orderBy(desc(smokeTest.createdAt)).limit(1),
+    );
+    return NextResponse.json({ data: latest[0] ?? null });
   } catch {
     return errorResponse(500, "INTERNAL_ERROR", "Could not reach the database.");
   }
@@ -32,8 +34,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const created = await prisma.smokeTest.create({ data: parsed.data });
-    return NextResponse.json({ data: created }, { status: 201 });
+    const created = await withDb((db) => db.insert(smokeTest).values(parsed.data).returning());
+    return NextResponse.json({ data: created[0] }, { status: 201 });
   } catch {
     return errorResponse(500, "INTERNAL_ERROR", "Could not reach the database.");
   }

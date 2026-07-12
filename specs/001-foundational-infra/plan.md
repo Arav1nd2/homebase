@@ -6,6 +6,21 @@
 
 **Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
 
+**Post-implementation amendment (2026-07-12)**: This plan and the rest of
+this feature's docs (`research.md`, `data-model.md`, `contracts/`,
+`quickstart.md`) were written against **Prisma**. During implementation,
+Prisma on Cloudflare Workers hit a series of unresolved issues (native
+engine binary detection needing filesystem access; the newer
+engine-free generator still dynamically compiling a WASM query
+compiler, which Workers disallows). The project switched to **Drizzle
+ORM** instead — a plain TypeScript query builder over `pg` with no
+codegen, no engine binary, and no WASM, which is Cloudflare's own
+documented pattern for Hyperdrive. Constitution Principle II was amended
+accordingly (Prisma → Drizzle). References to Prisma/`schema.prisma`/
+`prisma migrate` below are historical; the actual code uses `db/schema.ts`,
+`lib/db.ts`, and `drizzle-kit`. See `.specify/memory/constitution.md` for
+the current mandated ORM.
+
 ## Summary
 
 Stand up the walking skeleton for Hombase: a Next.js/TypeScript app with one

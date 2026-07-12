@@ -6,13 +6,13 @@ the full stack, local dev, CI, and deploy pipeline all work.
 
 ## Stack
 
-Next.js (App Router) + TypeScript, Prisma + Supabase Postgres, deployed to
-Cloudflare Workers via OpenNext. See `.specify/memory/constitution.md` for
-the full set of project principles.
+Next.js (App Router) + TypeScript, Drizzle ORM + Supabase Postgres, deployed
+to Cloudflare Workers via OpenNext. See `.specify/memory/constitution.md`
+for the full set of project principles.
 
 ## Prerequisites (one-time)
 
-- Node.js 20+
+- Node.js 22+ (Wrangler 4.x requires it)
 - A local container runtime (Docker or equivalent) — required by the
   Supabase CLI. If `supabase start` hangs or errors, **check that your
   container runtime is actually running first**; that's the most common
@@ -23,35 +23,52 @@ the full set of project principles.
 
 ```bash
 npm install
-cp .env.local.example .env.local
-npm run dev   # runs: supabase start -> prisma migrate deploy -> next dev
+npm run dev   # runs: supabase start -> migrate local DB -> build -> Workers preview
 ```
 
-Open <http://localhost:3000>. Everything — Postgres, Auth, Storage — runs
+Open the URL `preview:workers` prints (a local Miniflare-emulated Workers
+runtime, not `next dev`). Everything — Postgres, Auth, Storage — runs
 locally via the Supabase CLI; nothing here talks to production or any cloud
-service (enforced by a guard in `lib/prisma.ts` — a non-local `DATABASE_URL`
-is rejected outside the real Cloudflare Workers runtime).
+service.
+
+**Environment Parity (constitution Principle VI)**: local dev, CI, and
+production all resolve the database through the exact same code path —
+`getCloudflareContext().env.HYPERDRIVE` — never a raw `DATABASE_URL` at
+runtime. Locally that binding's `localConnectionString` (in
+`wrangler.jsonc`) points at the Supabase CLI stack instead of the real
+Hyperdrive service; that's the only difference. There's no Node-only
+fallback to accidentally diverge from production, and no separate "local
+mode" of `lib/db.ts` to keep in sync. The tradeoff: no Next.js
+`next dev` hot-reload — a full `build:workers` + `preview:workers` cycle is
+slower per iteration, but it's the only thing that's actually guaranteed to
+behave like production.
 
 Stop with `npm run db:stop`. Data persists across restarts unless you run
 `npm run db:reset`.
 
+**Schema changes**: edit `db/schema.ts`, then `npm run db:generate-migration`
+(runs `drizzle-kit generate`, diffs the schema and writes a new SQL file
+under `drizzle/`) — commit the generated migration file alongside the
+schema change. Apply it locally with `npm run db:migrate:local`.
+
 ## Tests
 
 ```bash
-npm run test:unit   # Vitest — shared/data-access code
-npm run test:e2e    # Playwright — full round trip (needs the local stack running)
+npm run test:unit         # Vitest — shared/data-access code, no server needed
+npm run test:e2e          # Playwright — builds + starts + tears down the real
+                           # Workers preview itself (playwright.config.ts
+                           # `webServer`); reuses `npm run dev` if it's
+                           # already running. Needs the local Supabase stack
+                           # up (`npm run db:start`) first.
+npm run test:integration  # One-shot, fully hermetic: resets the local DB,
+                           # migrates, runs test:e2e, stops the DB. This is
+                           # what CI runs (US3) — safe to run repeatedly with
+                           # no leftover state between runs.
+npm test                  # test:unit + test:integration
 ```
 
-For a higher-fidelity e2e run against the actual Cloudflare Workers runtime
-(not just `next dev`):
-
-```bash
-npm run build:workers
-npm run preview:workers &
-PLAYWRIGHT_BASE_URL=http://localhost:8771 npm run test:e2e
-```
-
-(Port depends on what `preview:workers` reports on startup.)
+e2e/integration tests always run against the real Workers runtime (never
+`next dev`), per Environment Parity above.
 
 ## Production setup (manual, one-time — requires your accounts)
 
@@ -68,23 +85,27 @@ with account access and can't be automated by an agent:
      in CI/CD below). **Do not use the plain "direct connection"**
      (`db.<ref>.supabase.co:5432`) for migrations from CI — it's IPv6-only
      unless you've paid for Supabase's IPv4 add-on, and GitHub Actions
-     runners are IPv4-only; `prisma migrate deploy` will fail there with
-     `P1001: Can't reach database server`. The session pooler supports the
-     same prepared-statement/locking behavior Migrate needs, over IPv4.
+     runners are IPv4-only; `drizzle-kit migrate` will fail to connect
+     there. The session pooler supports the same locking behavior Migrate
+     needs, over IPv4.
 2. **Create a Cloudflare Hyperdrive config** pointing at the **transaction
    pooler** connection string, then fill in the `hyperdrive` block in
    `wrangler.jsonc` with its id (see `localConnectionString` note there too
    — needed for `opennextjs-cloudflare deploy`, not just `wrangler dev`).
-3. **Run migrations against production**: `DATABASE_URL=<session-pooler-url> npx prisma migrate deploy`.
+3. **Run migrations against production**: `DATABASE_URL=<session-pooler-url> npx drizzle-kit migrate`.
 4. **Deploy**: `npm run deploy:workers` (or let `deploy.yml` do it — see below).
 5. **Verify**: visit the production URL, submit the smoke-test form, reload
    — the value should persist within a few seconds.
 
 ## CI/CD (GitHub, manual one-time setup)
 
-`.github/workflows/ci.yml` runs lint/typecheck/unit/e2e on every PR.
-`.github/workflows/deploy.yml` deploys to production on merge to `main`,
-gated by manual approval. To finish wiring this up on GitHub itself (not
+`.github/workflows/ci.yml` runs lint/typecheck/unit/e2e on every PR — the
+e2e job runs against the real Cloudflare Workers runtime locally (see
+Environment Parity below), so a passing e2e run is the actual correctness
+signal, not a check against production. `.github/workflows/deploy.yml`
+deploys to production on merge to `main`, gated by manual approval, and
+does not run any test against the live database (deliberately — see
+constitution Principle VI). To finish wiring this up on GitHub itself (not
 doable from a checked-out repo):
 
 1. **Branch protection**: on `main`, require the `ci.yml` checks to pass

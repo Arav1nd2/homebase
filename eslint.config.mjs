@@ -17,11 +17,13 @@ const eslintConfig = [
       "node_modules/**",
       ".next/**",
       ".open-next/**",
+      ".wrangler/**",
       "dist/**",
       "build/**",
       "coverage/**",
       "playwright-report/**",
       "test-results/**",
+      "next-env.d.ts",
     ],
   },
 ];

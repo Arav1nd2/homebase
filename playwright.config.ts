@@ -1,14 +1,25 @@
 import { defineConfig } from "@playwright/test";
 
-// baseURL defaults to `next dev`'s port for local iteration; CI overrides it
-// to the OpenNext/Wrangler local Workers preview URL (research.md §2, T025).
+const PORT = 8787;
+
+// Always the real Workers runtime (Miniflare via Wrangler), never `next dev`
+// — constitution Principle VI, Environment Parity. `webServer` builds and
+// starts it, waits until it's ready, and tears it down after the run;
+// `reuseExistingServer` lets a `npm run dev` already running locally be
+// reused instead of starting a second instance.
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+    baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
+  },
+  webServer: {
+    command: "npm run build:workers && npm run preview:workers",
+    url: `http://localhost:${PORT}`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
 });

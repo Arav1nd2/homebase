@@ -27,9 +27,6 @@ playwright-report/
 test-results/
 /blob-report/
 
-# Prisma
-prisma/generated/
-
 # Logs
 *.log
 npm-debug.log*
