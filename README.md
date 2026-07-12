@@ -58,12 +58,24 @@ PLAYWRIGHT_BASE_URL=http://localhost:8771 npm run test:e2e
 This repository ships the code and config; the following steps need a human
 with account access and can't be automated by an agent:
 
-1. **Create a Supabase cloud project** (supabase.com). Note its pooled
-   (Supavisor, transaction-mode) connection string.
-2. **Create a Cloudflare Hyperdrive config** pointing at that connection
-   string, then uncomment and fill in the `hyperdrive` block in
-   `wrangler.jsonc` with its id.
-3. **Run migrations against production**: `DATABASE_URL=<supabase-direct-url> npx prisma migrate deploy`.
+1. **Create a Supabase cloud project** (supabase.com). From the **Connect**
+   button on the project page, you'll need two different connection
+   strings for two different jobs — do not mix them up:
+   - **Transaction pooler** (Supavisor, port `6543`) — for the app's live
+     queries, via Cloudflare Hyperdrive (step 2 below).
+   - **Session pooler** (port `5432`, `aws-<region>.pooler.supabase.com`
+     host) — for running migrations (step 3, and `PRODUCTION_DATABASE_URL`
+     in CI/CD below). **Do not use the plain "direct connection"**
+     (`db.<ref>.supabase.co:5432`) for migrations from CI — it's IPv6-only
+     unless you've paid for Supabase's IPv4 add-on, and GitHub Actions
+     runners are IPv4-only; `prisma migrate deploy` will fail there with
+     `P1001: Can't reach database server`. The session pooler supports the
+     same prepared-statement/locking behavior Migrate needs, over IPv4.
+2. **Create a Cloudflare Hyperdrive config** pointing at the **transaction
+   pooler** connection string, then fill in the `hyperdrive` block in
+   `wrangler.jsonc` with its id (see `localConnectionString` note there too
+   — needed for `opennextjs-cloudflare deploy`, not just `wrangler dev`).
+3. **Run migrations against production**: `DATABASE_URL=<session-pooler-url> npx prisma migrate deploy`.
 4. **Deploy**: `npm run deploy:workers` (or let `deploy.yml` do it — see below).
 5. **Verify**: visit the production URL, submit the smoke-test form, reload
    — the value should persist within a few seconds.
@@ -80,9 +92,15 @@ doable from a checked-out repo):
 2. **Production environment**: create a GitHub Environment named
    `production` with at least one required reviewer — this is the
    manual-approval gate (FR-012/FR-013).
-3. **Secrets**: add `CLOUDFLARE_API_TOKEN` and the production `DATABASE_URL`
-   (for the migration step) as secrets scoped to the `production`
-   environment only, so pull requests from forks never see them.
+3. **Secrets**, scoped to the `production` environment only (so pull
+   requests from forks never see them):
+   - `CLOUDFLARE_API_TOKEN` — "Edit Cloudflare Workers" template, scoped to
+     your account
+   - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard sidebar or
+     `wrangler whoami`
+   - `PRODUCTION_DATABASE_URL` — the **session pooler** connection string
+     (see step 1 above under Production setup) — not the direct connection,
+     it'll fail with `P1001` from GitHub Actions' IPv4-only runners.
 
 ## Manual rollback
 
