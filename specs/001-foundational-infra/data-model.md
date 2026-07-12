@@ -1,5 +1,9 @@
 # Data Model: Foundational Project Infrastructure
 
+> **Amendment (2026-07-12)**: written against Prisma; the project switched
+> to Drizzle ORM post-implementation — see `plan.md`'s amendment note. The
+> Prisma model below is historical; the real schema is `db/schema.ts`.
+
 ## SmokeTest
 
 The only data entity this feature introduces. A throwaway diagnostic record

@@ -1,5 +1,11 @@
 # Research: Foundational Project Infrastructure
 
+> **Amendment (2026-07-12)**: §1 (Prisma + Hyperdrive via `@prisma/adapter-pg`)
+> is superseded — the project switched to Drizzle ORM post-implementation
+> after Prisma proved unworkable on Workers. See `plan.md`'s amendment note.
+> Drizzle uses the same underlying `pg` driver and Hyperdrive binding
+> pattern described here, just without Prisma's codegen/engine layer.
+
 All items below were resolved during planning; none remain as
 `NEEDS CLARIFICATION`.
 

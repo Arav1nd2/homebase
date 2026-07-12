@@ -1,5 +1,9 @@
 # Quickstart: Foundational Project Infrastructure
 
+> **Amendment (2026-07-12)**: `prisma migrate deploy` commands below are
+> historical — use `drizzle-kit migrate` (see README.md). See `plan.md`'s
+> amendment note for why.
+
 Validation guide for this feature. Assumes Node.js 20+, Docker (or
 equivalent, for the Supabase CLI), and the Supabase CLI are installed —
 one-time prerequisites (see spec Assumptions).

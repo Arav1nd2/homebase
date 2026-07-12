@@ -24,7 +24,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
       - run: npm run typecheck
 
   unit:
@@ -36,7 +35,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
       - run: npm run test:unit
 
   # Hermetic, isolated e2e run (US3): a brand-new local Supabase CLI stack is
@@ -60,29 +58,20 @@ jobs:
       - name: Start a fresh local Supabase stack
         run: supabase start
       - name: Apply migrations to the fresh local stack
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
+        run: npm run db:migrate:local
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Build for Cloudflare Workers (OpenNext)
-        run: npm run build:workers
-      - name: Start the local Workers preview
-        run: npm run preview:workers &
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
-      - name: Wait for the preview server to be ready
-        run: |
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:8771 && exit 0
-            sleep 2
-          done
-          echo "Workers preview never became ready" >&2
-          exit 1
+      # `npm run test:e2e` (playwright.config.ts's `webServer`) builds,
+      # starts, and waits for the real Workers preview itself, then tears it
+      # down after — no manual build/background-start/curl-poll steps here.
+      # It resolves the database purely through the Hyperdrive binding (its
+      # `localConnectionString` in wrangler.jsonc), the same code path
+      # production uses — no DATABASE_URL is set for this step. A fallback
+      # here would mask bugs in that binding-access code, which is exactly
+      # what happened before this comment was added (a broken binding check
+      # silently fell back to a working DATABASE_URL in CI).
       - name: Run Playwright e2e tests
         run: npm run test:e2e
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:8771
       - name: Tear down the local Supabase stack (always, so no state leaks between runs)
         if: always()
         run: supabase stop --no-backup

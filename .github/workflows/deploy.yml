@@ -22,11 +22,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
       # FR-009 / G1: keep production's schema in lockstep with the same
       # migration history local/CI use — never let it drift.
       - name: Apply migrations to production
-        run: npx prisma migrate deploy
+        run: npx drizzle-kit migrate
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
       - name: Build for Cloudflare Workers (OpenNext)
@@ -36,3 +35,8 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # No test/smoke step runs against production here, deliberately — see
+      # constitution Principle VI's Environment Parity rule. Correctness is
+      # established by ci.yml's e2e job running the exact same binding-access
+      # code path (real Workers runtime via local preview) before this
+      # workflow ever runs, not by writing to the live database.
