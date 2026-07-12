@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:unit
+
+  # Hermetic, isolated e2e run (US3): a brand-new local Supabase CLI stack is
+  # provisioned fresh for every single run of this job, torn down at the end
+  # regardless of outcome, and the app under test runs against the actual
+  # Cloudflare Workers local preview (not plain `next dev`) so Workers
+  # incompatibilities surface here, not in production. No step in this job
+  # talks to any live/cloud service (FR-006, FR-007, FR-008; SC-004, SC-006).
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start a fresh local Supabase stack
+        run: supabase start
+      - name: Apply migrations to the fresh local stack
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Build for Cloudflare Workers (OpenNext)
+        run: npm run build:workers
+      - name: Start the local Workers preview
+        run: npm run preview:workers &
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
+      - name: Wait for the preview server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8771 && exit 0
+            sleep 2
+          done
+          echo "Workers preview never became ready" >&2
+          exit 1
+      - name: Run Playwright e2e tests
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:8771
+      - name: Tear down the local Supabase stack (always, so no state leaks between runs)
+        if: always()
+        run: supabase stop --no-backup

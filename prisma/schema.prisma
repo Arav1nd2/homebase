@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// `url` is required here for Prisma 6.x Migrate CLI commands to know where
+// to connect; PrismaClient itself uses the adapter-pg driver adapter at
+// runtime (lib/prisma.ts), not this URL directly. Revisit when upgrading to
+// Prisma 7's prisma.config.ts-based connection config.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Throwaway diagnostic record proving the browser -> API -> database round
+// trip works. No `updatedAt`/`userId` by design: write-once, no auth in this
+// feature (FR-016). Delete this model once the first real module ships and
+// a follow-up feature adds the auth-checked Route Handler convention.
+// See specs/001-foundational-infra/data-model.md.
+model SmokeTest {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+}

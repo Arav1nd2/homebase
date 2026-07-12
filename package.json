@@ -1,0 +1,46 @@
+{
+  "name": "hombase",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run db:start && npx prisma migrate deploy && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "build:workers": "opennextjs-cloudflare build",
+    "preview:workers": "opennextjs-cloudflare preview",
+    "deploy:workers": "opennextjs-cloudflare deploy"
+  },
+  "dependencies": {
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@prisma/client": "^6.2.0",
+    "@prisma/adapter-pg": "^6.2.0",
+    "pg": "^8.13.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/pg": "^8.11.0",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "prettier": "^3.4.0",
+    "prisma": "^6.2.0",
+    "vitest": "^2.1.0",
+    "@playwright/test": "^1.49.0",
+    "@opennextjs/cloudflare": "^1.20.0",
+    "wrangler": "^4.86.0"
+  }
+}
