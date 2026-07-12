@@ -1,24 +1,29 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "hombase",
-  "main": ".open-next/worker.js",
-  "compatibility_date": "2025-01-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  },
-  // T016 (manual, requires a Cloudflare account): create a Hyperdrive config
-  // pointing at the production Supabase Postgres connection-pooled endpoint
-  // (Supavisor, transaction mode), then uncomment and fill in the id below.
-  // See research.md §1 and quickstart.md.
-  // "hyperdrive": [
-  //   {
-  //     "binding": "HYPERDRIVE",
-  //     "id": "<hyperdrive-config-id>"
-  //   }
-  // ],
-  "observability": {
-    "enabled": true
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hombase",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-01-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "0d061e7b327f4abba58b651ae47640d1",
+			// Not used for the real production connection (that goes through
+			// the Hyperdrive service via `id` above) — only needed because
+			// `opennextjs-cloudflare`'s deploy command resolves config through
+			// Wrangler's local platform-proxy layer, which validates Hyperdrive
+			// bindings even during `deploy`. Safe to commit: fixed local-only
+			// default from `supabase start`, not a real credential.
+			"localConnectionString": "postgresql://postgres:postgres@localhost:54322/postgres"
+		}
+	]
 }
