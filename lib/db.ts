@@ -26,8 +26,8 @@ export function resolveConnectionString(): string {
   if (!connectionString) {
     throw new Error(
       "No HYPERDRIVE binding found on the Cloudflare context. This code must run " +
-        "under the real Workers runtime (`npm run preview:workers`, not `next dev`) " +
-        "with `hyperdrive` configured in wrangler.jsonc.",
+      "under the real Workers runtime (`npm run preview:workers`, not `next dev`) " +
+      "with `hyperdrive` configured in wrangler.jsonc.",
     );
   }
 
