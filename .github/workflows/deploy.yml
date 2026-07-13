@@ -30,16 +30,6 @@ jobs:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
       - name: Build for Cloudflare Workers (OpenNext)
         run: npm run build:workers
-      # DATABASE_URL is a Worker secret (`wrangler secret put`), not code —
-      # it persists on the Worker independently of deploys, but re-setting
-      # it here every run keeps it in sync with the GitHub secret with no
-      # separate manual step. Uses the transaction pooler, NOT the session
-      # pooler PRODUCTION_DATABASE_URL above uses for migrations.
-      - name: Set production DATABASE_URL secret
-        run: echo "${{ secrets.PRODUCTION_APP_DATABASE_URL }}" | npx wrangler secret put DATABASE_URL
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Cloudflare Workers
         run: npm run deploy:workers
         env:

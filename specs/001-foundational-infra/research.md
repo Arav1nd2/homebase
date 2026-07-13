@@ -5,22 +5,6 @@
 > after Prisma proved unworkable on Workers. See `plan.md`'s amendment note.
 > Drizzle uses the same underlying `pg` driver and Hyperdrive binding
 > pattern described here, just without Prisma's codegen/engine layer.
->
-> **Amendment (2026-07-13)**: §1's Hyperdrive binding is itself superseded —
-> a production incident found Hyperdrive intermittently hanging for minutes
-> ("Timed out while waiting for a message from the origin database" on both
-> GET and POST) before failing, traced to a stuck/locked session on the
-> origin outliving the request that opened it. `lib/db.ts` now connects
-> directly over TCP (`pg` via Workers' `nodejs_compat`, same as it would
-> from a normal Node server) to Supabase's transaction pooler, using a
-> `DATABASE_URL` secret instead of the Hyperdrive binding — removing the
-> extra hop and its independent connection-pool/timeout behavior. Constitution
-> Principle VI was amended accordingly (v3.0.0 → v3.1.0). Environment Parity
-> is preserved: `DATABASE_URL` is resolved through the exact same
-> `lib/db.ts` code path in local dev, CI, and production, differing only in
-> which connection string it points at (`.dev.vars` locally/CI vs.
-> `wrangler secret put` in production) — the same guarantee Hyperdrive's
-> `localConnectionString` gave, via a different mechanism.
 
 All items below were resolved during planning; none remain as
 `NEEDS CLARIFICATION`.
