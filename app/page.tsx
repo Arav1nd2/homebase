@@ -65,7 +65,7 @@ export default function SmokeTestPage() {
 
   return (
     <main style={{ maxWidth: 480, margin: "3rem auto", fontFamily: "sans-serif" }}>
-      <h1>Hombase smoke test</h1>
+      <h1>HomeBase smoke test</h1>
       <p>Proves browser → API → database → browser works end-to-end. No sign-in required.</p>
 
       {error && (

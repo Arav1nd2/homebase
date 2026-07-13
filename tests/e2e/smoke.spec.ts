@@ -23,7 +23,7 @@ test("round-trips a message through the browser, API, and database (US1)", async
   const message = `smoke-${Date.now()}`;
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Hombase smoke test" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "HomeBase smoke test" })).toBeVisible();
 
   await page.getByPlaceholder("Type a message").fill(message);
   await page.getByRole("button", { name: "Save" }).click();

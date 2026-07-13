@@ -39,7 +39,7 @@ Sync Impact Report
 - Follow-up TODOs: none
 -->
 
-# Hombase Constitution
+# HomeBase Constitution
 
 ## Core Principles
 
@@ -116,7 +116,7 @@ the wrong default and wastes effort on the less-used surface.
 
 ### IV. Installable, Reliable PWA on iOS Safari and Android Chrome
 
-Hombase MUST remain installable as a Progressive Web App on both iOS
+HomeBase MUST remain installable as a Progressive Web App on both iOS
 (Safari "Add to Home Screen") and Android (Chrome install prompt), via a
 valid `manifest.json` (name, icons at required sizes, `display: standalone`,
 theme/background color) and a service worker managed through `next-pwa` (or
