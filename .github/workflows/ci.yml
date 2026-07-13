@@ -1,7 +1,18 @@
 name: CI
 
+# `push: main` exists for cache seeding, not correctness. GitHub Actions
+# scopes a `pull_request`-triggered run's caches to that PR's merge ref —
+# they can only be restored by re-runs of the *same* PR, never by other
+# PRs (confirmed against GitHub's cache docs). With only `pull_request:`,
+# this workflow never ran on `main` itself, so no cache was ever saved to
+# the default branch for new PR branches to fall back to — every new PR
+# was a guaranteed miss on the npm (via setup-node's `cache: npm`),
+# Supabase Docker image, and Playwright Chromium caches below, no matter
+# how many times ci.yml had run elsewhere.
 on:
   pull_request:
+  push:
+    branches: [main]
 
 jobs:
   lint:
@@ -70,6 +81,12 @@ jobs:
         with:
           path: /tmp/supabase-docker-images.tar
           key: supabase-docker-images-2.109.1-${{ hashFiles('supabase/config.toml') }}
+          # Falls back to the most recent same-CLI-version cache on a
+          # config.toml change, instead of a hard miss — config tweaks
+          # (e.g. a new local service setting) rarely change which images
+          # get pulled, so partial credit beats a full re-pull.
+          restore-keys: |
+            supabase-docker-images-2.109.1-
       - name: Load cached Docker images
         if: steps.docker-cache.outputs.cache-hit == 'true'
         run: docker load -i /tmp/supabase-docker-images.tar

@@ -1,4 +1,4 @@
-~~# HomeBase
+# HomeBase
 
 A personal life-management app built with Next.js and deployed to Cloudflare
 Workers, backed by Supabase Postgres.
