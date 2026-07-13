@@ -15,7 +15,8 @@ export async function GET(): Promise<NextResponse> {
       db.select().from(smokeTest).orderBy(desc(smokeTest.createdAt)).limit(1),
     );
     return NextResponse.json({ data: latest[0] ?? null });
-  } catch {
+  } catch (err) {
+    console.error("smoke route DB error:", err);
     return errorResponse(500, "INTERNAL_ERROR", "Could not reach the database.");
   }
 }
@@ -36,7 +37,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const created = await withDb((db) => db.insert(smokeTest).values(parsed.data).returning());
     return NextResponse.json({ data: created[0] }, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("smoke route DB error:", err);
     return errorResponse(500, "INTERNAL_ERROR", "Could not reach the database.");
   }
 }
