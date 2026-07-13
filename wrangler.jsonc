@@ -1,39 +1,37 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "hombase",
-	"main": ".open-next/worker.js",
-	"compatibility_date": "2026-07-01",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
-	"observability": {
-		"enabled": true
-	},
-	// The Supabase project (and its Hyperdrive origin) lives in
-	// ap-northeast-1 (Tokyo). Without Smart Placement, the Worker runs at
-	// the Cloudflare PoP nearest each user, so every DB round trip pays
-	// full user-to-Tokyo network distance on top of the query itself —
-	// this is what was causing GET APIs to be so slow. Smart Placement
-	// lets Cloudflare execute the Worker near the database instead.
-	"placement": {
-		"mode": "smart"
-	},
-	"hyperdrive": [
-		{
-			"binding": "HYPERDRIVE",
-			"id": "0d061e7b327f4abba58b651ae47640d1",
-			// Not used for the real production connection (that goes through
-			// the Hyperdrive service via `id` above). This is what `npm run
-			// preview:workers` (local dev, per constitution Principle VI
-			// Environment Parity) and `opennextjs-cloudflare deploy` resolve
-			// through Wrangler's local platform-proxy layer instead. Safe to
-			// commit: fixed local-only default from `supabase start`, not a
-			// real credential.
-			"localConnectionString": "postgresql://postgres:postgres@localhost:54322/postgres"
-		}
-	]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hombase",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  // The Supabase project (and its Hyperdrive origin) lives in
+  // ap-northeast-1 (Tokyo). Without Smart Placement, the Worker runs at
+  // the Cloudflare PoP nearest each user, so every DB round trip pays
+  // full user-to-Tokyo network distance on top of the query itself —
+  // this is what was causing GET APIs to be so slow. Smart Placement
+  // lets Cloudflare execute the Worker near the database instead.
+  "placement": {
+    "mode": "smart",
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "78565da38225438ca42d98a7dbbce21c",
+      // Not used for the real production connection (that goes through
+      // the Hyperdrive service via `id` above). This is what `npm run
+      // preview:workers` (local dev, per constitution Principle VI
+      // Environment Parity) and `opennextjs-cloudflare deploy` resolve
+      // through Wrangler's local platform-proxy layer instead. Safe to
+      // commit: fixed local-only default from `supabase start`, not a
+      // real credential.
+      "localConnectionString": "postgresql://postgres:postgres@localhost:54322/postgres",
+    },
+  ],
 }
