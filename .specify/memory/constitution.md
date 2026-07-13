@@ -1,5 +1,27 @@
 <!--
 Sync Impact Report
+- Version change: 3.0.0 → 3.1.0
+- Modified principles (MINOR: swaps the specific mechanism Principle VI
+  names for Postgres access; the principle's intent — one code path in
+  local/CI/production, connect-query-close per request, Environment Parity
+  — is unchanged):
+  - VI. Cloudflare Workers Runtime Constraints: "MUST connect exclusively
+    through the Cloudflare Hyperdrive binding" → "MUST connect via
+    DATABASE_URL (a direct TCP connection over Workers' nodejs_compat, to
+    Supabase's transaction pooler)". Reason: a production incident showed
+    Hyperdrive intermittently returning "Timed out while waiting for a
+    message from the origin database" for minutes at a time on both GET and
+    POST, traced to a stuck/locked origin session outliving the request
+    that opened it. Removing Hyperdrive (an extra hop with its own
+    connection-pool and timeout behavior outside this project's control)
+    resolved it. DATABASE_URL still satisfies Environment Parity: it's the
+    exact same `lib/db.ts` code path in local dev (`.dev.vars`), CI
+    (`.dev.vars`, written fresh per run), and production (`wrangler secret
+    put`), differing only in which connection string that path resolves —
+    the same shape of guarantee Hyperdrive gave, via a different mechanism.
+    See specs/001-foundational-infra/research.md's amendment note for the
+    full incident account.
+- Previous entry (retained for history):
 - Version change: 2.2.0 → 3.0.0
 - Modified principles (MAJOR: redefines the mandated ORM, a
   backward-incompatible stack change per this constitution's own
@@ -86,7 +108,7 @@ or renaming another module's tables. To keep that true:
   ad hoc schema edits directly against shared/prod data are not permitted.
 - Database code MUST NOT hold a long-lived connection/pool across requests
   (Workers isolates are request-scoped — Principle VI); connect, query, and
-  close per request, relying on Hyperdrive's own pooling.
+  close per request, relying on Supabase's transaction pooler for pooling.
 
 **Rationale**: Schema conflicts (two modules fighting over a table or column
 name) are the most likely source of cross-module breakage as new tools get
@@ -202,9 +224,13 @@ Route Handlers or middleware, confirm it:
   local/CI testing, not only discoverable in production.
 
 The ORM (Drizzle, see Principle II) MUST connect to Postgres exclusively
-through the Cloudflare Hyperdrive binding, never a driver's default
-long-lived pool assumption — Hyperdrive does the pooling at the edge, the
-Worker just connects, queries, and closes per request.
+through `DATABASE_URL` (a direct TCP connection, via Workers'
+`nodejs_compat`, to Supabase's transaction pooler), never a driver's
+default long-lived pool assumption — the transaction pooler does the
+pooling near the origin, the Worker just connects, queries, and closes per
+request. (Amendment 2026-07-13: previously mandated the Cloudflare
+Hyperdrive binding; dropped after a production incident where Hyperdrive
+itself became the point of failure — see Sync Impact Report above.)
 
 When a needed library is genuinely Node-only and has no edge-compatible
 alternative, that is a signal to reconsider the feature's implementation,
@@ -340,4 +366,4 @@ begins; unresolved conflicts MUST be simplified away, resolved via the
 Bootstrap Sequencing Exception above, or the constitution amended first —
 never silently bypassed.
 
-**Version**: 3.0.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-12
+**Version**: 3.1.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-13

@@ -2,8 +2,8 @@ import { expect, request, test } from "@playwright/test";
 
 // Direct API-level check, independent of the UI: fails with an unambiguous
 // "database connection" signal rather than a generic UI assertion failure,
-// so a broken DB binding (e.g. the Hyperdrive access bug this test was
-// added to catch) is immediately distinguishable from a broken page.
+// so a broken DB connection is immediately distinguishable from a broken
+// page.
 test("the API can actually reach the database (US1)", async ({ baseURL }) => {
   const api = await request.newContext({ baseURL });
   const message = `smoke-api-${Date.now()}`;

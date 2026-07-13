@@ -9,18 +9,18 @@ vi.mock("@opennextjs/cloudflare", () => ({
 const mockedGetContext = vi.mocked(getCloudflareContext);
 
 describe("resolveConnectionString", () => {
-  it("reads the connection string from the HYPERDRIVE binding", () => {
+  it("reads the connection string from DATABASE_URL", () => {
     mockedGetContext.mockReturnValue({
-      env: { HYPERDRIVE: { connectionString: "postgresql://user:pass@hyperdrive/db" } },
+      env: { DATABASE_URL: "postgresql://user:pass@pooler.supabase.com:6543/postgres" },
     } as unknown as ReturnType<typeof getCloudflareContext>);
 
-    expect(resolveConnectionString()).toBe("postgresql://user:pass@hyperdrive/db");
+    expect(resolveConnectionString()).toBe("postgresql://user:pass@pooler.supabase.com:6543/postgres");
   });
 
-  it("throws a clear error when the HYPERDRIVE binding is missing", () => {
+  it("throws a clear error when DATABASE_URL is missing", () => {
     mockedGetContext.mockReturnValue({ env: {} } as unknown as ReturnType<typeof getCloudflareContext>);
 
-    expect(() => resolveConnectionString()).toThrow(/No HYPERDRIVE binding found/);
+    expect(() => resolveConnectionString()).toThrow(/No DATABASE_URL found/);
   });
 
   it("propagates when getCloudflareContext() itself throws (not the real Workers runtime)", () => {
