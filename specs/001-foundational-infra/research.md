@@ -92,7 +92,7 @@ Supabase and requires no custom tooling.
 
 **Decision**: Per user direction during planning, this feature does not
 wire up Supabase Auth, the Route Handler auth-check convention (Principle
-V), or the PWA manifest/service worker (Principle IV). Hombase is being
+V), or the PWA manifest/service worker (Principle IV). HomeBase is being
 bootstrapped incrementally: this feature is the first slice (walking
 skeleton + environments + CI/CD), and dedicated follow-up foundational
 features will add auth and PWA support before any real product module is

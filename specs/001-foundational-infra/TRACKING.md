@@ -3,8 +3,8 @@
 No GitHub repository exists yet for this checkout, so these can't be filed
 as GitHub issues yet — convert them once the repo is pushed. Required by
 `.specify/memory/constitution.md`'s Bootstrap Sequencing Exception and
-`specs/001-foundational-infra/plan.md` Complexity Tracking: **both MUST land
-before any real product/module feature is built.**
+`plan.md` Complexity Tracking: **both MUST land before any real
+product/module feature is built.**
 
 ## 1. Supabase Auth + Route Handler auth-check convention
 

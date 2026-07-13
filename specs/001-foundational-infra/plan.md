@@ -23,7 +23,7 @@ the current mandated ORM.
 
 ## Summary
 
-Stand up the walking skeleton for Hombase: a Next.js/TypeScript app with one
+Stand up the walking skeleton for HomeBase: a Next.js/TypeScript app with one
 public smoke-test page proving browser → API Route Handler → Prisma →
 Supabase Postgres → back to browser works, deployed to Cloudflare Workers
 via OpenNext. Pair it with a fully local, offline-capable Supabase CLI dev

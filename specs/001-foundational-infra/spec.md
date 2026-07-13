@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Set up the foundational project infrastructure for Hombase before any feature UI is built. This includes: a working Next.js TypeScript project scaffold deployed end-to-end (a trivial page that proves the full stack works, from frontend through API route through database), a local development environment using the Supabase CLI for a fully local Postgres/Auth/Storage stack so development works offline, a hermetic end-to-end test environment using the same local Supabase CLI stack spun up fresh in CI with Playwright running integration tests against it (isolated per test run, no shared state between runs, no dependency on any live cloud service), a production environment on Cloudflare Workers with a real Supabase cloud project, and a CI/CD pipeline that runs linting/type-checking/unit tests/e2e tests on every pull request, and deploys to production only after those checks pass and a manual approval step is completed."
+**Input**: User description: "Set up the foundational project infrastructure for HomeBase before any feature UI is built. This includes: a working Next.js TypeScript project scaffold deployed end-to-end (a trivial page that proves the full stack works, from frontend through API route through database), a local development environment using the Supabase CLI for a fully local Postgres/Auth/Storage stack so development works offline, a hermetic end-to-end test environment using the same local Supabase CLI stack spun up fresh in CI with Playwright running integration tests against it (isolated per test run, no shared state between runs, no dependency on any live cloud service), a production environment on Cloudflare Workers with a real Supabase cloud project, and a CI/CD pipeline that runs linting/type-checking/unit tests/e2e tests on every pull request, and deploys to production only after those checks pass and a manual approval step is completed."
 
 ## Clarifications
 
@@ -29,7 +29,7 @@
 
 <!--
   This feature has no end-user-facing UI. The "user" for these scenarios is the
-  developer/maintainer of Hombase, who needs a trustworthy foundation to build
+  developer/maintainer of HomeBase, who needs a trustworthy foundation to build
   every future module on.
 -->
 
@@ -142,7 +142,7 @@ accidentally go live.
 **Why this priority**: This depends on User Stories 1-3 already existing
 (there must be a production environment, a local dev flow producing code to
 check, and a trustworthy test environment to run checks against), so it is
-correctly built last, but it's what makes every future change to Hombase
+correctly built last, but it's what makes every future change to HomeBase
 safe to ship without manual, ad hoc verification.
 
 **Independent Test**: Open a pull request that intentionally fails one

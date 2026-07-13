@@ -1,145 +1,135 @@
-# Hombase
+~~# HomeBase
 
-Personal life-management app. This is the foundational walking skeleton
-(see `specs/001-foundational-infra/`) — no real modules yet, just proof that
-the full stack, local dev, CI, and deploy pipeline all work.
+A personal life-management app built with Next.js and deployed to Cloudflare
+Workers, backed by Supabase Postgres.
 
-## Stack
+## Tech stack
 
-Next.js (App Router) + TypeScript, Drizzle ORM + Supabase Postgres, deployed
-to Cloudflare Workers via OpenNext. See `.specify/memory/constitution.md`
-for the full set of project principles.
+- **Framework**: Next.js (App Router) + TypeScript
+- **Database**: Supabase Postgres, accessed via Drizzle ORM
+- **Hosting**: Cloudflare Workers, via the OpenNext adapter
+- **Testing**: Vitest (unit), Playwright (end-to-end)
+- **CI/CD**: GitHub Actions
 
-## Prerequisites (one-time)
+## Getting started
 
-- Node.js 22+ (Wrangler 4.x requires it)
-- A local container runtime (Docker or equivalent) — required by the
-  Supabase CLI. If `supabase start` hangs or errors, **check that your
-  container runtime is actually running first**; that's the most common
-  cause.
-- The Supabase CLI is invoked via `npx supabase`, no separate install needed.
+### Prerequisites
 
-## Local development (offline-capable)
+- Node.js 22 or later
+- A local container runtime (Docker or equivalent), required by the
+  Supabase CLI — if `supabase start` hangs or errors, check that it's
+  running first
+- No separate Supabase CLI install is needed; it's invoked via `npx`
+
+### Local development
 
 ```bash
 npm install
-npm run dev   # runs: supabase start -> migrate local DB -> build -> Workers preview
+npm run dev
 ```
 
-Open the URL `preview:workers` prints (a local Miniflare-emulated Workers
-runtime, not `next dev`). Everything — Postgres, Auth, Storage — runs
-locally via the Supabase CLI; nothing here talks to production or any cloud
-service.
+This starts a local Supabase stack (Postgres, Auth, Storage), applies
+database migrations, builds the app, and serves it through a local
+Cloudflare Workers preview — open the URL it prints. Everything runs
+locally; nothing talks to production.
 
-**Environment Parity (constitution Principle VI)**: local dev, CI, and
-production all resolve the database through the exact same code path —
-`getCloudflareContext().env.HYPERDRIVE` — never a raw `DATABASE_URL` at
-runtime. Locally that binding's `localConnectionString` (in
-`wrangler.jsonc`) points at the Supabase CLI stack instead of the real
-Hyperdrive service; that's the only difference. There's no Node-only
-fallback to accidentally diverge from production, and no separate "local
-mode" of `lib/db.ts` to keep in sync. The tradeoff: no Next.js
-`next dev` hot-reload — a full `build:workers` + `preview:workers` cycle is
-slower per iteration, but it's the only thing that's actually guaranteed to
-behave like production.
+Local dev intentionally runs through the same Cloudflare Workers runtime
+used in production (not Next.js's `next dev` server), so the database
+connection path, request handling, and any Workers-specific behavior are
+identical across local, CI, and production. The tradeoff is slower
+iteration — no hot reload — in exchange for local testing that's actually
+representative of production.
 
-Stop with `npm run db:stop`. Data persists across restarts unless you run
-`npm run db:reset`.
+Stop the local stack with `npm run db:stop`. Data persists across restarts
+unless you run `npm run db:reset`.
 
-**Schema changes**: edit `db/schema.ts`, then `npm run db:generate-migration`
-(runs `drizzle-kit generate`, diffs the schema and writes a new SQL file
-under `drizzle/`) — commit the generated migration file alongside the
-schema change. Apply it locally with `npm run db:migrate:local`.
+### Schema changes
 
-## Tests
+1. Edit `db/schema.ts`.
+2. Run `npm run db:generate-migration` to generate a migration file under
+   `drizzle/`.
+3. Commit the generated migration alongside your schema change.
+4. Apply it locally with `npm run db:migrate:local`.
+
+## Testing
 
 ```bash
-npm run test:unit         # Vitest — shared/data-access code, no server needed
-npm run test:e2e          # Playwright — builds + starts + tears down the real
-                           # Workers preview itself (playwright.config.ts
-                           # `webServer`); reuses `npm run dev` if it's
-                           # already running. Needs the local Supabase stack
-                           # up (`npm run db:start`) first.
-npm run test:integration  # One-shot, fully hermetic: resets the local DB,
-                           # migrates, runs test:e2e, stops the DB. This is
-                           # what CI runs (US3) — safe to run repeatedly with
-                           # no leftover state between runs.
+npm run test:unit         # Vitest — shared/data-access code
+npm run test:e2e          # Playwright, against a local Workers preview
+npm run test:integration  # Fully hermetic: fresh local DB, migrate, e2e, teardown
 npm test                  # test:unit + test:integration
 ```
 
-e2e/integration tests always run against the real Workers runtime (never
-`next dev`), per Environment Parity above.
+## Deployment
 
-## Production setup (manual, one-time — requires your accounts)
+Pushes to `main` trigger `.github/workflows/deploy.yml`, which applies
+database migrations, builds the app, and deploys to Cloudflare Workers.
+Deploys are gated behind a manual approval step in GitHub.
 
-This repository ships the code and config; the following steps need a human
-with account access and can't be automated by an agent:
+### One-time production setup
 
-1. **Create a Supabase cloud project** (supabase.com). From the **Connect**
-   button on the project page, you'll need two different connection
-   strings for two different jobs — do not mix them up:
-   - **Transaction pooler** (Supavisor, port `6543`) — for the app's live
-     queries, via Cloudflare Hyperdrive (step 2 below).
+1. **Create a Supabase cloud project.** From its **Connect** dialog, get two
+   separate connection strings:
+   - **Transaction pooler** (port `6543`) — used for the app's live
+     queries, via Cloudflare Hyperdrive.
    - **Session pooler** (port `5432`, `aws-<region>.pooler.supabase.com`
-     host) — for running migrations (step 3, and `PRODUCTION_DATABASE_URL`
-     in CI/CD below). **Do not use the plain "direct connection"**
-     (`db.<ref>.supabase.co:5432`) for migrations from CI — it's IPv6-only
-     unless you've paid for Supabase's IPv4 add-on, and GitHub Actions
-     runners are IPv4-only; `drizzle-kit migrate` will fail to connect
-     there. The session pooler supports the same locking behavior Migrate
-     needs, over IPv4.
-2. **Create a Cloudflare Hyperdrive config** pointing at the **transaction
-   pooler** connection string, then fill in the `hyperdrive` block in
-   `wrangler.jsonc` with its id (see `localConnectionString` note there too
-   — needed for `opennextjs-cloudflare deploy`, not just `wrangler dev`).
-3. **Run migrations against production**: `DATABASE_URL=<session-pooler-url> npx drizzle-kit migrate`.
-4. **Deploy**: `npm run deploy:workers` (or let `deploy.yml` do it — see below).
-5. **Verify**: visit the production URL, submit the smoke-test form, reload
-   — the value should persist within a few seconds.
+     host) — used for running migrations. Don't use the plain "direct
+     connection" (`db.<ref>.supabase.co:5432`) for this; it's IPv6-only
+     unless you've purchased Supabase's IPv4 add-on, and GitHub Actions
+     runners are IPv4-only.
+2. **Create a Cloudflare Hyperdrive config** pointing at the transaction
+   pooler connection string, and set its ID in the `hyperdrive` block of
+   `wrangler.jsonc`.
+3. **Run the initial migration**:
+   `DATABASE_URL=<session-pooler-url> npx drizzle-kit migrate`.
+4. **Deploy**: `npm run deploy:workers`, or push to `main` and let CI/CD
+   handle it.
+5. **Verify**: visit the production URL and confirm the app loads and can
+   read/write data.
 
-## CI/CD (GitHub, manual one-time setup)
+### GitHub configuration
 
-`.github/workflows/ci.yml` runs lint/typecheck/unit/e2e on every PR — the
-e2e job runs against the real Cloudflare Workers runtime locally (see
-Environment Parity below), so a passing e2e run is the actual correctness
-signal, not a check against production. `.github/workflows/deploy.yml`
-deploys to production on merge to `main`, gated by manual approval, and
-does not run any test against the live database (deliberately — see
-constitution Principle VI). To finish wiring this up on GitHub itself (not
-doable from a checked-out repo):
-
-1. **Branch protection**: on `main`, require the `ci.yml` checks to pass
-   before merging.
+1. **Branch protection** on `main`: require CI checks to pass before
+   merging.
 2. **Production environment**: create a GitHub Environment named
    `production` with at least one required reviewer — this is the
-   manual-approval gate (FR-012/FR-013).
-3. **Secrets**, scoped to the `production` environment only (so pull
-   requests from forks never see them):
-   - `CLOUDFLARE_API_TOKEN` — "Edit Cloudflare Workers" template, scoped to
+   deploy approval gate.
+3. **Secrets**, scoped to the `production` environment:
+   - `CLOUDFLARE_API_TOKEN` — an "Edit Cloudflare Workers" token scoped to
      your account
-   - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard sidebar or
+   - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard, or
      `wrangler whoami`
-   - `PRODUCTION_DATABASE_URL` — the **session pooler** connection string
-     (see step 1 above under Production setup) — not the direct connection,
-     it'll fail with `P1001` from GitHub Actions' IPv4-only runners.
+   - `PRODUCTION_DATABASE_URL` — the session pooler connection string (see
+     step 1 above); using the direct connection here will fail from
+     GitHub's IPv4-only runners
 
-## Manual rollback
+### Rolling back
 
-If a deploy causes a problem, there's no automated rollback (deliberate —
-see `plan.md` Complexity Tracking). To roll back by hand:
+There's no automated rollback. To roll back by hand:
 
-1. Go to the repo's Actions tab → `deploy.yml` → find the last known-good
-   run.
-2. Re-run that job. It rebuilds and redeploys that commit's code.
-3. If the bad deploy also shipped a schema migration, you'll need to assess
-   whether reverting the migration is safe before or after re-deploying the
-   old code — there's no automatic migration rollback either.
+1. In the Actions tab, find the last known-good run of `deploy.yml` and
+   re-run it — this rebuilds and redeploys that commit.
+2. If the bad deploy included a schema migration, assess separately
+   whether it's safe to revert before or after redeploying the old code;
+   migrations aren't rolled back automatically either.
 
-## What's deliberately not here yet
+## Contributing
 
-Per `.specify/memory/constitution.md`'s Bootstrap Sequencing Exception:
-Supabase Auth (and the auth-checked Route Handler convention) and PWA
-support (manifest/service worker) are **not** part of this feature. Two
-dedicated follow-up foundational features must land before any real
-product module is built — see `specs/001-foundational-infra/plan.md`
-Complexity Tracking.
+1. Branch off `main` and make your changes.
+2. Before opening a PR, make sure the following all pass locally:
+   ```bash
+   npm run lint
+   npm run typecheck
+   npm test
+   ```
+3. Open a PR against `main`. GitHub Actions runs lint, type-checking, unit
+   tests, and end-to-end tests on every PR — all must pass before merging.
+4. Merging to `main` triggers a production deploy, gated behind manual
+   approval (see Deployment above).
+
+Design and planning documents for individual features live under `specs/`.
+
+## Roadmap
+
+Authentication (Supabase Auth) and installable PWA support are planned as
+foundational work, ahead of further product features.
