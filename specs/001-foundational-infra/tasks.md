@@ -67,7 +67,7 @@ Project Structure): `app/`, `lib/`, `prisma/`, `supabase/`, `tests/unit/`,
 - [X] T013 [US1] Add DB-unavailable error handling to `app/page.tsx` / `app/api/smoke/route.ts` so a DB outage shows a clear error state instead of a blank page or crash (spec Edge Cases)
 - [X] T014 [P] [US1] Write the Playwright e2e spec for the full round trip in `tests/e2e/smoke.spec.ts`
 - [X] T015 [P] [US1] Write Vitest unit tests for `lib/prisma.ts` in `tests/unit/prisma.test.ts`
-- [ ] T016 [US1] **MANUAL — needs your Cloudflare + Supabase accounts.** Create the production Supabase project and set its transaction-pooler connection string as the `DATABASE_URL` Worker secret (`wrangler secret put DATABASE_URL`, or via `deploy.yml`'s `PRODUCTION_APP_DATABASE_URL` GitHub secret — see README.md "Production setup"). Amendment (2026-07-13): originally a Cloudflare Hyperdrive binding in `wrangler.jsonc`; dropped after a production incident — see `research.md`'s amendment note.
+- [ ] T016 [US1] **MANUAL — needs your Cloudflare + Supabase accounts.** Create the production Supabase project and configure the Cloudflare Hyperdrive binding to it in `wrangler.jsonc` (placeholder + instructions left in the file)
 - [ ] T017 [US1] **MANUAL — depends on T016.** Deploy to Cloudflare Workers via OpenNext and manually verify the production round trip (`quickstart.md` §3, SC-002)
 
 **Checkpoint**: User Story 1 is fully functional and independently verifiable — the production URL round-trips data with no sign-in required.

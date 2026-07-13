@@ -80,12 +80,6 @@ jobs:
         run: docker save -o /tmp/supabase-docker-images.tar $(docker images -q)
       - name: Apply migrations to the fresh local stack
         run: npm run db:migrate:local
-      # DATABASE_URL is a secret, never a committed var (see
-      # wrangler.jsonc), so CI writes its own `.dev.vars` pointing at the
-      # ephemeral local Supabase stack just started above — the same file
-      # `.dev.vars.example` documents for local dev.
-      - name: Write .dev.vars for the local Workers preview
-        run: echo "DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres" > .dev.vars
       # Chromium's binary (~100MB+) is the expensive part of `playwright
       # install`; cache it keyed on the resolved @playwright/test version so
       # a matching version never re-downloads it. OS-level dependencies
@@ -109,8 +103,12 @@ jobs:
       # `npm run test:e2e` (playwright.config.ts's `webServer`) builds,
       # starts, and waits for the real Workers preview itself, then tears it
       # down after — no manual build/background-start/curl-poll steps here.
-      # It resolves the database through DATABASE_URL in `.dev.vars` (written
-      # above), the same code path (`lib/db.ts`) production uses.
+      # It resolves the database purely through the Hyperdrive binding (its
+      # `localConnectionString` in wrangler.jsonc), the same code path
+      # production uses — no DATABASE_URL is set for this step. A fallback
+      # here would mask bugs in that binding-access code, which is exactly
+      # what happened before this comment was added (a broken binding check
+      # silently fell back to a working DATABASE_URL in CI).
       - name: Run Playwright e2e tests
         run: npm run test:e2e
       - name: Tear down the local Supabase stack (always, so no state leaks between runs)

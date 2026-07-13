@@ -21,13 +21,6 @@ accordingly (Prisma → Drizzle). References to Prisma/`schema.prisma`/
 `lib/db.ts`, and `drizzle-kit`. See `.specify/memory/constitution.md` for
 the current mandated ORM.
 
-**Further amendment (2026-07-13)**: the Hyperdrive binding mentioned
-throughout this plan is also superseded — a production incident traced
-GET/POST hangs to Hyperdrive itself, so `lib/db.ts` now connects directly
-to Supabase's transaction pooler via a `DATABASE_URL` secret instead.
-Constitution Principle VI was amended accordingly (v3.0.0 → v3.1.0). See
-`research.md`'s amendment note for the full account.
-
 ## Summary
 
 Stand up the walking skeleton for Hombase: a Next.js/TypeScript app with one

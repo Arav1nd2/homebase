@@ -13,18 +13,27 @@
 	"observability": {
 		"enabled": true
 	},
-	// The Supabase project lives in ap-northeast-1 (Tokyo). Without Smart
-	// Placement, the Worker runs at the Cloudflare PoP nearest each user, so
-	// every DB round trip pays full user-to-Tokyo network distance on top of
-	// the query itself. Smart Placement lets Cloudflare execute the Worker
-	// near the database instead.
+	// The Supabase project (and its Hyperdrive origin) lives in
+	// ap-northeast-1 (Tokyo). Without Smart Placement, the Worker runs at
+	// the Cloudflare PoP nearest each user, so every DB round trip pays
+	// full user-to-Tokyo network distance on top of the query itself —
+	// this is what was causing GET APIs to be so slow. Smart Placement
+	// lets Cloudflare execute the Worker near the database instead.
 	"placement": {
 		"mode": "smart"
-	}
-	// DATABASE_URL is deliberately NOT here: it's a credential, so it's a
-	// secret, not a plain var. Local dev/CI read it from `.dev.vars`
-	// (gitignored — see `.dev.vars.example`); production gets it from
-	// `wrangler secret put DATABASE_URL`, set once by `deploy.yml` from the
-	// `PRODUCTION_APP_DATABASE_URL` GitHub secret (the transaction-pooler
-	// connection string — see README.md "Production setup").
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "0d061e7b327f4abba58b651ae47640d1",
+			// Not used for the real production connection (that goes through
+			// the Hyperdrive service via `id` above). This is what `npm run
+			// preview:workers` (local dev, per constitution Principle VI
+			// Environment Parity) and `opennextjs-cloudflare deploy` resolve
+			// through Wrangler's local platform-proxy layer instead. Safe to
+			// commit: fixed local-only default from `supabase start`, not a
+			// real credential.
+			"localConnectionString": "postgresql://postgres:postgres@localhost:54322/postgres"
+		}
+	]
 }

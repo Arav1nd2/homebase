@@ -33,24 +33,15 @@ service.
 
 **Environment Parity (constitution Principle VI)**: local dev, CI, and
 production all resolve the database through the exact same code path —
-`getCloudflareContext().env.DATABASE_URL`, a direct `pg` TCP connection
-(Workers' `nodejs_compat`) to Supabase's transaction pooler. Locally/in CI
-that value comes from `.dev.vars` (gitignored — copy `.dev.vars.example`)
-and points at the Supabase CLI stack; in production it's a
-`wrangler secret put DATABASE_URL` value pointing at the real pooler.
-There's no Node-only fallback to accidentally diverge from production, and
-no separate "local mode" of `lib/db.ts` to keep in sync. The tradeoff: no
-Next.js `next dev` hot-reload — a full `build:workers` + `preview:workers`
-cycle is slower per iteration, but it's the only thing that's actually
-guaranteed to behave like production.
-
-(Amendment 2026-07-13: this used to go through a Cloudflare Hyperdrive
-binding. Dropped after a production incident where Hyperdrive itself
-intermittently hung for minutes before failing — see
-`specs/001-foundational-infra/research.md`'s amendment note.)
-
-Copy `.dev.vars.example` to `.dev.vars` before your first `npm run dev` —
-it's gitignored (contains a connection string) and not created for you.
+`getCloudflareContext().env.HYPERDRIVE` — never a raw `DATABASE_URL` at
+runtime. Locally that binding's `localConnectionString` (in
+`wrangler.jsonc`) points at the Supabase CLI stack instead of the real
+Hyperdrive service; that's the only difference. There's no Node-only
+fallback to accidentally diverge from production, and no separate "local
+mode" of `lib/db.ts` to keep in sync. The tradeoff: no Next.js
+`next dev` hot-reload — a full `build:workers` + `preview:workers` cycle is
+slower per iteration, but it's the only thing that's actually guaranteed to
+behave like production.
 
 Stop with `npm run db:stop`. Data persists across restarts unless you run
 `npm run db:reset`.
@@ -88,7 +79,7 @@ with account access and can't be automated by an agent:
    button on the project page, you'll need two different connection
    strings for two different jobs — do not mix them up:
    - **Transaction pooler** (Supavisor, port `6543`) — for the app's live
-     queries (step 2 below).
+     queries, via Cloudflare Hyperdrive (step 2 below).
    - **Session pooler** (port `5432`, `aws-<region>.pooler.supabase.com`
      host) — for running migrations (step 3, and `PRODUCTION_DATABASE_URL`
      in CI/CD below). **Do not use the plain "direct connection"**
@@ -97,10 +88,10 @@ with account access and can't be automated by an agent:
      runners are IPv4-only; `drizzle-kit migrate` will fail to connect
      there. The session pooler supports the same locking behavior Migrate
      needs, over IPv4.
-2. **Set the app's `DATABASE_URL` secret** to the **transaction pooler**
-   connection string: `npx wrangler secret put DATABASE_URL` (or let
-   `deploy.yml` do it from the `PRODUCTION_APP_DATABASE_URL` GitHub secret
-   — see CI/CD setup below). Append `?sslmode=require`.
+2. **Create a Cloudflare Hyperdrive config** pointing at the **transaction
+   pooler** connection string, then fill in the `hyperdrive` block in
+   `wrangler.jsonc` with its id (see `localConnectionString` note there too
+   — needed for `opennextjs-cloudflare deploy`, not just `wrangler dev`).
 3. **Run migrations against production**: `DATABASE_URL=<session-pooler-url> npx drizzle-kit migrate`.
 4. **Deploy**: `npm run deploy:workers` (or let `deploy.yml` do it — see below).
 5. **Verify**: visit the production URL, submit the smoke-test form, reload
@@ -130,13 +121,7 @@ doable from a checked-out repo):
      `wrangler whoami`
    - `PRODUCTION_DATABASE_URL` — the **session pooler** connection string
      (see step 1 above under Production setup) — not the direct connection,
-     it'll fail with `P1001` from GitHub Actions' IPv4-only runners. Used
-     only for running migrations.
-   - `PRODUCTION_APP_DATABASE_URL` — the **transaction pooler** connection
-     string (`?sslmode=require`). `deploy.yml` sets this as the Worker's
-     `DATABASE_URL` secret on every deploy — this is what the app queries
-     through at runtime, deliberately a different secret from
-     `PRODUCTION_DATABASE_URL` above (different pooler, different job).
+     it'll fail with `P1001` from GitHub Actions' IPv4-only runners.
 
 ## Manual rollback
 

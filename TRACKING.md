@@ -23,9 +23,8 @@ use.
 
 ## Also manual, not yet done (see README.md for details)
 
-- T016/T017: create the production Supabase project, set the `DATABASE_URL`
-  Worker secret (transaction pooler — no longer Hyperdrive, see README.md
-  "Production setup"), and run the first production deploy.
+- T016/T017: create the production Supabase project, configure the
+  Cloudflare Hyperdrive binding, and run the first production deploy.
 - T031-T033: GitHub branch protection on `main`, the `production`
   Environment with a required reviewer, and scoped deploy secrets.
 - T028: empirically verify CI e2e hermeticity (two back-to-back runs) once
