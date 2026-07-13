@@ -42,7 +42,22 @@ export function resolveConnectionString(): string {
  * — constitution Principle VI). Always closes the client, even on error.
  */
 export async function withDb<T>(fn: (db: NodePgDatabase<typeof schema>) => Promise<T>): Promise<T> {
-  const client = new Client({ connectionString: resolveConnectionString() });
+  const client = new Client({
+    connectionString: resolveConnectionString(),
+    // A production incident showed a query can hang far longer than is
+    // useful (10+ minutes, per Hyperdrive's own "Timed out while waiting
+    // for a message from the origin database" error) when the origin is
+    // stuck — e.g. a prior request's connection was killed mid-transaction
+    // (Worker isolate torn down before its `finally` ran) and left an
+    // idle-in-transaction session holding a lock. These bound every
+    // connection so a stuck origin fails fast and cleanly instead of
+    // hanging until some outer platform timeout returns an opaque 502, and
+    // so a killed Worker can't leave a lock held indefinitely.
+    connectionTimeoutMillis: 8_000,
+    query_timeout: 10_000,
+    statement_timeout: 10_000,
+    idle_in_transaction_session_timeout: 10_000,
+  });
   await client.connect();
   try {
     return await fn(drizzle(client, { schema }));
