@@ -274,6 +274,33 @@ activity" view, it can query this existing table rather than a new one.
 rejected as duplicate functionality Supabase already provides, with no
 current requirement (per Principle VIII) to expose it in-app yet.
 
+## 9. Supabase API key type: publishable key, not the legacy anon key
+
+**Decision**: Use Supabase's current-generation **publishable key**
+(`sb_publishable_...`) as `SUPABASE_PUBLISHABLE_KEY`, not the legacy JWT
+`anon` key this feature originally used.
+
+**Rationale**: Supabase is migrating away from the legacy `anon`/
+`service_role` JWT keys toward publishable/secret keys — database-backed,
+individually revocable tokens that can be rotated instantly from the
+dashboard without invalidating active user sessions, unlike a JWT anon key
+tied to the project's JWT secret. Both key types work simultaneously and
+the migration guide confirms any client library version accepts the new
+key value as a drop-in replacement wherever the anon key was used — no
+`@supabase/ssr`/`@supabase/supabase-js` code change was needed beyond the
+env var rename in `lib/supabase/server.ts` and `lib/supabase/middleware.ts`.
+One behavioral difference: publishable/secret keys are sent only via the
+`apikey` header, never `Authorization: Bearer` (that header is reserved
+for the end user's own JWT) — `@supabase/ssr`'s client already handles
+this correctly, so it wasn't something this feature's code had to account
+for directly.
+
+**Alternatives considered**: Keep the legacy anon key — works today (both
+key types coexist with no announced hard cutoff for existing legacy keys
+as of this writing), but starting a brand-new feature on the
+soon-to-be-legacy key type would just create a future migration to redo
+for no benefit now.
+
 ## Summary of new infrastructure this feature introduces
 
 | Component | Type | Purpose |

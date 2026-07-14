@@ -13,20 +13,20 @@ export function createSupabaseMiddlewareClient(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const { env } = getCloudflareContext();
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = env as {
+  const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = env as {
     SUPABASE_URL?: string;
-    SUPABASE_ANON_KEY?: string;
+    SUPABASE_PUBLISHABLE_KEY?: string;
   };
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     throw new Error(
-      "No SUPABASE_URL/SUPABASE_ANON_KEY binding found on the Cloudflare context. This " +
-      "code must run under the real Workers runtime (`npm run preview:workers`, not " +
+      "No SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY binding found on the Cloudflare context. " +
+      "This code must run under the real Workers runtime (`npm run preview:workers`, not " +
       "`next dev`) with these set in .dev.vars (see .dev.vars.example).",
     );
   }
 
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

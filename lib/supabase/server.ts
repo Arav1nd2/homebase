@@ -10,28 +10,34 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
  * session to actually stay long-lived. See
  * specs/002-email-otp-auth/research.md §2, §5.
  *
- * Reads `SUPABASE_URL`/`SUPABASE_ANON_KEY` via the Cloudflare bindings
- * object, mirroring lib/db.ts's binding-access pattern — no `process.env`
- * fallback (constitution Principle VI, Environment Parity).
+ * Reads `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` via the Cloudflare
+ * bindings object, mirroring lib/db.ts's binding-access pattern — no
+ * `process.env` fallback (constitution Principle VI, Environment Parity).
+ *
+ * Uses the publishable key (`sb_publishable_...`), not the legacy JWT
+ * `anon` key — Supabase's current-generation, database-backed client key
+ * that can be rotated instantly without invalidating active sessions. Any
+ * client library version accepts it as a drop-in value in the same slot
+ * the anon key used to occupy; no code beyond this rename was needed.
  */
 export async function createSupabaseServerClient() {
   const { env } = getCloudflareContext();
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = env as {
+  const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = env as {
     SUPABASE_URL?: string;
-    SUPABASE_ANON_KEY?: string;
+    SUPABASE_PUBLISHABLE_KEY?: string;
   };
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     throw new Error(
-      "No SUPABASE_URL/SUPABASE_ANON_KEY binding found on the Cloudflare context. This " +
-      "code must run under the real Workers runtime (`npm run preview:workers`, not " +
+      "No SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY binding found on the Cloudflare context. " +
+      "This code must run under the real Workers runtime (`npm run preview:workers`, not " +
       "`next dev`) with these set in .dev.vars (see .dev.vars.example).",
     );
   }
 
   const cookieStore = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

@@ -7,8 +7,8 @@
 - Local stack running: `npm run dev` (starts local Supabase, migrates,
   builds, and serves the Workers preview — see repo `README.md`).
 - Local secrets set in `.dev.vars` (gitignored): `SUPABASE_URL`,
-  `SUPABASE_ANON_KEY`, `ALLOWED_EMAILS` (containing at least one test
-  email you control locally).
+  `SUPABASE_PUBLISHABLE_KEY`, `ALLOWED_EMAILS` (containing at least one
+  test email you control locally).
 - Local Supabase Inbucket (email capture) at `http://127.0.0.1:54324` —
   every OTP email sent by the local stack lands here instead of a real
   inbox.

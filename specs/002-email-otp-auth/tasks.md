@@ -11,6 +11,14 @@ The task descriptions below are left as originally written (historical
 record of what was actually done at the time); the current code, `.dev.vars`,
 and all other docs reflect the plain-email design.
 
+**Second amendment (same day)**: T008, T009, and the `SUPABASE_ANON_KEY`
+references in T003/T004/T026 also originally used Supabase's legacy JWT
+`anon` key. That was switched to the current-generation publishable key
+(`sb_publishable_...`, env var `SUPABASE_PUBLISHABLE_KEY`) after checking
+Supabase's docs — the two are drop-in equivalents for any client library
+version, so this was a rename with no logic change. Current code and all
+other docs use `SUPABASE_PUBLISHABLE_KEY`.
+
 **Input**: Design documents from `/specs/002-email-otp-auth/`
 
 **Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [contracts/auth-api.md](./contracts/auth-api.md), [quickstart.md](./quickstart.md)
@@ -121,7 +129,7 @@ handled safely, before any auth logic is written.
 **Purpose**: Production parity and hardening that spans all stories.
 
 - [ ] T025 **Requires manual action in the Supabase Dashboard (not performed — needs your hosted-project credentials).** Set the hosted Supabase project's Authentication settings (OTP expiry 10 minutes, sessions inactivity timeout 30 days, tightened email rate limit) to match `supabase/config.toml` (T005) — these do not sync automatically from `config.toml` (research.md §3 operational note). Steps are documented in `README.md`'s "One-time production setup."
-- [ ] T026 **Requires manual action in GitHub (not performed — needs your repo admin access).** Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `ALLOWED_EMAILS` as GitHub Actions secrets scoped to the `production` environment — these are the single source of truth per the constitution's "GitHub Actions secrets are the single secret manager" constraint; `deploy.yml` syncs them to the Cloudflare Worker secret on every run, so there is no separate `wrangler secret put` step to perform. Steps are documented in `README.md`'s "One-time production setup" and "GitHub configuration."
+- [ ] T026 **Requires manual action in GitHub (not performed — needs your repo admin access).** Set `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (the current-generation `sb_publishable_...` key, not the legacy anon key), and `ALLOWED_EMAILS` as GitHub Actions secrets scoped to the `production` environment — these are the single source of truth per the constitution's "GitHub Actions secrets are the single secret manager" constraint; `deploy.yml` syncs them to the Cloudflare Worker secret on every run, so there is no separate `wrangler secret put` step to perform. Steps are documented in `README.md`'s "One-time production setup" and "GitHub configuration."
 - [X] T027 [P] Update `README.md` with plain-language local setup steps for signing in (allow-list configuration, required `.dev.vars` entries) — no internal spec/process terminology, consistent with the rest of the README
 - [X] T028 [P] Security pass: grep the new code for any accidental logging of raw emails, OTP codes, or the pepper, and confirm every error response is checked against FR-014's non-disclosure requirement. Clean: the only `console.error` (`request-code`) logs Supabase's own generic error message, never the email/code/pepper; `.dev.vars` confirmed untracked by git.
 - [X] T029 Ran every scenario in `quickstart.md` end-to-end locally (via direct curl against the local Workers preview, in addition to the Playwright suite) — all 5 pass, including Scenario 3 with a literal full stop/restart of the preview process (not just a fresh browser context) to confirm the session survives a real process restart, not only a client-side one.

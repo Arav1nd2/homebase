@@ -26,7 +26,7 @@ Workers, backed by Supabase Postgres.
 ```bash
 npm install
 cp .dev.vars.example .dev.vars
-npm run db:start   # then fill in SUPABASE_URL / SUPABASE_ANON_KEY from `npx supabase status`
+npm run db:start   # then fill in SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY from `npx supabase status`
 npm run dev
 ```
 
@@ -120,10 +120,12 @@ gated behind a manual approval step in GitHub either way.
    30-day session inactivity timeout. These settings live only in the
    hosted project — they don't sync from `supabase/config.toml`, so update
    both whenever one changes.
-5. **Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `ALLOWED_EMAILS`** as
-   GitHub Actions secrets (see "GitHub configuration" below) — not via
+5. **Set `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `ALLOWED_EMAILS`**
+   as GitHub Actions secrets (see "GitHub configuration" below) — not via
    `wrangler secret put` directly. `deploy.yml` pushes them to the Worker
-   on every run.
+   on every run. Use the project's publishable key (`sb_publishable_...`,
+   from the same **Connect** dialog / API settings page), not the legacy
+   anon key.
 6. **Deploy**: push to `main`, or trigger `deploy.yml` manually from the
    Actions tab — either way it builds, migrates, deploys, and syncs
    secrets to the Worker.
@@ -149,8 +151,9 @@ gated behind a manual approval step in GitHub either way.
    - `PRODUCTION_DATABASE_URL` — the session pooler connection string (see
      step 1 above); using the direct connection here will fail from
      GitHub's IPv4-only runners
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY` — from the same Supabase cloud
-     project's API settings
+   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...`, not
+     the legacy anon key) — from the same Supabase cloud project's API
+     settings
    - `ALLOWED_EMAILS` — comma-separated household member emails allowed to
      sign in; update this whenever someone is added or removed, then
      re-run `deploy.yml`

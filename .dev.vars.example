@@ -2,9 +2,11 @@
 # local development. `.dev.vars` is read by Wrangler for local Workers
 # preview/dev, mirroring how these are set as Worker secrets in production.
 
-# From `supabase status` after `supabase start` (local stack).
+# From `supabase status` after `supabase start` (local stack). Use the
+# PUBLISHABLE_KEY value (sb_publishable_...), not the legacy ANON_KEY —
+# Supabase's current-generation client key.
 SUPABASE_URL=
-SUPABASE_ANON_KEY=
+SUPABASE_PUBLISHABLE_KEY=
 
 # Comma-separated list of household member email addresses allowed to
 # sign in. Never commit real values — this file only holds placeholders.
