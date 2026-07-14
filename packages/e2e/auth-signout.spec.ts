@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./inbucket";
+import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
 
 // Own dedicated email — see auth-signin.spec.ts for why (Supabase's 60s
 // per-email resend cooldown vs. parallel test workers).

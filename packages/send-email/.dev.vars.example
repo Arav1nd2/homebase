@@ -1,0 +1,16 @@
+# Copy to `.dev.vars` (gitignored) for local development.
+
+# From Supabase Dashboard → Authentication → Hooks → Send Email hook →
+# "Generate Secret" (format: "v1,whsec_...").
+SEND_EMAIL_HOOK_SECRET=
+
+# From resend.com → API Keys.
+RESEND_API_KEY=
+
+# A verified sending address, e.g. "HomeBase <sign-in@yourdomain.com>".
+RESEND_FROM_ADDRESS=
+
+# Local/CI only — points Resend calls at a fake capture endpoint instead
+# of the real API, so e2e tests stay hermetic (no live email sends).
+# Never set in production. See tests/e2e/ in the main app.
+RESEND_BASE_URL=

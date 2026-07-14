@@ -14,6 +14,13 @@ and `verifyOtp({ email, token, type: 'email' })` to redeem it. Configure the
 email template so it surfaces `{{ .Token }}` (the 6-digit code) prominently,
 not just a `{{ .ConfirmationURL }}` magic link.
 
+**Amendment (§10)**: The code-prominent-template *mechanism* described
+below (customizing `config.toml`'s `auth.email.template.magic_link`) was
+later replaced by a Send Email Hook + React Email + Resend pipeline — see
+Section 10 for why. The core decision on this page — code entry, not a
+magic link — is unchanged; only how the email is rendered/delivered
+changed.
+
 **Rationale**: `signInWithOtp` is a single Supabase API that can deliver
 either a clickable magic link or a numeric code from the same email,
 depending on which placeholder the email template uses. The user
@@ -301,6 +308,123 @@ as of this writing), but starting a brand-new feature on the
 soon-to-be-legacy key type would just create a future migration to redo
 for no benefit now.
 
+## 10. Sign-in email delivery: Supabase's Send Email Hook + React Email + Resend, not Supabase's own SMTP/template system
+
+**Decision**: Stop using Supabase Auth's own email delivery entirely
+(Sections 1 and 4's original design). Instead, enable Supabase's **Send
+Email Hook**, which intercepts every auth email before Supabase would send
+it and hands the raw payload (including the 6-digit `token`) to an HTTPS
+endpoint of our own. That endpoint is a small, dedicated Cloudflare Worker
+— `packages/send-email` — which renders a React Email template and sends
+it via Resend.
+
+**Why this pivot happened**: Investigating production email setup (a step
+that was always going to be needed regardless of this pivot) surfaced two
+facts that made the original design a dead end for production use:
+
+1. Supabase's built-in email service is capped at **2 emails/hour for the
+   entire project** (not per user) — unusable for real, if infrequent,
+   household use.
+2. As of a recent Supabase change, projects using the default email
+   provider **can no longer customize auth email templates at all**
+   without configuring custom SMTP first — meaning the code-prominent
+   `magic_link.html` template from Section 1 could never actually be
+   applied in production without custom SMTP regardless.
+
+Custom SMTP alone would have fixed both problems with less change (point
+Supabase at a real SMTP provider, keep its own template system). The
+further pivot to React Email + Resend specifically was a deliberate
+product choice on top of that fix: React Email's component library
+encodes real, hard-won email-client compatibility knowledge (Outlook's
+Word rendering engine, Gmail's CSS stripping, table-based layout
+fallbacks) that a hand-authored template or Supabase's basic Go-template
+HTML doesn't get for free, and Resend's first-class React Email
+integration is the natural pairing for it.
+
+**Why a dedicated Worker, not a Route Handler on the existing app**: The
+Send Email Hook's endpoint must be callable by Supabase's own servers —
+an external, non-authenticated-by-our-session caller, unlike every other
+route in the app. It could technically live in `packages/web` as another
+Route Handler, but the constitution's single-deployment-target rule is
+about avoiding a *second thing to build, deploy, and maintain* — after
+weighing it, an explicit, narrow exception (this Worker does nothing but
+receive/verify/act on one webhook) was judged the more honest choice than
+folding a third-party-facing webhook into the same app whose other routes
+are all called only by its own frontend. This is now a documented
+exception in the constitution's Additional Constraints, not a silent
+deviation.
+
+**Why the template is pre-rendered at build time, not live in the
+Worker**: `@react-email/render`'s live SSR path (and the full `react-email`
+package's much heavier CLI-oriented dependency tree — esbuild, Tailwind,
+etc.) has documented Cloudflare Workers/edge-runtime bundling
+incompatibilities. The template is authored with `react-email`'s real
+components (`Html`, `Body`, `Container`, etc. — not hand-rolled HTML
+tags, which would lose exactly the compatibility knowledge that was the
+point of choosing React Email), then rendered to a static HTML string
+once at build time by `scripts/build-template.ts` (a plain Node script,
+run via `tsx`, never inside the deployed Worker). The token is rendered
+with a placeholder and substituted via a plain string `.replace()` at
+request time — the deployed Worker's runtime code only ever needs
+`standardwebhooks` and `resend` (both confirmed, via a local
+`wrangler dev` spike, to bundle and run correctly under the real Workers
+runtime), never React or `react-email` itself.
+
+**Local development — Docker networking**: Supabase's GoTrue container
+runs inside this stack's Docker network, so it cannot reach a server on
+the host machine via `localhost`. Its Send Email Hook `uri` in
+`supabase/config.toml` uses `http://host.docker.internal:8788` — Docker
+Desktop's special DNS name for "the host machine" — pointing at the
+send-email Worker's local `wrangler dev` instance. The shared webhook
+secret is supplied to Supabase via a repo-root `.env` file (read through
+`config.toml`'s `env()` substitution — a separate mechanism from
+Wrangler's own `.dev.vars`) and to the Worker via its own `.dev.vars`;
+both must hold the exact same value.
+
+**Testing — a fake Resend capture server, not Resend's own test
+addresses**: Resend documents two testing patterns (mocking
+`page.route()` for a browser-driven `/api/send` call, or hitting the real
+API with reserved addresses like `delivered+label@resend.dev`). Neither
+fits here: our email send is triggered server-side by Supabase's webhook,
+never by the browser Playwright controls, so there's nothing for
+`page.route()` to intercept; and Resend's reserved test addresses confirm
+"the send succeeded" but never hand back the email's actual rendered
+content, while our tests need the literal OTP code to complete the
+sign-in flow, not just a success signal. `packages/e2e/fake-resend-server.ts`
+is a small local HTTP server mirroring Resend's real `POST /emails`
+contract, which `packages/send-email`'s Worker is pointed at via
+`RESEND_BASE_URL` (an env var only ever set in local/CI testing, never in
+production — the Resend SDK's own `baseUrl` constructor option makes this
+a clean, single-code-path swap, the same pattern used for Hyperdrive's
+connection string).
+
+**Important honest caveat on that last point**: unlike the Hyperdrive
+pattern, where the "local" target is a *real* Postgres instance (same
+wire protocol, just a different physical instance), there is no way to
+run "a real Resend, just local" — Resend has no offline/local mode. The
+fake server is a hand-written approximation of Resend's contract, so
+tests against it **cannot** catch a real production failure like an
+invalid `RESEND_API_KEY` or an unverified sending domain (the single most
+likely real failure mode for this integration). Automated tests
+structurally cannot cover this gap; a manual one-time real-Resend smoke
+test (send one actual email through the real API with the real verified
+domain) is required as part of production setup — see `README.md`'s
+production setup steps — precisely because no amount of hermetic testing
+substitutes for it.
+
+**Alternatives considered**: Custom SMTP pointed at Resend's SMTP relay,
+keeping Supabase's own template system — would have fixed the deliverability/
+rate-limit problem alone, without needing a second Worker or a
+webhook-handling architecture at all; rejected because the code-prominent
+template couldn't be customized in the hosted dashboard without custom
+SMTP anyway (so some change was unavoidable), and once a change was
+required, React Email's component library was judged worth the extra
+architecture for a materially better, more email-client-correct template.
+A second Cloudflare Worker without the constitution amendment — rejected
+as a silent violation rather than a documented, narrowly-scoped exception.
+Live-rendering the React Email template inside the Worker — rejected per
+the documented Workers-incompatibility above.
+
 ## Summary of new infrastructure this feature introduces
 
 | Component | Type | Purpose |
@@ -310,6 +434,9 @@ for no benefit now.
 | `auth.email.max_frequency` | Supabase Auth config (local + hosted) | Resend cooldown (supplements FR-008) |
 | `middleware.ts` | Next.js middleware | Route protection + session refresh (FR-001, FR-013) |
 | `lib/supabase/server.ts` | Shared helper | `getSessionOrThrow()`-style session access for Route Handlers |
+| `packages/send-email` | Dedicated Cloudflare Worker (constitution exception) | Receives Supabase's Send Email Hook, sends the sign-in code via Resend (§10) |
+| `SEND_EMAIL_HOOK_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_ADDRESS` | GitHub Actions secrets, synced to `packages/send-email`'s Worker secrets by `deploy.yml` | Webhook signature verification; Resend authentication and sender address |
+| `packages/e2e/fake-resend-server.ts` | Local/CI-only HTTP server | Hermetic stand-in for Resend's API in tests (§10) |
 
 No new Drizzle table or Postgres schema change is introduced by this
 feature — see `data-model.md`.

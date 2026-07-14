@@ -6,12 +6,16 @@
 
 - Local stack running: `npm run dev` (starts local Supabase, migrates,
   builds, and serves the Workers preview — see repo `README.md`).
-- Local secrets set in `.dev.vars` (gitignored): `SUPABASE_URL`,
+- Local secrets set in `packages/web/.dev.vars` (gitignored): `SUPABASE_URL`,
   `SUPABASE_PUBLISHABLE_KEY`, `ALLOWED_EMAILS` (containing at least one
   test email you control locally).
-- Local Supabase Inbucket (email capture) at `http://127.0.0.1:54324` —
-  every OTP email sent by the local stack lands here instead of a real
-  inbox.
+- The send-email Worker also running locally
+  (`npm run dev --workspace=send-email -- --port 8788`) and a fake Resend
+  capture server (`npx tsx packages/e2e/fake-resend-server.ts`) —
+  Supabase's Send Email Hook delegates all OTP delivery to the former,
+  which calls the latter instead of the real Resend API in local dev. See
+  research.md §10. (`npm run test:e2e` starts both of these
+  automatically — only start them by hand for manual testing like this.)
 
 **Local testing caveat**: Supabase's per-email resend cooldown
 (`auth.email.max_frequency`, 60s per FR-008) is enforced against the same
@@ -31,7 +35,9 @@ no carried-over state.
 2. Submit an email address in your local `ALLOWED_EMAILS` → confirm the UI
    shows "check your email for a code" and responds within SC-001's
    60-second budget.
-3. Open Inbucket, find the message, copy the 6-digit code.
+3. Query the fake Resend capture server for the message
+   (`curl "http://localhost:9999/emails?to=<email>"`) and copy the
+   6-digit code out of its `html` field.
 4. Enter the code on the verify screen → confirm redirect to `/` and the
    main app page renders.
 
@@ -43,7 +49,9 @@ reachable only after step 4.
 1. Submit an email address **not** in the allow-list.
 2. Confirm the UI response is identical in wording/timing/shape to
    Scenario 1 step 2.
-3. Check Inbucket → confirm no email was sent for this address.
+3. Check the fake Resend capture server → confirm no email was sent for
+   this address (`curl "http://localhost:9999/emails?to=<email>"` returns
+   an empty list).
 
 ## Scenario 3 — Frictionless return visit (User Story 2, P2)
 

@@ -107,6 +107,15 @@ specs/002-email-otp-auth/
 
 ### Source Code (repository root)
 
+**Amendment**: The tree below reflects this feature's implementation
+before a later pivot (research.md §10) moved sign-in email delivery from
+Supabase's own SMTP/template system to a Send Email Hook handled by a
+second, dedicated Cloudflare Worker, and the whole repo was restructured
+into an npm workspaces monorepo (`packages/web`, `packages/send-email`,
+`packages/e2e`) to accommodate it. The tree is left as originally written
+below (historical record); see the **Structure Decision** note and
+research.md §10 for what actually shipped.
+
 ```text
 app/
 ├── page.tsx                       # Existing main page — now reachable only via middleware gate
@@ -149,12 +158,42 @@ tests/
     └── auth.spec.ts                   # New: sign-in/out journeys, per quickstart.md
 ```
 
-**Structure Decision**: Same single Next.js App Router project as
-`001-foundational-infra` (constitution: one codebase, one deployment
-target). Auth-specific code is grouped under `lib/supabase/` (mirroring
-`lib/db.ts`'s existing shared-infra pattern) rather than a new top-level
-directory, since it's shared infrastructure every future module's Route
-Handlers will depend on, not a feature module of its own.
+**What actually shipped** (current tree, post-amendment):
+
+```text
+packages/
+├── web/                             # Everything in the tree above, unchanged in substance,
+│   ├── app/, lib/, middleware.ts    # just relocated one level down as an npm workspace
+│   ├── tests/unit/
+│   └── wrangler.jsonc
+├── send-email/                      # New: dedicated Worker (constitution exception)
+│   ├── emails/magic-link.tsx        # React Email template (devDependency-only; never
+│   │                                 # imported by the deployed Worker itself)
+│   ├── scripts/build-template.ts    # Pre-renders the template to static HTML at build time
+│   ├── src/index.ts                 # Verifies the webhook, sends via Resend
+│   └── wrangler.jsonc
+└── e2e/                             # Playwright tests, moved out of packages/web entirely
+    ├── *.spec.ts
+    ├── fake-resend-server.ts        # Hermetic Resend stand-in for tests (research.md §10)
+    └── playwright.config.ts
+
+supabase/                            # Unchanged location (shared by both Workers)
+└── config.toml                      # Also gained [auth.hook.send_email] (research.md §10)
+
+.env                                 # New: SEND_EMAIL_HOOK_SECRET, read via config.toml's
+                                      # env() substitution (separate from .dev.vars)
+```
+
+**Structure Decision**: Originally, a single Next.js App Router project
+(constitution: one codebase, one deployment target), with auth-specific
+code grouped under `lib/supabase/`. That single-project structure is
+unchanged for the app itself — `packages/web` **is** that same project,
+just relocated. What changed is the addition of `packages/send-email`, an
+explicit, narrowly-scoped exception to the single-deployment-target rule
+(constitution Additional Constraints, amended for this), and the
+resulting move to an npm workspaces monorepo so the new Worker, the app,
+and the e2e tests (which now exercise both) could each have their own
+`package.json`/dependencies without polluting each other's.
 
 ## Complexity Tracking
 
@@ -164,3 +203,4 @@ Handlers will depend on, not a feature module of its own.
 |-----------|------------|---------------------------------------|
 | `request-code` and `verify-code` skip the Principle V "verify session first" sub-rule | These two routes exist specifically to *create* a session; there is no session yet to check. | N/A — this is the one Route Handler category where the rule structurally cannot apply, same reasoning the constitution itself anticipates for auth-establishing endpoints. |
 | No PWA manifest/service worker (Principle IV) still not delivered | This feature's scope, per explicit user request, is auth specifically; PWA installability is a materially separate concern (manifest, icons, service worker caching strategy, iOS/Android install-flow verification) that deserves its own focused feature rather than being bundled in. | Per the Bootstrap Sequencing Exception, this is only acceptable because a dedicated follow-up PWA-installability feature is explicitly named as required before any real product module — same commitment `001-foundational-infra` made and is now carrying forward one more feature. **Follow-up feature required next (or before any household module): PWA installability (manifest + service worker).** |
+| A second Cloudflare Worker (`packages/send-email`) — Principle VI / Additional Constraints "single deployment target" | Supabase's Send Email Hook needs an internet-reachable HTTPS endpoint that isn't part of the main app's own session-authenticated routes; see research.md §10 for the full reasoning (email deliverability requirements forced a change to Supabase's own email system regardless, and the React Email/Resend pivot on top of that needed a webhook receiver). | Adding it as a Route Handler in `packages/web` was considered and rejected: it would mix a third-party-facing webhook into an app whose every other route is called only by its own frontend, without actually avoiding a second thing to build/maintain (the Worker's logic still has to exist somewhere). The constitution was amended with an explicit, narrow, named exception (one webhook, no user-facing routes, no unrelated logic) rather than silently violating the rule. |

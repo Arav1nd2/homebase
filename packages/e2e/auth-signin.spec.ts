@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./inbucket";
+import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
 
 // Allow-listed in .dev.vars (ALLOWED_EMAILS) for local/CI runs. Each
 // test that triggers a real sign-in uses its own email — Supabase's

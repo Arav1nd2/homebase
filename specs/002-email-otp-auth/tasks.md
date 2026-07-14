@@ -19,6 +19,25 @@ Supabase's docs — the two are drop-in equivalents for any client library
 version, so this was a rename with no logic change. Current code and all
 other docs use `SUPABASE_PUBLISHABLE_KEY`.
 
+**Third amendment (same day) — sign-in email delivery pivot and monorepo
+restructure**: T018 (customizing Supabase's own `config.toml` email
+template) was superseded by a larger change: Supabase's own email
+delivery (built-in service capped at 2 emails/hour project-wide, and
+unable to serve a customized template without custom SMTP as of a recent
+Supabase change) was replaced entirely with a Send Email Hook handled by
+a new, dedicated Cloudflare Worker (`packages/send-email`) that renders a
+React Email template and sends via Resend — see research.md §10 for the
+full account, including the constitution amendment this required (a
+narrow, documented exception to the single-deployment-target rule) and
+the honest limits of the hermetic fake-Resend test server used in
+`packages/e2e`. This also prompted restructuring the whole repository
+into an npm workspaces monorepo (`packages/web`, `packages/send-email`,
+`packages/e2e`), so the new Worker and the e2e tests (which now exercise
+both Workers) could each have their own dependencies. All file paths
+referenced in tasks T001–T029 below are relative to the pre-restructure
+single-project layout; see plan.md's "What actually shipped" tree for the
+current locations.
+
 **Input**: Design documents from `/specs/002-email-otp-auth/`
 
 **Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [contracts/auth-api.md](./contracts/auth-api.md), [quickstart.md](./quickstart.md)

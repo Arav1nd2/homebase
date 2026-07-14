@@ -1,0 +1,26 @@
+{
+  "name": "send-email",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:template": "tsx scripts/build-template.ts",
+    "dev": "npm run build:template && wrangler dev",
+    "deploy": "npm run build:template && wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "resend": "^6.17.2",
+    "standardwebhooks": "^1.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "react": "^19.0.0",
+    "react-email": "^6.8.1",
+    "tsx": "^4.23.1",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^4.86.0"
+  }
+}
