@@ -63,6 +63,29 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # These aren't real secrets: SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY are
+      # fixed, publicly-known values baked into every local Supabase CLI
+      # instance (not project-specific); ALLOWED_EMAILS is just test data
+      # matching what the e2e specs use; SEND_EMAIL_HOOK_SECRET only has to
+      # match between these two files within this one ephemeral CI run, not
+      # anything in production; and RESEND_API_KEY/RESEND_FROM_ADDRESS are
+      # never actually sent to Resend, since RESEND_BASE_URL points the
+      # send-email Worker at the fake capture server instead (see
+      # specs/002-email-otp-auth/research.md §10).
+      - name: Create local secrets files for CI
+        run: |
+          echo 'SEND_EMAIL_HOOK_SECRET=v1,whsec_9oaWmwPji8LR8CbCuta9Lbr1uiYLY/sxjm1SlgP7jsk=' > .env
+          cat > packages/web/.dev.vars <<'EOF'
+          SUPABASE_URL=http://127.0.0.1:54321
+          SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+          ALLOWED_EMAILS=test@example.com,test-signin@example.com,test-relogin@example.com,test-session@example.com,test-signout@example.com,test-smoke@example.com
+          EOF
+          cat > packages/send-email/.dev.vars <<'EOF'
+          SEND_EMAIL_HOOK_SECRET=v1,whsec_9oaWmwPji8LR8CbCuta9Lbr1uiYLY/sxjm1SlgP7jsk=
+          RESEND_API_KEY=re_test_placeholder
+          RESEND_FROM_ADDRESS="HomeBase <onboarding@resend.dev>"
+          RESEND_BASE_URL=http://localhost:9999
+          EOF
       # Pinned (not "latest") so this exactly matches the `supabase`
       # devDependency version used locally (package.json), and so the
       # Docker image cache key below stays stable — bump both together.
