@@ -25,6 +25,8 @@ Workers, backed by Supabase Postgres.
 
 ```bash
 npm install
+cp .dev.vars.example .dev.vars
+npm run db:start   # then fill in SUPABASE_URL / SUPABASE_ANON_KEY from `npx supabase status`
 npm run dev
 ```
 
@@ -32,6 +34,11 @@ This starts a local Supabase stack (Postgres, Auth, Storage), applies
 database migrations, builds the app, and serves it through a local
 Cloudflare Workers preview — open the URL it prints. Everything runs
 locally; nothing talks to production.
+
+`.dev.vars` (gitignored — never commit it) holds local secrets Wrangler
+injects as environment bindings. Besides the Supabase URL/key, it also
+defines who is allowed to sign in (`ALLOWED_EMAILS`) — see "Signing in"
+below.
 
 Local dev intentionally runs through the same Cloudflare Workers runtime
 used in production (not Next.js's `next dev` server), so the database
@@ -42,6 +49,28 @@ representative of production.
 
 Stop the local stack with `npm run db:stop`. Data persists across restarts
 unless you run `npm run db:reset`.
+
+### Signing in
+
+The app is gated behind sign-in: enter your email on the login screen and
+a 6-digit code is sent to it (via local Supabase's Inbucket/Mailpit at
+`http://127.0.0.1:54324` in dev — no real email is sent locally). Only
+email addresses on an allow-list can sign in.
+
+To add yourself locally, append your email to the comma-separated
+`ALLOWED_EMAILS` in `.dev.vars`. Sessions stay signed in for 30 days of
+activity — closing and reopening the app doesn't require signing in again
+until then.
+
+In production, GitHub Actions secrets are the single source of truth for
+all secrets (see "GitHub configuration" below) — to add someone, update
+the `ALLOWED_EMAILS` secret in GitHub (Settings → Secrets and variables →
+Actions) with the full comma-separated list (this replaces the previous
+value, so include everyone who should still have access), then re-run
+`deploy.yml` (push to `main`, or trigger it manually from the Actions tab)
+to sync it to the Worker. Never set it directly with `wrangler secret put`
+against production — that would only update Cloudflare's copy, leaving it
+out of sync with GitHub the next time anyone deploys.
 
 ### Schema changes
 
@@ -63,8 +92,11 @@ npm test                  # test:unit + test:integration
 ## Deployment
 
 Pushes to `main` trigger `.github/workflows/deploy.yml`, which applies
-database migrations, builds the app, and deploys to Cloudflare Workers.
-Deploys are gated behind a manual approval step in GitHub.
+database migrations, builds the app, deploys to Cloudflare Workers, and
+syncs auth secrets from GitHub to the Worker. It can also be triggered
+manually from the Actions tab (`workflow_dispatch`) — useful when you've
+only changed a secret and don't have a new commit to push. Deploys are
+gated behind a manual approval step in GitHub either way.
 
 ### One-time production setup
 
@@ -82,10 +114,21 @@ Deploys are gated behind a manual approval step in GitHub.
    `wrangler.jsonc`.
 3. **Run the initial migration**:
    `DATABASE_URL=<session-pooler-url> npx drizzle-kit migrate`.
-4. **Deploy**: `npm run deploy:workers`, or push to `main` and let CI/CD
-   handle it.
-5. **Verify**: visit the production URL and confirm the app loads and can
-   read/write data.
+4. **Configure Supabase Auth** in the hosted project's Dashboard
+   (Authentication → Sign In / Providers → Email, and Authentication →
+   Sessions): OTP expiry 10 minutes, resend cooldown 60 seconds, and a
+   30-day session inactivity timeout. These settings live only in the
+   hosted project — they don't sync from `supabase/config.toml`, so update
+   both whenever one changes.
+5. **Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `ALLOWED_EMAILS`** as
+   GitHub Actions secrets (see "GitHub configuration" below) — not via
+   `wrangler secret put` directly. `deploy.yml` pushes them to the Worker
+   on every run.
+6. **Deploy**: push to `main`, or trigger `deploy.yml` manually from the
+   Actions tab — either way it builds, migrates, deploys, and syncs
+   secrets to the Worker.
+7. **Verify**: visit the production URL, confirm it redirects to the login
+   screen, and that signing in with an allowed email works end-to-end.
 
 ### GitHub configuration
 
@@ -94,7 +137,11 @@ Deploys are gated behind a manual approval step in GitHub.
 2. **Production environment**: create a GitHub Environment named
    `production` with at least one required reviewer — this is the
    deploy approval gate.
-3. **Secrets**, scoped to the `production` environment:
+3. **Secrets**, scoped to the `production` environment — these are the
+   single source of truth for every credential this project uses (see the
+   constitution's Additional Constraints); `deploy.yml` syncs the auth
+   ones to the Worker on every run, so nothing is ever set by hand
+   directly against Cloudflare:
    - `CLOUDFLARE_API_TOKEN` — an "Edit Cloudflare Workers" token scoped to
      your account
    - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard, or
@@ -102,6 +149,11 @@ Deploys are gated behind a manual approval step in GitHub.
    - `PRODUCTION_DATABASE_URL` — the session pooler connection string (see
      step 1 above); using the direct connection here will fail from
      GitHub's IPv4-only runners
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY` — from the same Supabase cloud
+     project's API settings
+   - `ALLOWED_EMAILS` — comma-separated household member emails allowed to
+     sign in; update this whenever someone is added or removed, then
+     re-run `deploy.yml`
 
 ### Rolling back
 
@@ -131,5 +183,5 @@ Design and planning documents for individual features live under `specs/`.
 
 ## Roadmap
 
-Authentication (Supabase Auth) and installable PWA support are planned as
-foundational work, ahead of further product features.
+Installable PWA support (manifest, service worker, offline behavior) is
+planned as foundational work, ahead of further product features.

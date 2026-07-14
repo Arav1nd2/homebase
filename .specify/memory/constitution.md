@@ -1,5 +1,27 @@
 <!--
 Sync Impact Report
+- Version change: 3.0.0 → 3.1.0
+- Added guidance (MINOR: new constraint, no existing principle redefined):
+  - Additional Constraints — new bullet "GitHub Actions secrets are the
+    single secret manager": every credential/config secret is set once as
+    a GitHub Actions secret scoped to the `production` environment;
+    Cloudflare Worker secrets are synced from it by `deploy.yml` on every
+    run, never set by hand via `wrangler secret put`. Added during
+    002-email-otp-auth, prompted by realizing Cloudflare Worker secrets
+    and GitHub Actions secrets are both write-only (no read-back), so an
+    automated "append one more allow-listed email" workflow had no source
+    of truth to append to unless one side was treated as canonical.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
 - Version change: 2.2.0 → 3.0.0
 - Modified principles (MAJOR: redefines the mandated ORM, a
   backward-incompatible stack change per this constitution's own
@@ -287,6 +309,22 @@ the next feature instead of speeding it up.
 - **Accessibility baseline**: Interactive elements MUST be usable via touch
   with adequate tap targets and sufficient color contrast; this is treated
   as part of mobile-first design, not a separate optional pass.
+- **GitHub Actions secrets are the single secret manager**: Every credential
+  and sensitive config value (database URLs, API tokens, the sign-in
+  allow-list, etc.) is set exactly once, as a GitHub Actions secret scoped
+  to the `production` environment. Cloudflare Worker secrets are never set
+  ad hoc via `wrangler secret put` by hand; `deploy.yml` pushes the current
+  GitHub secret values to the Worker on every run (push to `main` or a
+  manual `workflow_dispatch`), so Cloudflare's copy can never drift from
+  what's in GitHub. To change a secret, update it in GitHub and re-run the
+  deploy — never edit it directly on the Cloudflare side.
+
+**Rationale**: Two systems independently holding "the real value" of the
+same secret is exactly the kind of divergence Principle VI's Environment
+Parity rule warns about for infrastructure access — a secret quietly
+changed in one place and not the other is a silent, hard-to-notice
+production bug waiting to happen. A single source of truth, synced by the
+same pipeline that deploys the code, removes that failure mode entirely.
 
 ## Development Workflow
 
@@ -340,4 +378,4 @@ begins; unresolved conflicts MUST be simplified away, resolved via the
 Bootstrap Sequencing Exception above, or the constitution amended first —
 never silently bypassed.
 
-**Version**: 3.0.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-12
+**Version**: 3.1.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-14

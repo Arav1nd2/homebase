@@ -227,11 +227,15 @@ enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+# Raised from the "1s" default so a single email address cannot trigger more
+# than one OTP send per minute (spec 002-email-otp-auth FR-008).
+max_frequency = "60s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Set to 10 minutes per spec 002-email-otp-auth FR-006 (see
+# specs/002-email-otp-auth/research.md §1).
+otp_expiry = 600
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -242,6 +246,16 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# `signInWithOtp` sends the "magic link" mail type; its default template
+# only shows a clickable link, not the 6-digit code. This project's sign-in
+# UI is code-entry, not link-click (specs/002-email-otp-auth/research.md
+# §1 — a link would open the system browser, breaking the installed-PWA
+# experience), so the template is customized to surface `{{ .Token }}`
+# prominently instead.
+[auth.email.template.magic_link]
+subject = "Your HomeBase sign-in code"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -269,7 +283,15 @@ max_frequency = "5s"
 # 4152127777 = "123456"
 
 # Configure logged in session timeouts.
-# [auth.sessions]
+# Sliding 30-day session per spec 002-email-otp-auth FR-010/FR-011: no
+# `timebox` (no unconditional absolute cutoff — this must stay commented
+# out), only `inactivity_timeout`, so activity keeps renewing the session
+# and it only expires after 30 consecutive days with none. See
+# specs/002-email-otp-auth/research.md §3 — the hosted Supabase project's
+# Authentication settings must be set to match this manually (config.toml
+# only drives the local CLI stack).
+[auth.sessions]
+inactivity_timeout = "720h"
 # Force log out after the specified duration.
 # timebox = "24h"
 # Force log out if the user has been inactive longer than the specified duration.

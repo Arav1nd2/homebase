@@ -1,4 +1,9 @@
 import { expect, request, test } from "@playwright/test";
+import { clearInbox, getLatestOtpCodeFor } from "./inbucket";
+
+// Own dedicated email — see tests/e2e/auth-signin.spec.ts for why
+// (Supabase's 60s per-email resend cooldown vs. parallel test workers).
+const ALLOWED_EMAIL = "test-smoke@example.com";
 
 // Direct API-level check, independent of the UI: fails with an unambiguous
 // "database connection" signal rather than a generic UI assertion failure,
@@ -22,7 +27,18 @@ test("the API can actually reach the database (US1)", async ({ baseURL }) => {
 test("round-trips a message through the browser, API, and database (US1)", async ({ page }) => {
   const message = `smoke-${Date.now()}`;
 
-  await page.goto("/");
+  // This page is now gated behind sign-in (002-email-otp-auth FR-001) —
+  // sign in first so the round trip is exercised on the actual protected
+  // page, not the login screen it would otherwise land on.
+  await clearInbox();
+  await page.goto("/login");
+  await page.getByLabel("Email address").fill(ALLOWED_EMAIL);
+  await page.getByRole("button", { name: "Send me a code" }).click();
+  const code = await getLatestOtpCodeFor(ALLOWED_EMAIL);
+  await page.getByLabel("Enter the code").fill(code);
+  await page.getByRole("button", { name: "Sign in" }).click();
+
+  await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: "HomeBase smoke test" })).toBeVisible();
 
   await page.getByPlaceholder("Type a message").fill(message);

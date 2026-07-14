@@ -3,6 +3,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Lets a secret-only change (e.g. updating ALLOWED_EMAILS) be synced to
+  # Cloudflare without needing an empty commit — see the "Sync auth
+  # secrets" step below and README.md "Signing in".
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -32,6 +36,21 @@ jobs:
         run: npm run build:workers
       - name: Deploy to Cloudflare Workers
         run: npm run deploy:workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # GitHub Actions secrets are this project's single secret manager
+      # (constitution Additional Constraints) — every deploy pushes their
+      # current values to the Worker, so Cloudflare's copy can never drift
+      # from what's set in GitHub. `wrangler secret put` updates the live
+      # secret in place; it doesn't require a redeploy on its own, but
+      # running it here means updating a GitHub secret and re-running this
+      # workflow (push or workflow_dispatch) is the only step needed.
+      - name: Sync auth secrets to the Worker
+        run: |
+          echo "${{ secrets.SUPABASE_URL }}" | npx wrangler secret put SUPABASE_URL
+          echo "${{ secrets.SUPABASE_ANON_KEY }}" | npx wrangler secret put SUPABASE_ANON_KEY
+          echo "${{ secrets.ALLOWED_EMAILS }}" | npx wrangler secret put ALLOWED_EMAILS
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

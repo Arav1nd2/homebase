@@ -23,28 +23,30 @@
     "deploy:workers": "opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.1",
+    "@supabase/supabase-js": "^2.110.3",
+    "drizzle-orm": "^0.36.0",
     "next": "^15.1.0",
+    "pg": "^8.13.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "drizzle-orm": "^0.36.0",
-    "pg": "^8.13.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "@opennextjs/cloudflare": "^1.20.0",
+    "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/pg": "^8.11.0",
     "drizzle-kit": "^0.28.0",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.1.0",
-    "@eslint/eslintrc": "^3.2.0",
     "prettier": "^3.4.0",
     "supabase": "^2.109.1",
+    "typescript": "^5.7.0",
     "vitest": "^2.1.0",
-    "@playwright/test": "^1.49.0",
-    "@opennextjs/cloudflare": "^1.20.0",
     "wrangler": "^4.86.0"
   }
 }
