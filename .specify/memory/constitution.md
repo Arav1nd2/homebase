@@ -1,5 +1,29 @@
 <!--
 Sync Impact Report
+- Version change: 3.2.0 → 3.3.0
+- Added guidance (MINOR: new constraint under an existing principle, no
+  existing principle redefined):
+  - VII. Pragmatic Testing — new bullet: e2e tests that trigger a real
+    sign-in MUST each use their own dedicated, unique email address, never
+    shared across tests or spec files. Added after a real incident: with
+    Playwright's `fullyParallel` workers, a shared-email fake-inbox-clearing
+    helper caused one test to silently wipe another's just-captured OTP
+    email, producing intermittent "No OTP email arrived" failures that
+    looked like a Docker/host.docker.internal networking bug and were
+    debugged as one for a while before the actual cause (test-authoring,
+    not infrastructure) was found. See the e2e suite's fake-resend.ts
+    history for the fix.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
 - Version change: 3.1.0 → 3.2.0
 - Modified constraint (MINOR: narrows a MUST with an explicit, bounded
   exception rather than redefining or removing it):
@@ -291,6 +315,13 @@ blanket mandate:
   instead of automated tests.
 - Every bug fix for a reported issue MUST include a regression test that
   would have caught it, unless the code path is trivial.
+- End-to-end tests that trigger a real sign-in MUST each use their own
+  dedicated, unique email address — never shared across tests, even across
+  different spec files. Playwright's `fullyParallel` execution and Supabase
+  Auth's per-email OTP resend cooldown (`auth.email.max_frequency`) mean two
+  tests racing on the same email can silently suppress or misattribute the
+  OTP, producing an intermittent failure that looks like an infrastructure
+  bug rather than what it actually is: a test-authoring race condition.
 
 Tests MUST be fast enough to run locally before every commit; a suite that
 discourages running it is worse than a smaller one that gets run.
@@ -416,4 +447,4 @@ begins; unresolved conflicts MUST be simplified away, resolved via the
 Bootstrap Sequencing Exception above, or the constitution amended first —
 never silently bypassed.
 
-**Version**: 3.2.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-14
+**Version**: 3.3.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-15
