@@ -1,13 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
+import { getLatestOtpCodeFor } from "./fake-resend";
 
 // Own dedicated email — see auth-signin.spec.ts for why (Supabase's 60s
 // per-email resend cooldown vs. parallel test workers).
 const ALLOWED_EMAIL = "test-signout@example.com";
-
-test.beforeEach(async () => {
-  await clearInbox();
-});
 
 test("signing out immediately revokes access to the main app on that device (US3, SC-005)", async ({ page }) => {
   await page.goto("/login");

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
+import { getLatestOtpCodeFor } from "./fake-resend";
 
 // Allow-listed in .dev.vars (ALLOWED_EMAILS) for local/CI runs. Each
 // test that triggers a real sign-in uses its own email — Supabase's
@@ -9,10 +9,6 @@ import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
 const ALLOWED_EMAIL = "test-signin@example.com";
 const RELOGIN_EMAIL = "test-relogin@example.com";
 const NOT_ALLOWED_EMAIL = "not-allowed@example.com";
-
-test.beforeEach(async () => {
-  await clearInbox();
-});
 
 test("signed-out visitor is sent to /login instead of the main page (FR-001)", async ({ page }) => {
   await page.goto("/");

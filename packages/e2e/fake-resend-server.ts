@@ -15,7 +15,7 @@ interface CapturedEmail {
   receivedAt: number;
 }
 
-let capturedEmails: CapturedEmail[] = [];
+const capturedEmails: CapturedEmail[] = [];
 
 function toRecipientList(to: string | string[]): string[] {
   return Array.isArray(to) ? to : [to];
@@ -47,13 +47,6 @@ const server = createServer(async (req, res) => {
       .sort((a, b) => b.receivedAt - a.receivedAt);
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ emails: matches }));
-    return;
-  }
-
-  if (req.method === "DELETE" && req.url === "/emails") {
-    capturedEmails = [];
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true }));
     return;
   }
 

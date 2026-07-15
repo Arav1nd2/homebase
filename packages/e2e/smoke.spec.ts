@@ -1,5 +1,5 @@
 import { expect, request, test } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
+import { getLatestOtpCodeFor } from "./fake-resend";
 
 // Own dedicated email — see tests/e2e/auth-signin.spec.ts for why
 // (Supabase's 60s per-email resend cooldown vs. parallel test workers).
@@ -30,7 +30,6 @@ test("round-trips a message through the browser, API, and database (US1)", async
   // This page is now gated behind sign-in (002-email-otp-auth FR-001) —
   // sign in first so the round trip is exercised on the actual protected
   // page, not the login screen it would otherwise land on.
-  await clearInbox();
   await page.goto("/login");
   await page.getByLabel("Email address").fill(ALLOWED_EMAIL);
   await page.getByRole("button", { name: "Send me a code" }).click();

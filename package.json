@@ -17,7 +17,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "npm run test:unit --workspace=web",
     "test:e2e": "npm run test --workspace=e2e",
-    "test:integration": "npm run db:reset && npm run db:migrate:local && npm run test:e2e && npm run db:stop"
+    "test:integration": "npm run db:start && npm run db:reset && npm run db:migrate:local && npm run test:e2e && npm run db:stop"
   },
   "devDependencies": {
     "supabase": "^2.109.1"

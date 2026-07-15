@@ -1,5 +1,5 @@
 import { expect, test, type Browser } from "@playwright/test";
-import { clearInbox, getLatestOtpCodeFor } from "./fake-resend";
+import { getLatestOtpCodeFor } from "./fake-resend";
 
 // Own dedicated email — see auth-signin.spec.ts for why (Supabase's 60s
 // per-email resend cooldown vs. parallel test workers).
@@ -23,10 +23,6 @@ async function signInAndCaptureSession(browser: Browser) {
   await context.close();
   return storageState;
 }
-
-test.beforeEach(async () => {
-  await clearInbox();
-});
 
 // A brand-new BrowserContext with no shared in-memory state carries over
 // nothing except the persisted cookie — the closest Playwright-level

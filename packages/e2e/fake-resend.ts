@@ -32,8 +32,3 @@ export async function getLatestOtpCodeFor(email: string, timeoutMs = 10_000): Pr
 
   throw new Error(`No OTP email arrived for ${email} within ${timeoutMs}ms`);
 }
-
-/** Clears the fake capture server's stored emails so each test starts from a clean slate. */
-export async function clearInbox(): Promise<void> {
-  await fetch(`${FAKE_RESEND_URL}/emails`, { method: "DELETE" });
-}
