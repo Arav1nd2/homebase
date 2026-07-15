@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type SmokeTestRecord = {
   id: string;
@@ -11,11 +12,27 @@ type SmokeTestRecord = {
 type ApiError = { error: { message: string; code: string } };
 
 export default function SmokeTestPage() {
+  const router = useRouter();
   const [record, setRecord] = useState<SmokeTestRecord | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      const res = await fetch("/api/auth/sign-out", { method: "POST" });
+      if (res.ok) {
+        const body = (await res.json()) as { data: { redirectTo: string } };
+        router.push(body.data.redirectTo);
+        router.refresh();
+      }
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   async function loadLatest() {
     setLoading(true);
@@ -65,8 +82,13 @@ export default function SmokeTestPage() {
 
   return (
     <main style={{ maxWidth: 480, margin: "3rem auto", fontFamily: "sans-serif" }}>
-      <h1>HomeBase smoke test</h1>
-      <p>Proves browser → API → database → browser works end-to-end. No sign-in required.</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1>HomeBase smoke test</h1>
+        <button type="button" onClick={handleSignOut} disabled={signingOut}>
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
+      </div>
+      <p>Proves browser → API → database → browser works end-to-end.</p>
 
       {error && (
         <p role="alert" style={{ color: "crimson" }}>

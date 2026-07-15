@@ -3,6 +3,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Lets a secret-only change (e.g. updating ALLOWED_EMAILS) be synced to
+  # Cloudflare without needing an empty commit — see the "Sync auth
+  # secrets" step below and README.md "Signing in".
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -13,7 +17,9 @@ jobs:
     # repo's GitHub settings — see README.md "CI/CD (GitHub, manual one-time
     # setup)". Only runs after this workflow triggers, which itself only
     # happens on push to main — i.e. after PR checks in ci.yml already
-    # passed (FR-013: approval strictly after automated checks).
+    # passed (FR-013: approval strictly after automated checks). Both
+    # deployable units below (packages/web, packages/send-email) share this
+    # one job/one approval, rather than each having its own gate.
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -22,19 +28,66 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      # --- packages/web ---
       # FR-009 / G1: keep production's schema in lockstep with the same
       # migration history local/CI use — never let it drift.
       - name: Apply migrations to production
+        working-directory: packages/web
         run: npx drizzle-kit migrate
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-      - name: Build for Cloudflare Workers (OpenNext)
+      - name: Build web for Cloudflare Workers (OpenNext)
+        working-directory: packages/web
         run: npm run build:workers
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy web to Cloudflare Workers
+        working-directory: packages/web
         run: npm run deploy:workers
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # GitHub Actions secrets are this project's single secret manager
+      # (constitution Additional Constraints) — every deploy pushes their
+      # current values to the Worker, so Cloudflare's copy can never drift
+      # from what's set in GitHub. `wrangler secret put` updates the live
+      # secret in place; it doesn't require a redeploy on its own, but
+      # running it here means updating a GitHub secret and re-running this
+      # workflow (push or workflow_dispatch) is the only step needed.
+      - name: Sync web's auth secrets to the Worker
+        working-directory: packages/web
+        run: |
+          echo "${{ secrets.SUPABASE_URL }}" | npx wrangler secret put SUPABASE_URL
+          echo "${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" | npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
+          echo "${{ secrets.ALLOWED_EMAILS }}" | npx wrangler secret put ALLOWED_EMAILS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # --- packages/send-email ---
+      # Narrowly-scoped webhook-receiver Worker (constitution's Single
+      # deployment target exception) — receives Supabase's Send Email Hook
+      # and sends the sign-in code via Resend. See
+      # specs/002-email-otp-auth/research.md §10.
+      - name: Deploy send-email to Cloudflare Workers
+        working-directory: packages/send-email
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Sync send-email's secrets to the Worker
+        working-directory: packages/send-email
+        run: |
+          echo "${{ secrets.SEND_EMAIL_HOOK_SECRET }}" | npx wrangler secret put SEND_EMAIL_HOOK_SECRET
+          echo "${{ secrets.RESEND_API_KEY }}" | npx wrangler secret put RESEND_API_KEY
+          echo "${{ secrets.RESEND_FROM_ADDRESS }}" | npx wrangler secret put RESEND_FROM_ADDRESS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Intentionally NOT set here: RESEND_BASE_URL — leaving it unset
+          # in production means the Worker calls Resend's real API (see
+          # packages/send-email/src/index.ts). It's a test/local-only
+          # override, never a production secret.
+
       # No test/smoke step runs against production here, deliberately — see
       # constitution Principle VI's Environment Parity rule. Correctness is
       # established by ci.yml's e2e job running the exact same binding-access

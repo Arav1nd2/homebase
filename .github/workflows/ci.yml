@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+  push:
+    branches: [main]
 
 jobs:
   lint:
@@ -11,7 +13,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
       - run: npm run lint
 
@@ -22,7 +23,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
       - run: npm run typecheck
 
@@ -33,7 +33,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
       - run: npm run test:unit
 
@@ -50,56 +49,51 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
-      # Pinned (not "latest") so this exactly matches the `supabase`
-      # devDependency version used locally (package.json), and so the
-      # Docker image cache key below stays stable — bump both together.
+      # None of these are sensitive in the sense of protecting something
+      # real — SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY are fixed,
+      # publicly-known values baked into every local Supabase CLI instance
+      # (not project-specific); ALLOWED_EMAILS is just test data matching
+      # what the e2e specs use; CI_SEND_EMAIL_HOOK_SECRET only has to match
+      # between these two files within this one ephemeral CI run, not
+      # anything in production; and the Resend values are never actually
+      # sent to Resend, since RESEND_BASE_URL points the send-email Worker
+      # at the fake capture server instead (see
+      # specs/002-email-otp-auth/research.md §10). Still kept as repo
+      # secrets (CI_* prefix, distinct from the production-scoped secrets
+      # of similar purpose) rather than hardcoded in this file, so nothing
+      # here has to be treated as a trusted constant just because it's
+      # committed in the clear.
+      - name: Create local secrets files for CI
+        env:
+          CI_SUPABASE_URL: ${{ secrets.CI_SUPABASE_URL }}
+          CI_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.CI_SUPABASE_PUBLISHABLE_KEY }}
+          CI_ALLOWED_EMAILS: ${{ secrets.CI_ALLOWED_EMAILS }}
+          CI_SEND_EMAIL_HOOK_SECRET: ${{ secrets.CI_SEND_EMAIL_HOOK_SECRET }}
+          CI_RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
+          CI_RESEND_FROM_ADDRESS: ${{ secrets.CI_RESEND_FROM_ADDRESS }}
+        run: |
+          echo "SEND_EMAIL_HOOK_SECRET=$CI_SEND_EMAIL_HOOK_SECRET" > .env
+          cat > packages/web/.dev.vars <<EOF
+          SUPABASE_URL=$CI_SUPABASE_URL
+          SUPABASE_PUBLISHABLE_KEY=$CI_SUPABASE_PUBLISHABLE_KEY
+          ALLOWED_EMAILS=$CI_ALLOWED_EMAILS
+          EOF
+          cat > packages/send-email/.dev.vars <<EOF
+          SEND_EMAIL_HOOK_SECRET=$CI_SEND_EMAIL_HOOK_SECRET
+          RESEND_API_KEY=$CI_RESEND_API_KEY
+          RESEND_FROM_ADDRESS="$CI_RESEND_FROM_ADDRESS"
+          RESEND_BASE_URL=http://localhost:9999
+          EOF
       - uses: supabase/setup-cli@v1
         with:
           version: 2.109.1
-      # The Supabase CLI pulls several Docker images (Postgres, GoTrue,
-      # PostgREST, Kong, Storage, etc.) on first `supabase start`. Cache
-      # them as a single tarball so subsequent runs load from cache instead
-      # of re-pulling every image over the network. Keyed on the CLI
-      # version + config.toml's hash, since either can change which image
-      # tags get pulled.
-      - name: Restore cached Supabase Docker images
-        id: docker-cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/supabase-docker-images.tar
-          key: supabase-docker-images-2.109.1-${{ hashFiles('supabase/config.toml') }}
-      - name: Load cached Docker images
-        if: steps.docker-cache.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/supabase-docker-images.tar
       - name: Start a fresh local Supabase stack
         run: supabase start
-      - name: Save Docker images to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true'
-        run: docker save -o /tmp/supabase-docker-images.tar $(docker images -q)
       - name: Apply migrations to the fresh local stack
         run: npm run db:migrate:local
-      # Chromium's binary (~100MB+) is the expensive part of `playwright
-      # install`; cache it keyed on the resolved @playwright/test version so
-      # a matching version never re-downloads it. OS-level dependencies
-      # (apt packages) aren't part of this cache — they're cheap and always
-      # installed via `install-deps` regardless of cache hit/miss.
-      - name: Get installed Playwright version
-        id: playwright-version
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Restore cached Playwright browser binaries
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ steps.playwright-version.outputs.version }}
-      - name: Install Playwright's Chromium (cache miss only)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright's Chromium
         run: npx playwright install --with-deps chromium
-      - name: Install Playwright's OS dependencies only (cache hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
       # `npm run test:e2e` (playwright.config.ts's `webServer`) builds,
       # starts, and waits for the real Workers preview itself, then tears it
       # down after — no manual build/background-start/curl-poll steps here.

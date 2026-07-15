@@ -1,5 +1,76 @@
 <!--
 Sync Impact Report
+- Version change: 3.2.0 → 3.3.0
+- Added guidance (MINOR: new constraint under an existing principle, no
+  existing principle redefined):
+  - VII. Pragmatic Testing — new bullet: e2e tests that trigger a real
+    sign-in MUST each use their own dedicated, unique email address, never
+    shared across tests or spec files. Added after a real incident: with
+    Playwright's `fullyParallel` workers, a shared-email fake-inbox-clearing
+    helper caused one test to silently wipe another's just-captured OTP
+    email, producing intermittent "No OTP email arrived" failures that
+    looked like a Docker/host.docker.internal networking bug and were
+    debugged as one for a while before the actual cause (test-authoring,
+    not infrastructure) was found. See the e2e suite's fake-resend.ts
+    history for the fix.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
+- Version change: 3.1.0 → 3.2.0
+- Modified constraint (MINOR: narrows a MUST with an explicit, bounded
+  exception rather than redefining or removing it):
+  - Additional Constraints — "Single deployment target" gains a narrow,
+    named exception: a small, dedicated Cloudflare Worker MAY exist solely
+    to receive a third-party webhook callback (e.g. Supabase's Send Email
+    Auth Hook) that requires an internet-reachable endpoint separate from
+    the main app. Scoped tightly (receive/verify/act on one callback only,
+    no user-facing routes, no unrelated logic) and requires being named
+    here when added. First instance: `send-email-hook`. Added during
+    002-email-otp-auth after deciding to pivot the sign-in email itself to
+    a React Email template sent via Resend (through Supabase's Send Email
+    Hook) instead of Supabase's own SMTP+template system — see
+    specs/002-email-otp-auth/research.md §10.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
+- Version change: 3.0.0 → 3.1.0
+- Added guidance (MINOR: new constraint, no existing principle redefined):
+  - Additional Constraints — new bullet "GitHub Actions secrets are the
+    single secret manager": every credential/config secret is set once as
+    a GitHub Actions secret scoped to the `production` environment;
+    Cloudflare Worker secrets are synced from it by `deploy.yml` on every
+    run, never set by hand via `wrangler secret put`. Added during
+    002-email-otp-auth, prompted by realizing Cloudflare Worker secrets
+    and GitHub Actions secrets are both write-only (no read-back), so an
+    automated "append one more allow-listed email" workflow had no source
+    of truth to append to unless one side was treated as canonical.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
 - Version change: 2.2.0 → 3.0.0
 - Modified principles (MAJOR: redefines the mandated ORM, a
   backward-incompatible stack change per this constitution's own
@@ -244,6 +315,13 @@ blanket mandate:
   instead of automated tests.
 - Every bug fix for a reported issue MUST include a regression test that
   would have caught it, unless the code path is trivial.
+- End-to-end tests that trigger a real sign-in MUST each use their own
+  dedicated, unique email address — never shared across tests, even across
+  different spec files. Playwright's `fullyParallel` execution and Supabase
+  Auth's per-email OTP resend cooldown (`auth.email.max_frequency`) mean two
+  tests racing on the same email can silently suppress or misattribute the
+  OTP, producing an intermittent failure that looks like an infrastructure
+  bug rather than what it actually is: a test-authoring race condition.
 
 Tests MUST be fast enough to run locally before every commit; a suite that
 discourages running it is worse than a smaller one that gets run.
@@ -274,9 +352,22 @@ the next feature instead of speeding it up.
 ## Additional Constraints
 
 - **Single deployment target**: Cloudflare Workers via OpenNext is the only
-  deployment target. No separate backend service, serverless function
-  platform, or second runtime may be introduced to work around a Workers
-  limitation — see Principle VI.
+  deployment target for the application itself. No separate backend
+  service, serverless function platform, or second runtime may be
+  introduced to work around a Workers limitation — see Principle VI.
+  **Narrow exception**: a small, dedicated Cloudflare Worker MAY exist
+  solely to receive a webhook callback from a third-party service the app
+  integrates with (e.g. Supabase's Send Email Auth Hook), when that
+  third-party integration itself requires an internet-reachable endpoint
+  separate from the main app's own routes. Such a Worker MUST do nothing
+  beyond receiving, verifying, and acting on that one callback — it MUST
+  NOT grow its own pages, user-facing routes, or unrelated business logic;
+  the moment it would, that logic belongs in the main app instead. Each
+  such Worker MUST be documented here by name and purpose when added.
+  - `send-email-hook` (`workers/send-email-hook/`): receives Supabase
+    Auth's Send Email Hook webhook, renders the sign-in code email, and
+    sends it via Resend. See specs/002-email-otp-auth/research.md §10 for
+    the full rationale.
 - **Auth and storage stay managed**: Authentication goes through Supabase
   Auth and file/image storage through Supabase Storage; modules MUST NOT
   roll their own auth or stand up a separate storage bucket/provider.
@@ -287,6 +378,22 @@ the next feature instead of speeding it up.
 - **Accessibility baseline**: Interactive elements MUST be usable via touch
   with adequate tap targets and sufficient color contrast; this is treated
   as part of mobile-first design, not a separate optional pass.
+- **GitHub Actions secrets are the single secret manager**: Every credential
+  and sensitive config value (database URLs, API tokens, the sign-in
+  allow-list, etc.) is set exactly once, as a GitHub Actions secret scoped
+  to the `production` environment. Cloudflare Worker secrets are never set
+  ad hoc via `wrangler secret put` by hand; `deploy.yml` pushes the current
+  GitHub secret values to the Worker on every run (push to `main` or a
+  manual `workflow_dispatch`), so Cloudflare's copy can never drift from
+  what's in GitHub. To change a secret, update it in GitHub and re-run the
+  deploy — never edit it directly on the Cloudflare side.
+
+**Rationale**: Two systems independently holding "the real value" of the
+same secret is exactly the kind of divergence Principle VI's Environment
+Parity rule warns about for infrastructure access — a secret quietly
+changed in one place and not the other is a silent, hard-to-notice
+production bug waiting to happen. A single source of truth, synced by the
+same pipeline that deploys the code, removes that failure mode entirely.
 
 ## Development Workflow
 
@@ -340,4 +447,4 @@ begins; unresolved conflicts MUST be simplified away, resolved via the
 Bootstrap Sequencing Exception above, or the constitution amended first —
 never silently bypassed.
 
-**Version**: 3.0.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-12
+**Version**: 3.3.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-15

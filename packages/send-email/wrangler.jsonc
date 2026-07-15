@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "homebase-send-email-hook",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+  },
+  // No bindings beyond secrets (SEND_EMAIL_HOOK_SECRET, RESEND_API_KEY,
+  // optionally RESEND_BASE_URL for local/CI testing — see .dev.vars.example
+  // and README.md). This Worker is narrowly scoped to one webhook callback
+  // per constitution's Additional Constraints "Single deployment target"
+  // exception — it must not grow bindings/routes beyond that.
+}
