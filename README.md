@@ -166,6 +166,14 @@ approval step in GitHub.
 5. **Create a Resend account and verify a sending domain.** Sign-in emails
    are sent from this domain (e.g. `sign-in@yourdomain.com`) — Resend
    won't deliver from an unverified one.
+   - **PENDING**: production is currently running on Resend's shared
+     `onboarding@resend.dev` sandbox address as a stopgap
+     (`RESEND_FROM_ADDRESS = "HomeBase <onboarding@resend.dev>"`), which
+     only delivers to the Resend account's own verified email — other
+     household members won't receive sign-in codes until a real domain is
+     verified. Once verified, update `RESEND_FROM_ADDRESS` (both the
+     `production` GitHub Actions secret and `packages/send-email/.dev.vars`
+     if you want local parity) to the new address, then re-run `deploy.yml`.
 6. **Configure Supabase's Send Email Hook** (Authentication → Hooks → Send
    Email hook, in the hosted project's Dashboard): set it to HTTPS,
    pointing at the deployed `packages/send-email` Worker's URL, and
