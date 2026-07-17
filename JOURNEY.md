@@ -2,7 +2,7 @@
 
 <!-- The structural and temporal design spec for HomeBase. Pairs with DESIGN.md (visual tokens — locked in a later phase). -->
 
-**Status:** Phase 1 of 2 complete (Job + Journey + IA). Flows and Page specs are added in Phase 2.
+**Status:** Phase 2 of 2 complete (Job + Journey + IA + Flows + Page specs). Microcopy (Phase 6, `content-design`) and chart/table encoding for the habit heatmap + expense ledger (Phase 7, `data-viz`) extend the Page specs section further in later phases.
 **Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md)
 
 ---
@@ -202,4 +202,217 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 
 ---
 
-<!-- Flows and Page specs are added in Phase 2, per the design plan (Phase 2: Flows + page specs, depends on this phase). -->
+## Flows
+
+**Notation:** Steps use the universal flow notation from `journey-stack.md` (circle = entry/exit, rectangle = action/screen, diamond = decision, arrow = direction), rendered as ordered steps with explicit "Decision" markers rather than a drawn diagram — matching the JOURNEY.md template's own "Decision → yes: path A / no: path B" convention. Six flows below are **task flows** (linear — one per tool's single named linear job, per the design plan's scope split); one (Expenses) is the plan's one genuinely **branching user flow**; one (Launcher) is the app's one customization interaction, named as its own task flow per the plan's edge cases, with a single bounded decision inside it.
+
+### Log a habit (Habits)
+**Type:** Task flow (linear)
+**Entry:** Launcher quick-start pin or shelf card → Habits page
+**Goal:** Mark today complete for a habit and see the streak update.
+**Steps:**
+1. Land on Habits page; the most-recently-logged habit (or the sole habit, if only one exists) is selected by default.
+2. Tap the "log today" control for the active habit — **primary CTA** (Fitts's law, Fitts 1954: large, full-width control placed in the thumb-reachable lower half of the viewport, since this is the single highest-frequency action in the app, per the Job section's explicit "two taps" requirement).
+3. The heatmap's today-cell and the streak counter update in place — no page transition, no confirmation dialog (an intermediate confirm step would violate the Job section's "two taps" constraint).
+**Error states:** The log-today action fails to save (network/write error) — inline error at the control itself; today's cell stays in its pre-tap state so no false success is shown; retry is the same tap, not a separate recovery flow.
+**Success state:** Today's cell fills in; streak counter increments; no further navigation is required to confirm.
+
+### Add a grocery item (Groceries)
+**Type:** Task flow (linear)
+**Entry:** Launcher quick-start pin → Groceries page
+**Goal:** Add one item to the running list in the fewest possible steps, usable one-handed mid-week.
+**Steps:**
+1. Land on Groceries page; the quick-add field is reachable without a prior tap (the Job section's anxiety force names "slow to add" as the thing that kills adoption).
+2. Type the item name; tap "Add" — **primary CTA** (Fitts's law: the quick-add control is a persistent, large, bottom-fixed input+button pair, always in the same thumb-reachable position regardless of how long the list has grown).
+3. The item appears in the unchecked list immediately.
+**Error states:** The add action fails to sync — the item stays visible in the local list (optimistic UI) with an inline sync-pending/error marker; it is never silently dropped, and retry is automatic or a single re-tap.
+**Success state:** New item visible in the list, unchecked, ready to be checked off later in-store.
+
+### Log a movie or show (Movies & TV)
+**Type:** Task flow (linear)
+**Entry:** Launcher shelf card → Movies & TV page
+**Goal:** Record a watched title with a rating and short note.
+**Steps:**
+1. Land on Movies & TV page; watch history shown, newest first.
+2. Tap "Log a watch" — **primary CTA** (Fitts's law: a persistent, large, bottom-reachable button so logging never requires scrolling back to the top of a growing history).
+3. Enter title, rating, short note (poster art auto-attached where available, kept in original color per the plan's imagery constraint).
+4. Save.
+**Error states:** Save fails — the entry is preserved on-screen for retry, not discarded; a failed poster-art lookup falls back to a plain framed placeholder rather than blocking the log itself.
+**Success state:** New entry appears at the top of the watch history with poster, rating, and note visible.
+
+### Add a food review (Food Reviews)
+**Type:** Task flow (linear)
+**Entry:** Launcher shelf card, shortly after a meal out → Food Reviews page
+**Goal:** Capture a rating and note before the moment (and motivation) passes.
+**Steps:**
+1. Land on Food Reviews page; review list shown, newest first.
+2. Tap "Add a review" — **primary CTA** (Fitts's law: large, single-thumb-reachable button; the Job section's anxiety force — "if logging takes more than a moment, it never happens" — makes reach-and-tap speed a hard requirement here, not a nice-to-have).
+3. Enter restaurant name, rating, short note, optional photo.
+4. Save.
+**Error states:** Save fails — the entry is preserved for retry, given the narrow post-meal window this flow realistically happens in; a skipped or failed photo attach never blocks saving the rating+note.
+**Success state:** New review appears at the top of the list.
+
+### Add a recipe (Recipes)
+**Type:** Task flow (linear)
+**Entry:** Launcher shelf card → Recipes page
+**Goal:** Save a recipe once, in the user's own words, without it feeling like transcription homework.
+**Steps:**
+1. Land on Recipes page; recipe library shown.
+2. Tap "Add a recipe" — **primary CTA** (Fitts's law: large, bottom-fixed action on the entry form; the Job section's anxiety force — transcription effort deferring the save indefinitely — makes the save action the easiest, most reachable thing on the screen, not a buried final step).
+3. Enter title, ingredients, steps (freeform, no forced structured-field minimum, per "in my own words" from the Job section).
+4. Save.
+**Error states:** Save fails mid-entry — draft content (title/ingredients/steps typed so far) is preserved, never wiped, so a failed save doesn't compound the transcription-effort anxiety into a lost-work anxiety.
+**Success state:** Recipe appears in the library, reachable for retrieval while cooking.
+
+### Split an expense (Expenses)
+**Type:** User flow (branching — the one genuinely branching flow this phase specifies, per the plan's scope)
+**Entry:** Launcher quick-start pin, right after a shared purchase → Expenses page
+**Goal:** Turn a photographed bill into a confirmed, saved split without manual math or an awkward money conversation.
+**Steps:**
+1. Tap "Add expense" — **primary CTA** (Fitts's law: large, bottom-fixed action on the Expenses page, since this flow is triggered in-the-moment right after a purchase and needs to be reachable without hunting).
+2. Capture bill photo.
+3. AI parses the photo → draft line-items + split (loading/status state shown throughout — see page spec below).
+4. **Decision — did the parse succeed?** (Hick's law, Hick–Hyman 1952: this failure branch is scoped to exactly two recovery options, never a longer troubleshooting menu — per the plan's edge case that this is a first-class flow, not an afterthought)
+   - **No →** retry-vs-manual-entry sub-decision:
+     - **Retry the photo** → back to step 2.
+     - **Switch to manual entry** → structured manual line-item form (same ledger shape as the parsed result, so it is a real fallback, not a dead end) → proceed to step 6.
+   - **Yes →** continue to step 5.
+5. **Decision — confirm or edit?** (Hick's law: exactly two options presented — Confirm or Edit — never a per-line-item micro-decision menu at this stage)
+   - **Confirm as-is** → proceed to step 6.
+   - **Edit** → line-item edit screen (edits chunked into groups per Miller/Cowan ~4±1, flagged for Phase 5's form spec) → proceed to step 6.
+6. Tap "Confirm & save" — **primary CTA** (Fitts's law: large, bottom-fixed action bar, physically separated from the secondary "Edit" affordance so a rushed tap right after a purchase can't misfire the wrong action).
+7. Ledger/balance updates.
+**Error states:** AI-parse failure (step 4, the first-class failure path above — retry vs. manual entry, never a dead-end toast); a network/save failure after confirm (step 6) — retriable, no data lost, line-items stay on-screen.
+**Success state:** Line-items (parsed or manually entered) saved; ledger balance reflects the new split; each user's individual account shows their own side of the split (per the plan's individual-per-user model — no shared-access visual signal).
+
+### Pin or unpin a quick-start (Launcher)
+**Type:** Task flow (linear, with one bounded decision — the app's one customization interaction, per the plan's edge case)
+**Entry:** Launcher page, from either the quick-starts row's own trailing affordance or a pin-toggle on any shelf card
+**Goal:** Curate the small, fast-path quick-starts set without it growing into a second, redundant copy of the full shelf.
+**Steps:**
+1. Tap the pin toggle on a shelf card, or the quick-starts row's trailing "add" affordance.
+2. **Decision — is the quick-starts row already at its capped size?** (Hick's law, Hick–Hyman 1952: the cap itself is the option-reduction mechanism — quick-starts stay fast to scan precisely because they never grow past a small, deliberate set, per Phase 1's IA)
+   - **No (room available) →** the tool is pinned; its card appears in the quick-starts row.
+   - **Yes (at cap) →** prompted to unpin one existing quick-start first (a single, explicit swap choice — not silently rejected, not an open-ended reshuffle).
+3. Unpinning: tap the pin toggle on an already-pinned tool, from either the quick-starts row or the shelf — **primary-CTA-equivalent for this action** (Fitts's law: the toggle is the same size and position whether pinning or unpinning, so the action is equally easy to reverse as to perform, matching the "curation, not commitment" nature of this interaction).
+4. The quick-starts row updates immediately; the shelf itself is unaffected — a tool is never removed from the shelf by unpinning it (Phase 1 IA: tools are never hidden for lack of pin status either).
+**Error states:** Pin/unpin state fails to persist — the toggle reverts to its prior state with an inline indicator, rather than showing a false pinned/unpinned state that doesn't survive a reload.
+**Success state:** Quick-starts row reflects the user's current curated set; the shelf remains the full, unaffected source of truth for every tool.
+
+---
+
+## Page specs
+
+<!-- Format: Purpose / Entry points / Content blocks / States (empty, loading, error, success — all four always named) / Primary CTA / Exit-next, per journey-stack.md's page-spec template. Microcopy (Phase 6) and chart/table encoding (Phase 7) extend these entries further; this phase names where states and data surfaces exist, not their words or visual encoding. -->
+
+### Launcher
+**Purpose:** Get either user into the right tool in one tap, from one calm hub, without a nav bar or an icon folder to hunt through.
+**Entry points:** Home-screen app icon / PWA launch (every session — the front door to everything below); back-arrow from any tool.
+**Content blocks:**
+1. Header — app wordmark; no persistent nav bar/drawer (the hub itself is the global nav, per Phase 1's IA).
+2. Quick-starts row — user-curated, capped set of pinned tools (horizontally scrollable), with a trailing "add a pin" affordance.
+3. Shelf — every tool, alphabetical by canonical name, each card showing icon + canonical label + an optional summary badge (streak count, balance, etc.) + a pin-toggle affordance.
+**States:**
+- **Empty:** First launch, zero quick-starts pinned — the quick-starts row shows an invitation to pin a tool rather than blank space; the shelf below is unaffected and shows all six tools normally (per Phase 1's zero-data-tool IA rule: presence is never contingent on pin status or data).
+- **Loading:** Shelf cards' icon + label render immediately (static); summary badges (streak count, balance, etc.) show a skeleton placeholder while their underlying data resolves.
+- **Error:** A card's summary badge fails to load — the card stays fully tappable (icon/label are static and unaffected); only the badge shows a muted inline marker, never blocking entry to the tool.
+- **Success:** Quick-starts row (if populated) + full alphabetical shelf, all cards tappable with badges resolved.
+**Primary CTA:** Tap any quick-start pin or shelf card → open that tool (Fitts's law, Fitts 1954: cards are large, full/near-full-width tap targets; the quick-starts row sits in the thumb-reachable upper-middle zone; shelf cards run full-width so the target stays maximal regardless of scroll position).
+**Exit / next:** Opens the tapped tool (a spoke) — hub-and-spoke structure, no persistent nav; back-arrow inside the tool returns here.
+
+### Habits
+**Purpose:** Log today's completion for a habit in two taps and see its streak/history at a glance.
+**Entry points:** Launcher quick-start pin (daily cadence) or shelf card.
+**Content blocks:**
+1. Header — "Habits" H1 (canonical name) + back-to-hub affordance.
+2. Habit selector — tabs/list of the user's habits (e.g., Exercise, Meditation); selecting one sets the content below.
+3. Streak summary — current streak, longest streak, completion-rate stat for the selected habit.
+4. Heatmap — calendar-style completion grid for the selected habit (visual encoding specified in Phase 7).
+5. Log-today control — the day's complete/not-complete action for the selected habit.
+6. Add-a-habit entry (secondary) — create a new habit to track.
+**States:**
+- **Empty:** First-ever use — no habits created yet; the page invites creating the first habit instead of showing an empty selector/heatmap. (A habit that exists but has zero logged days is a lesser case of the same rule: its selector + a blank-but-present heatmap still show — presence is never hidden for lack of data, per Phase 1's IA.)
+- **Loading:** Selected habit's streak/heatmap data fetching — skeleton grid + placeholder stat values.
+- **Error:** Log-today action fails to save — inline error at the control itself; today's cell stays in its pre-tap state (no false success shown); retry is the same tap.
+- **Success:** Habit(s) exist; selected habit's heatmap and streak reflect the latest logged state.
+**Primary CTA:** Log-today control for the active habit (Fitts's law, Fitts 1954: the single highest-frequency action in the app — per the Job section's explicit "two taps" requirement — gets a large, full-width control in the thumb-reachable lower half of the viewport).
+**Exit / next:** Back-arrow to the launcher hub; no cross-tool navigation.
+
+### Movies & TV
+**Purpose:** Log a watched movie or show with a rating and short note so past watches are easy to recall.
+**Entry points:** Launcher shelf card (occasional quick-start pin).
+**Content blocks:**
+1. Header — "Movies & TV" H1 + back-to-hub affordance.
+2. Add-a-watch entry control.
+3. Watch history list — poster (original color, consistent frame), title, rating, short note, date; newest first.
+4. In-tool search/filter over one's own history (a page-level content block — Phase 1's IA explicitly places in-tool search here, outside top-level IA).
+**States:**
+- **Empty:** First-ever use — zero watches logged yet; the page invites the first log rather than showing a blank history list.
+- **Loading:** Watch history fetching — skeleton poster-card placeholders.
+- **Error:** A save/log action fails — inline error on the add-a-watch form; entry preserved for retry, not discarded.
+- **Success:** Watch history populated, newest entries at the top.
+**Primary CTA:** "Log a watch" (Fitts's law, Fitts 1954: a persistent, large, bottom-reachable button so adding a new watch never requires scrolling to the top of a growing history).
+**Exit / next:** Back-arrow to the launcher hub.
+
+### Expenses
+**Purpose:** Turn a photographed bill into a confirmed, saved split without manual math or an awkward money conversation.
+**Entry points:** Launcher quick-start pin, typically right after a shared purchase.
+**Content blocks:**
+1. Header — "Expenses" H1 + back-to-hub affordance.
+2. Add-expense entry (camera/photo capture control).
+3. AI-parse status/progress indicator (shown during parsing).
+4. Confirm-or-edit line-item review (ledger-style — one of the four dense-data families named in the plan's Phase 5 scope).
+5. Ledger/balance history — settled + outstanding balance indicator (visual/color encoding specified in Phase 7).
+**States:**
+- **Empty:** First-ever use — zero expenses logged yet; the page invites the first bill photo rather than showing a blank ledger.
+- **Loading:** AI-parse in progress after photo capture — an explicit progress/status indicator (Nielsen #1, visibility of system status — flagged for Phase 5's component spec), not a silent wait.
+- **Error:** AI parse fails — the first-class failure flow (see "Split an expense" flow above): retry-vs-manual-entry, never a dead-end generic error toast.
+- **Success:** Parsed (or manually entered) line-items confirmed and saved; ledger/balance updated.
+**Primary CTA:** "Confirm & save" on the parse-review screen (Fitts's law, Fitts 1954: large, bottom-fixed action bar, physically separated from the secondary "Edit" affordance so a rushed tap can't misfire the wrong action).
+**Exit / next:** Back-arrow to the launcher hub after save, or continue reviewing the ledger in place.
+
+### Food Reviews
+**Purpose:** Capture a rating and short note right after eating, in the couple's own private voice, before the moment passes.
+**Entry points:** Launcher shelf card, shortly after a meal out.
+**Content blocks:**
+1. Header — "Food Reviews" H1 + back-to-hub affordance.
+2. Add-a-review entry (rating + short note + optional photo capture).
+3. Review list — restaurant name, rating, short note, optional photo (original color, consistent frame); newest first.
+**States:**
+- **Empty:** First-ever use — zero reviews yet; the page invites the first review rather than showing a blank list.
+- **Loading:** Review list fetching — skeleton card placeholders.
+- **Error:** Save fails — inline error on the add-review form; entry preserved for retry (protects the narrow post-meal window named in the Job section's anxiety force).
+- **Success:** New review saved and visible at the top of the list.
+**Primary CTA:** "Add a review" (Fitts's law, Fitts 1954: large, single-thumb-reachable button; the Job section's anxiety force — "if logging takes more than a moment, it never happens" — makes reach-and-tap speed a hard requirement, not a nice-to-have).
+**Exit / next:** Back-arrow to the launcher hub.
+
+### Recipes
+**Purpose:** Save a recipe once, in the user's own words, and retrieve it easily while cooking.
+**Entry points:** Launcher shelf card, mid-cook or while meal-planning.
+**Content blocks:**
+1. Header — "Recipes" H1 + back-to-hub affordance.
+2. Add-a-recipe entry (title, ingredients, steps).
+3. Recipe library — title, optional photo, quick preview; browsable/searchable.
+4. Recipe detail view — full ingredients + steps, optimized for reference while actively cooking.
+**States:**
+- **Empty:** First-ever use — zero recipes saved yet; the page invites the first save rather than showing a blank library.
+- **Loading:** Library/detail view fetching — skeleton placeholders.
+- **Error:** Save fails mid-entry — draft content (title/ingredients/steps typed so far) is preserved, never wiped (protects against compounding the Job section's transcription-effort anxiety into a lost-work anxiety).
+- **Success:** Recipe saved and reachable from the library.
+**Primary CTA:** "Save recipe" (Fitts's law, Fitts 1954: large, bottom-fixed action on the entry form — the anxiety force here is effort/abandonment risk, so the save action must be the easiest, most reachable thing on the screen).
+**Exit / next:** Back-arrow to the launcher hub, or tap into a saved recipe's detail view mid-cook.
+
+### Groceries
+**Purpose:** Maintain a running shared checklist that's fast to add to all week and fast to check off in the store.
+**Entry points:** Launcher quick-start pin (continuous, added-to-all-week); opened fully at the store.
+**Content blocks:**
+1. Header — "Groceries" H1 + back-to-hub affordance.
+2. Quick-add control — fast single-field add-to-list entry.
+3. Checklist — running list, checked/unchecked rows (one of the four dense-data families named in the plan's Phase 5 scope).
+**States:**
+- **Empty:** First-ever use — zero items on the list yet; the page invites the first add rather than showing a blank checklist.
+- **Loading:** List fetching — skeleton row placeholders.
+- **Error:** Add/check action fails to sync — the item stays visible locally (optimistic UI) with an inline sync-pending marker, so a mid-aisle failure never silently loses the item.
+- **Success:** List reflects the latest additions/checks in real time.
+**Primary CTA:** Quick-add control (Fitts's law, Fitts 1954: persistent, large, single-field input + add button, always in the same reachable position — the Job section's anxiety force names "slow to add mid-week" as the adoption killer, so the add action must be the fastest, most reachable thing on the page).
+**Exit / next:** Back-arrow to the launcher hub.
