@@ -2,8 +2,8 @@
 
 <!-- The structural and temporal design spec for HomeBase. Pairs with DESIGN.md (visual tokens — locked in a later phase). -->
 
-**Status:** Phase 2 of 2 complete (Job + Journey + IA + Flows + Page specs). Microcopy (Phase 6, `content-design`) and chart/table encoding for the habit heatmap + expense ledger (Phase 7, `data-viz`) extend the Page specs section further in later phases.
-**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md)
+**Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Chart/table encoding for the habit heatmap + expense ledger (Phase 7, `data-viz`) still extends the Page specs section further.
+**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `VOICE.md` at project root for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply.
 
 ---
 
@@ -317,6 +317,14 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Shelf cards' icon + label render immediately (static); summary badges (streak count, balance, etc.) show a skeleton placeholder while their underlying data resolves.
 - **Error:** A card's summary badge fails to load — the card stays fully tappable (icon/label are static and unaffected); only the badge shows a muted inline marker, never blocking entry to the tool.
 - **Success:** Quick-starts row (if populated) + full alphabetical shelf, all cards tappable with badges resolved.
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (quick-starts invite — deliberately PLAIN register, not literary; VOICE.md's register-split note):* "Pin the tools you open daily." Trailing affordance label: "Add a pin."
+- *Loading (badge skeleton; screen-reader only — visual stays a skeleton line):* "Loading [tool label]'s badge."
+- *Badge error (plain register; Yifrah-lite — no fix is needed since no user action caused it, so reassurance stands in for the "fix" step):* visible glyph is a muted em dash; screen-reader text: "[Tool label]'s count is unavailable right now. The tool still opens."
+- *Pin/unpin fails to persist (Yifrah: what happened + fix; no blame):* "That pin didn't save. Try again." Toggle visibly reverts to its prior state, never a false pinned/unpinned display.
+- *Success (screen-reader only — no visual toast; DESIGN.md's no-shadow/no-elevation lock rules out toast chrome):* "[Tool label] pinned." / "[Tool label] unpinned."
+
 **Primary CTA:** Tap any quick-start pin or shelf card → open that tool (Fitts's law, Fitts 1954: cards are large, full/near-full-width tap targets; the quick-starts row sits in the thumb-reachable upper-middle zone; shelf cards run full-width so the target stays maximal regardless of scroll position).
 **Exit / next:** Opens the tapped tool (a spoke) — hub-and-spoke structure, no persistent nav; back-arrow inside the tool returns here.
 
@@ -335,7 +343,15 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Selected habit's streak/heatmap data fetching — skeleton grid + placeholder stat values.
 - **Error:** Log-today action fails to save — inline error at the control itself; today's cell stays in its pre-tap state (no false success shown); retry is the same tap.
 - **Success:** Habit(s) exist; selected habit's heatmap and streak reflect the latest logged state.
-**Primary CTA:** Log-today control for the active habit (Fitts's law, Fitts 1954: the single highest-frequency action in the app — per the Job section's explicit "two taps" requirement — gets a large, full-width control in the thumb-reachable lower half of the viewport).
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (literary register — display serif at `--text-lg`, framed by the signature bracket, per DESIGN.md's Expressive moments):* "Nothing kept yet. Name the first thing worth doing daily — the streak begins the moment you do." First-run CTA: "Name a habit."
+- *Error — log-today fails to save (Yifrah: what → why → fix; no blame on the tap):* "Today didn't save. The connection may have dropped. Tap Log again; nothing else was lost."
+- *Loading (screen-reader only; visual stays a skeleton grid):* "Loading Habits."
+- *Success (screen-reader only — the cell fill + streak increment ARE the visible confirmation; no separate toast):* "Today logged. [N]-day streak."
+- *Dense-data labels (plain register, Inter — `type.dense`/`type.micro`):* habit-selector tabs use the habit's own user-authored name (e.g. "Exercise," "Meditation"); stat labels are plain concrete nouns: "Current streak," "Longest streak," "Completion rate."
+
+**Primary CTA:** "Log today" (Yifrah/Nielsen #2 — names the action, not "Submit"/"Done") for the active habit (Fitts's law, Fitts 1954: the single highest-frequency action in the app — per the Job section's explicit "two taps" requirement — gets a large, full-width control in the thumb-reachable lower half of the viewport).
 **Exit / next:** Back-arrow to the launcher hub; no cross-tool navigation.
 
 ### Movies & TV
@@ -351,6 +367,14 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Watch history fetching — skeleton poster-card placeholders.
 - **Error:** A save/log action fails — inline error on the add-a-watch form; entry preserved for retry, not discarded.
 - **Success:** Watch history populated, newest entries at the top.
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "Not yet remembered. Log the first one — the poster keeps the rest."
+- *Error — save/log fails (Yifrah: what → why → fix; entry preserved, no blame):* "That watch didn't save. Check your connection and try again. Your entry is still here."
+- *Loading (screen-reader only; visual stays skeleton poster cards):* "Loading watch history."
+- *Success (screen-reader only):* "Saved. [Title] added to your history."
+- *Dense-data labels (plain register, Inter):* form fields "Title," "Rating," "Note (optional)"; list rows show title + rating (numeric fallback for a11y, e.g. "4 of 5") + date; failed poster lookup falls back to the plain inline label "No poster" — never blocks the log itself.
+
 **Primary CTA:** "Log a watch" (Fitts's law, Fitts 1954: a persistent, large, bottom-reachable button so adding a new watch never requires scrolling to the top of a growing history).
 **Exit / next:** Back-arrow to the launcher hub.
 
@@ -368,7 +392,18 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** AI-parse in progress after photo capture — an explicit progress/status indicator (Nielsen #1, visibility of system status — flagged for Phase 5's component spec), not a silent wait.
 - **Error:** AI parse fails — the first-class failure flow (see "Split an expense" flow above): retry-vs-manual-entry, never a dead-end generic error toast.
 - **Success:** Parsed (or manually entered) line-items confirmed and saved; ledger/balance updated.
-**Primary CTA:** "Confirm & save" on the parse-review screen (Fitts's law, Fitts 1954: large, bottom-fixed action bar, physically separated from the secondary "Edit" affordance so a rushed tap can't misfire the wrong action).
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`; this page carries the plan's single highest-stakes microcopy moment):**
+- *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "No bill has passed through here yet. Photograph the next one — the math can be its problem, not yours."
+- *Loading — AI-parse stages (plain register, present-progressive, real-world terms per Nielsen #2, not OCR jargon):* "Capture" → "Reading the photo…" → "Itemizing…". Cancel label: "Cancel." Standing secondary path: "Enter items manually" (always present, not a failure-only concession).
+- *Error — AI-parse failure, the highest-stakes moment (Yifrah what→why→fix, zero blame toward the user's photo or the AI; corrects the Phase 5 mock's provisional "We couldn't read this photo..." line, which used the named "we"-centers-the-company anti-pattern — see `VOICE.md`'s worked example):* "The bill didn't come through clearly enough to read. Low light or a tilted photo can do that. Retry the photo, or enter the items yourself: either way they land in the same ledger." Buttons: **Retry photo** (primary) / **Enter items manually** (secondary) — exactly two options (Hick's law).
+- *Error — post-confirm save fails (Yifrah: what happened + what's safe + fix):* "That save didn't go through. Your line items are safe — try Confirm & save again."
+- *Warning (non-blocking) — reconciliation mismatch (Exact voice attribute: both real figures stated, never "there's a mismatch"):* "Entered $21.90 · the bill reads $25.90. Tax or tip may explain the gap — you can still save."
+- *Success (screen-reader only):* "Split saved. [Name]'s share: $[amount]."
+- *Ledger balance wording (Exact attribute; the standing redundant-cue rule — words carry the sign, never color alone):* "You owe [Name] $18.50" / "[Name] owes you $12.00" / "All settled" (the zero-balance case gets its own truthful neutral wording, not a default to either hue — visual encoding is Phase 7's).
+- *Dense-data labels (plain register, Inter):* ledger row = description + date/payer meta + tabular-numeral amount; form field labels "Item," "Amount," "Tax," "Tip"; split-choice labels "Split evenly, two ways" / "By item."
+
+**Primary CTA:** "Add expense" (entry point) → "Confirm & save" on the parse-review screen (Fitts's law, Fitts 1954: large, bottom-fixed action bar, physically separated from the secondary "Edit" affordance so a rushed tap can't misfire the wrong action).
 **Exit / next:** Back-arrow to the launcher hub after save, or continue reviewing the ledger in place.
 
 ### Food Reviews
@@ -383,6 +418,14 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Review list fetching — skeleton card placeholders.
 - **Error:** Save fails — inline error on the add-review form; entry preserved for retry (protects the narrow post-meal window named in the Job section's anxiety force).
 - **Success:** New review saved and visible at the top of the list.
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "No table remembered yet. Jot the next one down before the taste fades."
+- *Error — save fails (Yifrah: what → why → fix; protects the narrow post-meal window named in the Job section's anxiety force):* "That review didn't save. Check your connection and try again. Nothing you wrote is lost."
+- *Loading (screen-reader only; visual stays skeleton cards):* "Loading reviews."
+- *Success (screen-reader only):* "Saved. [Restaurant] added to your list."
+- *Dense-data labels (plain register, Inter):* form fields "Restaurant name," "Rating," "Note," "Photo (optional)"; list rows show name + rating + note snippet + date.
+
 **Primary CTA:** "Add a review" (Fitts's law, Fitts 1954: large, single-thumb-reachable button; the Job section's anxiety force — "if logging takes more than a moment, it never happens" — makes reach-and-tap speed a hard requirement, not a nice-to-have).
 **Exit / next:** Back-arrow to the launcher hub.
 
@@ -399,7 +442,15 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Library/detail view fetching — skeleton placeholders.
 - **Error:** Save fails mid-entry — draft content (title/ingredients/steps typed so far) is preserved, never wiped (protects against compounding the Job section's transcription-effort anxiety into a lost-work anxiety).
 - **Success:** Recipe saved and reachable from the library.
-**Primary CTA:** "Save recipe" (Fitts's law, Fitts 1954: large, bottom-fixed action on the entry form — the anxiety force here is effort/abandonment risk, so the save action must be the easiest, most reachable thing on the screen).
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "The book is still blank. Write in the first one worth keeping."
+- *Error — save fails mid-entry (Yifrah: what → why → fix; prevents transcription-effort anxiety compounding into lost-work anxiety, per the Job section):* "This recipe didn't save. Check your connection and try again. Everything you've written is still here."
+- *Loading (screen-reader only; visual stays skeleton placeholders):* "Loading your recipes."
+- *Success (screen-reader only):* "Saved. [Title] added to your book."
+- *Dense-data labels (plain register, Inter):* form fields "Title," "Ingredients," "Steps" — freeform, no imposed structured-field copy, per "in my own words" from the Job section.
+
+**Primary CTA:** "Add a recipe" (library entry point) → "Save recipe" (entry-form primary CTA; Fitts's law, Fitts 1954: large, bottom-fixed action on the entry form — the anxiety force here is effort/abandonment risk, so the save action must be the easiest, most reachable thing on the screen).
 **Exit / next:** Back-arrow to the launcher hub, or tap into a saved recipe's detail view mid-cook.
 
 ### Groceries
@@ -414,5 +465,13 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** List fetching — skeleton row placeholders.
 - **Error:** Add/check action fails to sync — the item stays visible locally (optimistic UI) with an inline sync-pending marker, so a mid-aisle failure never silently loses the item.
 - **Success:** List reflects the latest additions/checks in real time.
-**Primary CTA:** Quick-add control (Fitts's law, Fitts 1954: persistent, large, single-field input + add button, always in the same reachable position — the Job section's anxiety force names "slow to add mid-week" as the adoption killer, so the add action must be the fastest, most reachable thing on the page).
+
+**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+- *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "The list is empty, for now. Add what's running low before you forget."
+- *Error — add/check fails to sync (Yifrah: what happened + reassurance + fix; no "we," no "Oops," item never appears lost):* "This item didn't sync yet. It's still on your list. Tap to try again."
+- *Loading (screen-reader only; visual stays skeleton rows):* "Loading your list."
+- *Success (screen-reader only):* "[Item] added." / "[Item] checked off."
+- *Dense-data labels (plain register, Inter):* quick-add field carries a persistent visible label "Add an item" (never placeholder-only, WCAG 1.3.5); list rows are the item's own plain user-authored name.
+
+**Primary CTA:** Quick-add control, button labeled "Add" (the one deliberate exception to full verb+object CTA copy, licensed by `microcopy-patterns.md`'s own carve-out — "acceptable only when the next step is already visible in context," true here since the button sits directly beside its own input field) (Fitts's law, Fitts 1954: persistent, large, single-field input + add button, always in the same reachable position — the Job section's anxiety force names "slow to add mid-week" as the adoption killer, so the add action must be the fastest, most reachable thing on the page).
 **Exit / next:** Back-arrow to the launcher hub.
