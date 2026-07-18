@@ -1,6 +1,7 @@
 # Design: Verse Margin
 **Date:** 2026-07-18 · **Status:** confirmed
 **Extended:** Phase 4 (Type + color), 2026-07-18 — full type scale + complete functional-color tokens added below; base DNA (archetype/composition/motion/base tokens) unchanged from the Phase 3 lock.
+**Extended:** Phase 5 (Design system), 2026-07-18 — three-tier W3C DTCG token hierarchy + component specs added below (§Design system); no locked value changed.
 
 **Archetype:** Sage (primary) with a Caregiver inflection on motion + tone only
 **Register:** calm structure · expressive at: empty states set as short verse, the habit day-complete accent fill, oversize punctuation at page heads
@@ -304,8 +305,516 @@ PASS  info-on-solid    on info-9:    7.91:1
 - **No "generic tasteful quiet tool" (Notion-adjacent) gravity.** This was the critique's named weakest point for this exact candidate: sitting near a distributional center of quiet minimal tools. The oversize-punctuation signature and the no-container hairline grid are the two standing defenses — an implementation that loses either of them is no longer this DNA, it's the center it was built to avoid.
 - **No uniform/flat spacing.** The tight-within-group / generous-between rhythm must be visibly present in the built surface, not averaged into evenly-spaced whitespace everywhere.
 
+## Design system
+
+**Phase 5, 2026-07-18.** The locked DNA becomes a machine: a three-tier token hierarchy in W3C DTCG format (stable Oct 2025) and the component architecture — the ToolCard organism (Frost, *Atomic Design* 2013) that keeps the launcher open-ended, and the dense-frame functional pattern (Kholmatova, *Design Systems* 2017) that makes the four dense-data families read as one family. Nothing locked above changes; this section consumes it. The standing regression gate is `.design-foundations/build/phase5-spec-check.mjs`: it parses this section's three JSON blocks directly and exits non-zero on any tier-discipline or contrast violation.
+
+**Governance (named, not invented — Mall, *Design That Scales* 2023):** single owner, the maintainer. Global tokens change only by re-running `palette.mjs` — never hand-edited hex (the spec-check cross-checks every DTCG global color against the CSS blocks above, so the two representations cannot drift). Alias/component changes are edits to this section, gated by the spec-check. No RFC, semver, or deprecation process: a single-owner personal app sits below the governance ROI threshold, and inventing that machinery would violate the project's own no-abstraction-without-need principle.
+
+### Token tiers (W3C DTCG format)
+
+| Tier | Encodes | May reference | Source |
+|------|---------|---------------|--------|
+| **Global** | what values exist | nothing — raw values only | `palette.mjs` (color) + Phase 5 mints (space / size / border-width) |
+| **Alias** | what role a value plays | global tokens only | this section |
+| **Component** | what one component uses | alias tokens only | this section |
+
+No component spec references a raw global or a hex value — the alias tier always mediates (design-systems doctrine: the tier boundary is the design-decision layer, not a rename layer). The spec-check enforces all four failure modes: unresolved references, alias→non-global references, component→non-alias references, and global token names or raw hex in component-spec prose.
+
+**Mode handling.** DTCG has no native theming construct. Dark-mode values ride per token in `$extensions["homebase.mode"].dark` — the spec's sanctioned extension point — mirroring the `[data-theme="dark"]` CSS redeclaration above. Mode-independent tokens (every solid `9` step, every on-solid ink, `neutral-9`) carry no extension: identical-in-both-modes is by construction, per §Functional colors.
+
+**Spacing scale (the §Space deferral, minted here).** 4px-base globals `space.1`–`space.9` = 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96px. The locked rhythm — tight-within-group, generous-between — is encoded at the **alias tier**, not left to per-component judgment: `space.dense` (4) for gaps inside dense interiors, `space.grouped` (8) for rows within one group, `space.related` (16) between associated blocks, `space.page-margin` (24) as the horizontal gutter, `space.between-group` (32) between module frames, `space.after-page-head` (48) below the H1 + signature mark. Because `space.grouped ≪ space.between-group` is a token relationship, uniform-spacing drift (a Never item) becomes detectable token misuse, not a taste call. Tap-target floor `size.tap-target` = 44px (Fitts 1954; platform HIG convention); control glyph `size.glyph` = 20px; `border-width.1` = 1px (the hairline).
+
+**New pairings decided and verified this phase** (WCAG 2.x, both modes, machine-checked on every spec-check run — exact ratios printed by the script):
+
+| Decision | Pairing | Light | Dark | Target |
+|----------|---------|-------|------|--------|
+| `color.border.input` → neutral-11 ink, **not** neutral-7 | input boundary vs page background | 5.87:1 | 9.39:1 | 3:1 — WCAG 1.4.11: a form control's boundary identifies it; neutral-7 = 1.72:1 fails, even neutral-8 = 2.24:1 fails |
+| CTA = accent-3 surface + accent-11 ink, **not** accent-9 solid | label vs fill | 5.17:1 | 8.12:1 | 4.5:1 |
+| Feedback-banner ink on its own tinted surface | each functional -11 vs its own -3 | ≥5.19:1 | ≥7.83:1 | 4.5:1 (all four hues pass both modes; Phase 4 verified -11 on neutral-2 only) |
+| Heatmap complete cell carries an in-cell mark | accent-on-solid vs accent-9 fill | 10.07:1 | 10.07:1 | 4.5:1 — accent-9 vs the light background is 1.88:1, so the fill stays the expressive layer and the mark carries the information |
+| Error boundary/chip solid vs background | error-9 vs background | 3.61:1 | 5.06:1 | 3:1 |
+
+Why the CTA is not the accent solid: §Expressive moments reserves solid accent-9 fill "at that intensity" for the habit day-complete cell alone. The CTA isolates instead by being the only accent-tinted block on any page (Von Restorff isolation effect), full-width and bottom-fixed at tap-target height (Fitts 1954) — prominence without spending the one licensed solid moment. The heatmap decision is an addition to the lock, not an override: the accent-9 fill stands exactly as licensed; the on-solid mark rides on top and simultaneously discharges the Phase 4 redundant-cue standing rule for the heatmap.
+
+#### Tier 1 — Global
+
+<!-- dtcg:global -->
+```json
+{
+  "color": {
+    "neutral": {
+      "1": { "$value": "#fcfdfc", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#121312" } } },
+      "2": { "$value": "#f8f9f8", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#191a19" } } },
+      "3": { "$value": "#eef1ef", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#212321" } } },
+      "4": { "$value": "#e5e9e6", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#282b29" } } },
+      "5": { "$value": "#dae0dc", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#2f3431" } } },
+      "6": { "$value": "#cdd4d0", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#383d3a" } } },
+      "7": { "$value": "#bdc6c0", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#444b46" } } },
+      "8": { "$value": "#a4aea7", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#5a635d" } } },
+      "9": { "$value": "#aebbb3", "$type": "color" },
+      "10": { "$value": "#9ca8a0", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#c2cec6" } } },
+      "11": { "$value": "#5e6561", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#b2bab5" } } },
+      "12": { "$value": "#2b2f2d", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#e5e9e6" } } }
+    },
+    "accent": {
+      "1": { "$value": "#fafefb", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#111312" } } },
+      "2": { "$value": "#f4fbf6", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#161b18" } } },
+      "3": { "$value": "#e6f5eb", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#1a251e" } } },
+      "4": { "$value": "#d9eee0", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#1e2f24" } } },
+      "5": { "$value": "#c9e7d4", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#20392a" } } },
+      "6": { "$value": "#b7ddc5", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#234431" } } },
+      "7": { "$value": "#a2d0b4", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#29533c" } } },
+      "8": { "$value": "#82ba98", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#386d4f" } } },
+      "9": { "$value": "#84caa0", "$type": "color" },
+      "10": { "$value": "#74b68f", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9adcb4" } } },
+      "11": { "$value": "#486d57", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9bc3aa" } } },
+      "12": { "$value": "#203327", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#d7efe0" } } },
+      "on-solid": { "$value": "#06100a", "$type": "color" }
+    },
+    "error": {
+      "3": { "$value": "#ffebe9", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#2d1d1c" } } },
+      "9": { "$value": "#c56c65", "$type": "color" },
+      "11": { "$value": "#86534f", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#e0a7a1" } } },
+      "on-solid": { "$value": "#150a09", "$type": "color" }
+    },
+    "success": {
+      "3": { "$value": "#e6f6e6", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#1a261a" } } },
+      "9": { "$value": "#84cc86", "$type": "color" },
+      "11": { "$value": "#486e49", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9bc49b" } } },
+      "on-solid": { "$value": "#081008", "$type": "color" }
+    },
+    "warning": {
+      "3": { "$value": "#f6f0e4", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#262219" } } },
+      "9": { "$value": "#ceb47e", "$type": "color" },
+      "11": { "$value": "#6f6144", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#c5b696" } } },
+      "on-solid": { "$value": "#110d04", "$type": "color" }
+    },
+    "info": {
+      "3": { "$value": "#e7f2fa", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#1b2329" } } },
+      "9": { "$value": "#7aabce", "$type": "color" },
+      "11": { "$value": "#4c677a", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9fbcd1" } } },
+      "on-solid": { "$value": "#060e15", "$type": "color" }
+    }
+  },
+  "font": {
+    "family": {
+      "display": { "$value": "\"Newsreader\", ui-serif, Georgia, serif", "$type": "fontFamily" },
+      "body": { "$value": "\"Inter\", -apple-system, \"Segoe UI\", Roboto, sans-serif", "$type": "fontFamily" }
+    },
+    "weight": {
+      "regular": { "$value": 400, "$type": "fontWeight" },
+      "medium": { "$value": 500, "$type": "fontWeight" },
+      "semibold": { "$value": 600, "$type": "fontWeight" }
+    },
+    "size": {
+      "xs": { "$value": "0.75rem", "$type": "dimension" },
+      "sm": { "$value": "0.875rem", "$type": "dimension" },
+      "base": { "$value": "1rem", "$type": "dimension" },
+      "lg": { "$value": "1.125rem", "$type": "dimension" },
+      "xl": { "$value": "1.25rem", "$type": "dimension" },
+      "2xl": { "$value": "1.5rem", "$type": "dimension" },
+      "3xl": { "$value": "2rem", "$type": "dimension" },
+      "4xl": { "$value": "2.5rem", "$type": "dimension" },
+      "5xl": { "$value": "4.5rem", "$type": "dimension" }
+    },
+    "leading": {
+      "xs": { "$value": 1.4, "$type": "number" },
+      "sm": { "$value": 1.45, "$type": "number" },
+      "base": { "$value": 1.5, "$type": "number" },
+      "lg": { "$value": 1.45, "$type": "number" },
+      "xl": { "$value": 1.4, "$type": "number" },
+      "2xl": { "$value": 1.3, "$type": "number" },
+      "3xl": { "$value": 1.2, "$type": "number" },
+      "4xl": { "$value": 1.15, "$type": "number" },
+      "5xl": { "$value": 1, "$type": "number" }
+    }
+  },
+  "space": {
+    "1": { "$value": "4px", "$type": "dimension" },
+    "2": { "$value": "8px", "$type": "dimension" },
+    "3": { "$value": "12px", "$type": "dimension" },
+    "4": { "$value": "16px", "$type": "dimension" },
+    "5": { "$value": "24px", "$type": "dimension" },
+    "6": { "$value": "32px", "$type": "dimension" },
+    "7": { "$value": "48px", "$type": "dimension" },
+    "8": { "$value": "64px", "$type": "dimension" },
+    "9": { "$value": "96px", "$type": "dimension" }
+  },
+  "size": {
+    "tap-target": { "$value": "44px", "$type": "dimension", "$description": "Interactive minimum (Fitts 1954; platform HIG)" },
+    "glyph": { "$value": "20px", "$type": "dimension", "$description": "Control glyph (checkbox box, inline icon)" }
+  },
+  "border-width": {
+    "1": { "$value": "1px", "$type": "dimension", "$description": "The hairline — this system's only structural line weight" }
+  }
+}
+```
+
+#### Tier 2 — Alias
+
+<!-- dtcg:alias -->
+```json
+{
+  "color": {
+    "background": { "$value": "{color.neutral.1}", "$type": "color", "$description": "Page background — the only page surface; no card fills" },
+    "surface": {
+      "default": { "$value": "{color.neutral.2}", "$type": "color", "$description": "Quiet raised-content tint (skeletons, image placeholders)" },
+      "hover": { "$value": "{color.neutral.3}", "$type": "color" },
+      "active": { "$value": "{color.neutral.4}", "$type": "color", "$description": "Pressed-row wash; skeleton blocks" }
+    },
+    "border": {
+      "subtle": { "$value": "{color.neutral.6}", "$type": "color", "$description": "Interior hairline dividers" },
+      "default": { "$value": "{color.neutral.7}", "$type": "color", "$description": "Frame-edge hairlines, image frames" },
+      "strong": { "$value": "{color.neutral.8}", "$type": "color" },
+      "input": { "$value": "{color.neutral.11}", "$type": "color", "$description": "Form-control boundary — an ink, not a hairline grey: WCAG 1.4.11 needs 3:1 for a boundary that identifies a control" }
+    },
+    "text": {
+      "primary": { "$value": "{color.neutral.12}", "$type": "color" },
+      "secondary": { "$value": "{color.neutral.11}", "$type": "color" }
+    },
+    "accent": {
+      "subtle-bg": { "$value": "{color.accent.3}", "$type": "color", "$description": "The CTA surface — the only accent-tinted block on a page (Von Restorff)" },
+      "subtle-bg-active": { "$value": "{color.accent.4}", "$type": "color", "$description": "CTA pressed state" },
+      "solid": { "$value": "{color.accent.9}", "$type": "color", "$description": "Licensed solid fill — habit day-complete cell ONLY (§Expressive moments)" },
+      "solid-hover": { "$value": "{color.accent.10}", "$type": "color" },
+      "text": { "$value": "{color.accent.11}", "$type": "color", "$description": "Accent ink — CTA labels, done-stage markers, progress fill" }
+    },
+    "on-accent": { "$value": "{color.accent.on-solid}", "$type": "color", "$description": "Ink placed on the accent solid fill" },
+    "feedback": {
+      "error": {
+        "surface": { "$value": "{color.error.3}", "$type": "color" },
+        "solid": { "$value": "{color.error.9}", "$type": "color" },
+        "text": { "$value": "{color.error.11}", "$type": "color" },
+        "on-solid": { "$value": "{color.error.on-solid}", "$type": "color" }
+      },
+      "success": {
+        "surface": { "$value": "{color.success.3}", "$type": "color" },
+        "solid": { "$value": "{color.success.9}", "$type": "color" },
+        "text": { "$value": "{color.success.11}", "$type": "color" },
+        "on-solid": { "$value": "{color.success.on-solid}", "$type": "color" }
+      },
+      "warning": {
+        "surface": { "$value": "{color.warning.3}", "$type": "color" },
+        "solid": { "$value": "{color.warning.9}", "$type": "color" },
+        "text": { "$value": "{color.warning.11}", "$type": "color" },
+        "on-solid": { "$value": "{color.warning.on-solid}", "$type": "color" }
+      },
+      "info": {
+        "surface": { "$value": "{color.info.3}", "$type": "color" },
+        "solid": { "$value": "{color.info.9}", "$type": "color" },
+        "text": { "$value": "{color.info.11}", "$type": "color" },
+        "on-solid": { "$value": "{color.info.on-solid}", "$type": "color" }
+      }
+    }
+  },
+  "space": {
+    "dense": { "$value": "{space.1}", "$type": "dimension", "$description": "Gaps inside dense interiors (heatmap cell gap)" },
+    "grouped": { "$value": "{space.2}", "$type": "dimension", "$description": "Tight-within-group: rows inside one module" },
+    "related": { "$value": "{space.4}", "$type": "dimension", "$description": "Between associated blocks" },
+    "page-margin": { "$value": "{space.5}", "$type": "dimension", "$description": "Horizontal gutter" },
+    "between-group": { "$value": "{space.6}", "$type": "dimension", "$description": "Generous-between: separates module frames — must stay visibly ≫ space.grouped (Never: no uniform spacing)" },
+    "after-page-head": { "$value": "{space.7}", "$type": "dimension", "$description": "Below the H1 + signature mark" }
+  },
+  "size": {
+    "interactive": {
+      "min": { "$value": "{size.tap-target}", "$type": "dimension", "$description": "Minimum height/hit area of anything tappable" }
+    },
+    "control-glyph": { "$value": "{size.glyph}", "$type": "dimension" }
+  },
+  "border": {
+    "hairline": { "$value": "{border-width.1}", "$type": "dimension" }
+  },
+  "type": {
+    "display-mark": { "$type": "typography", "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.5xl}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.5xl}" }, "$description": "The signature oversize punctuation mark — one per page head, display serif only" },
+    "h1": { "$type": "typography", "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.3xl}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.3xl}" } },
+    "mark-inline": { "$type": "typography", "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.2xl}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.2xl}" }, "$description": "A tool's mark at row scale (ToolCard leading glyph)" },
+    "section-label": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.leading.xl}" }, "$description": "Dense-frame headers / sub-section heads" },
+    "body": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.base}" } },
+    "cta-label": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.leading.base}" } },
+    "dense": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.sm}" }, "$description": "Ledger/checklist rows, dense labels" },
+    "dense-emphasis": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.leading.sm}" }, "$description": "Active/emphasized dense data (ledger amounts)" },
+    "micro": { "$type": "typography", "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.xs}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.leading.xs}" }, "$description": "Timestamps, badges, micro-metadata" }
+  }
+}
+```
+
+#### Tier 3 — Component
+
+<!-- dtcg:component -->
+```json
+{
+  "tool-card": {
+    "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+    "padding-x": { "$value": "{space.page-margin}", "$type": "dimension" },
+    "padding-y": { "$value": "{space.grouped}", "$type": "dimension" },
+    "gap": { "$value": "{space.grouped}", "$type": "dimension" },
+    "divider": {
+      "color": { "$value": "{color.border.subtle}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "label": {
+      "typography": { "$value": "{type.body}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "mark": {
+      "typography": { "$value": "{type.mark-inline}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "badge": {
+      "typography": { "$value": "{type.micro}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "pin": {
+      "active-color": { "$value": "{color.accent.text}", "$type": "color" },
+      "inactive-color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "pressed": {
+      "background": { "$value": "{color.surface.active}", "$type": "color" }
+    }
+  },
+  "dense-frame": {
+    "header": {
+      "typography": { "$value": "{type.section-label}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "edge": {
+      "color": { "$value": "{color.border.default}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "divider": {
+      "color": { "$value": "{color.border.subtle}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "row": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "padding": { "$value": "{space.grouped}", "$type": "dimension" }
+    },
+    "padding-x": { "$value": "{space.page-margin}", "$type": "dimension" },
+    "stack-gap": { "$value": "{space.between-group}", "$type": "dimension" }
+  },
+  "heatmap": {
+    "cell": {
+      "gap": { "$value": "{space.dense}", "$type": "dimension" },
+      "complete": {
+        "fill": { "$value": "{color.accent.solid}", "$type": "color" },
+        "mark": { "$value": "{color.on-accent}", "$type": "color" }
+      },
+      "incomplete": {
+        "fill": { "$value": "{color.surface.active}", "$type": "color" }
+      }
+    },
+    "label": {
+      "typography": { "$value": "{type.micro}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "ledger": {
+    "row": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" }
+    },
+    "amount": {
+      "typography": { "$value": "{type.dense-emphasis}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "meta": {
+      "typography": { "$value": "{type.micro}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "checklist": {
+    "box": {
+      "size": { "$value": "{size.control-glyph}", "$type": "dimension" },
+      "border": { "$value": "{color.border.input}", "$type": "color" },
+      "border-width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "checked": {
+      "fill": { "$value": "{color.accent.subtle-bg}", "$type": "color" },
+      "mark": { "$value": "{color.accent.text}", "$type": "color" },
+      "label": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "photo-card": {
+    "frame": {
+      "border": { "$value": "{color.border.default}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "gap": { "$value": "{space.grouped}", "$type": "dimension" },
+    "caption": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "meta": {
+      "typography": { "$value": "{type.micro}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "cta": {
+    "background": { "$value": "{color.accent.subtle-bg}", "$type": "color" },
+    "background-active": { "$value": "{color.accent.subtle-bg-active}", "$type": "color" },
+    "border": {
+      "color": { "$value": "{color.accent.text}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "label": {
+      "typography": { "$value": "{type.cta-label}", "$type": "typography" },
+      "color": { "$value": "{color.accent.text}", "$type": "color" }
+    },
+    "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+    "bar": {
+      "background": { "$value": "{color.background}", "$type": "color" },
+      "divider": { "$value": "{color.border.subtle}", "$type": "color" },
+      "padding": { "$value": "{space.related}", "$type": "dimension" }
+    }
+  },
+  "form-field": {
+    "label": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "input": {
+      "typography": { "$value": "{type.body}", "$type": "typography" },
+      "text": { "$value": "{color.text.primary}", "$type": "color" },
+      "background": { "$value": "{color.background}", "$type": "color" },
+      "border": { "$value": "{color.border.input}", "$type": "color" },
+      "border-width": { "$value": "{border.hairline}", "$type": "dimension" }
+    },
+    "error": {
+      "border": { "$value": "{color.feedback.error.solid}", "$type": "color" },
+      "text": { "$value": "{color.feedback.error.text}", "$type": "color" }
+    },
+    "gap": { "$value": "{space.grouped}", "$type": "dimension" },
+    "group-gap": { "$value": "{space.between-group}", "$type": "dimension" }
+  },
+  "parse-status": {
+    "stage": {
+      "done": { "color": { "$value": "{color.accent.text}", "$type": "color" } },
+      "active": { "color": { "$value": "{color.text.primary}", "$type": "color" } },
+      "pending": { "color": { "$value": "{color.text.secondary}", "$type": "color" } }
+    },
+    "track": { "color": { "$value": "{color.border.subtle}", "$type": "color" } },
+    "fill": { "color": { "$value": "{color.accent.text}", "$type": "color" } },
+    "gap": { "$value": "{space.related}", "$type": "dimension" }
+  },
+  "banner": {
+    "padding": { "$value": "{space.related}", "$type": "dimension" },
+    "surface": {
+      "error": { "$value": "{color.feedback.error.surface}", "$type": "color" },
+      "success": { "$value": "{color.feedback.success.surface}", "$type": "color" },
+      "warning": { "$value": "{color.feedback.warning.surface}", "$type": "color" },
+      "info": { "$value": "{color.feedback.info.surface}", "$type": "color" }
+    },
+    "text": {
+      "error": { "$value": "{color.feedback.error.text}", "$type": "color" },
+      "success": { "$value": "{color.feedback.success.text}", "$type": "color" },
+      "warning": { "$value": "{color.feedback.warning.text}", "$type": "color" },
+      "info": { "$value": "{color.feedback.info.text}", "$type": "color" }
+    }
+  }
+}
+```
+
+### Component specs
+
+<!-- spec-check:prose-start -->
+
+Atomic inventory (Frost 2013 — a composition model, not a file structure):
+
+| Level | Units |
+|-------|-------|
+| Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row |
+| Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list |
+| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form |
+| Templates | page head (mark + H1, then {space.after-page-head}) + stacked module frames — arrangements already specified per page in JOURNEY.md |
+| Pages | JOURNEY.md's seven page specs with real content |
+
+Pattern selections (usability bridge — the principle picks the pattern):
+
+| Surface | Selection | Selecting principle |
+|---------|-----------|--------------------|
+| Navigation | Hub-and-spoke held from IA; full-width shelf rows; capped quick-start row | Fitts (1954) — maximal targets; Hick–Hyman (1952) — capped daily choice set |
+| Bill edit form | Three chunks (items / adjustments / split), on-blur validation, forgiving amount parsing, reconciliation row | Miller/Cowan ~4±1 · "reward early, punish late" · Postel · Nielsen #5 error prevention |
+| AI-parse feedback | Staged determinate progress over a bare spinner; cancel always present | Nielsen #1 visibility of status · the 1–10s feedback band · Nielsen #3 user control |
+| Parse failure | Plain-language failure surface with exactly two recovery options; photo kept on screen | Nielsen #9 error recovery · Hick (two options) · Nielsen #6 recognition over recall |
+
+#### ToolCard — the launcher organism
+
+One organism renders every tool on the launcher, in both contexts. Adding a tool is a data entry, never a component.
+
+**Closed props set** (a new tool may only supply these — if it needs anything else, the organism is mis-abstracted and this spec must be revised, not worked around):
+
+| Prop | Type | Notes |
+|------|------|-------|
+| `id` | string | Stable key; doubles as the route segment |
+| `label` | string | The canonical name from JOURNEY.md's labeling table — identical on every surface, never re-phrased |
+| `mark` | string (one glyph) | The tool's punctuation mark, rendered in the display serif at {tool-card.mark.typography} — data, not component art. Expenses "§" and Recipes "¶" per the lock; every tool contributes its own |
+| `icon` | asset ref, optional | Reserved pictographic override; v1 supplies none — the mark IS the icon (typographic identification, per the Penguin grounding; no icon library) |
+| `route` | string | Spoke destination (hub-and-spoke; no spoke-to-spoke nav) |
+| `toolType` | enum: `heatmap` · `ledger` · `checklist` · `photo-card` | Binds the tool to its dense-family interior; on the card itself it drives only a11y labeling and badge formatting defaults |
+| `badge` | `{ kind, value, unit? }` where kind ∈ `count` · `streak` · `balance` · `none` | A closed set of format kinds. A new tool picks a kind; it never adds a badge molecule. `balance` formats with an explicit sign word ("owed to you") in plain ink — never color-coded on the launcher |
+| `pinned` | boolean | Quick-start membership; user-curated via the pin flow (JOURNEY.md) |
+
+**Contexts, not variants:** the shelf row and the quick-start pin are two presentation modes of the same organism, selected by the parent — a full-width hairline-divided row ({tool-card.divider.color} at {tool-card.divider.width}) on the shelf; a text-first block in the quick-start rail. No card chrome in either: no fill, no radius, no shadow (Never section). Row anatomy: mark glyph ({tool-card.mark.color}) · label ({tool-card.label.color}) · badge text right-aligned ({tool-card.badge.color}) · pin toggle. Minimum height {tool-card.min-height}; gutters {tool-card.padding-x}.
+
+**The 7th-tool proof:** a hypothetical "Plants" tool is one new data entry — `{ id: "plants", label: "Plants", mark: "†", route: "/plants", toolType: "checklist", badge: { kind: "count", unit: "to water" }, pinned: false }`. The shelf re-sorts alphabetically (IA's exact scheme), the badge reuses the `count` formatter, the interior reuses the checklist family. No new component, variant, or zone anywhere. The phase mock renders all seven tools — Plants included — from one render function over one data array.
+
+**States:** default · pressed ({tool-card.pressed.background} row wash, no transform) · focus-visible (outline in {color.border.input}, offset outside the row) · badge loading ({color.surface.active} skeleton line; mark + label render immediately — they are static data) · badge error (muted inline dash in {tool-card.badge.color}; the card stays fully tappable, per JOURNEY.md's launcher error state) · disabled: not a state this organism has — tools are never disabled or hidden (IA rule: presence is not contingent on data).
+
+**A11y:** the row is a single link (semantic `a`, no ARIA patch needed); accessible name = label + badge text (the mark is `aria-hidden` — it is identity, not information). Pin state is conveyed by glyph shape (filled vs outline) plus presence in the quick-start rail — location and shape cues, never color alone; toggle carries `aria-pressed`.
+
+#### Dense-frame — the shared functional pattern
+
+The four dense-data families are one functional pattern (Kholmatova: shared UI behavior) with four documented interiors. The outer chrome is identical everywhere, enforced by shared component tokens — that shared perceptual rhythm is what makes four genuinely different data shapes read as one family, without airing any of them out (§Direction: dense within the calm frame, by design).
+
+**Chrome (every instance):** section header in {dense-frame.header.typography} / {dense-frame.header.color} → frame-edge hairline ({dense-frame.edge.color} at {dense-frame.edge.width}) → dense body → terminal frame-edge hairline. Interior row separation uses {dense-frame.divider.color}. Rows sit at {dense-frame.row.min-height} minimum with {dense-frame.row.padding} padding; the frame runs full-bleed to the {dense-frame.padding-x} gutters; consecutive frames are separated by {dense-frame.stack-gap} — the tight-inside / generous-between rhythm made structural.
+
+**Shared states:** loading = skeleton rows in {color.surface.active} inside the real chrome (the frame never skeletons — structure is static); empty = the tool's verse empty state (§Expressive moments) replaces the interior, frame and header stay; error = inline at the affected row, never a frame-level takeover; success = the populated interior below.
+
+**Interiors (each family's own layout):**
+
+- **Heatmap (Habits):** a 7-column calendar grid of square cells, gap {heatmap.cell.gap}; weekday labels in {heatmap.label.typography} / {heatmap.label.color}. Complete cell: {heatmap.cell.complete.fill} — the one licensed solid-accent moment, exactly as locked — carrying an in-cell mark in {heatmap.cell.complete.mark} (v1 glyph: the asterisk, echoing the Habits mark). The mark, not the fill, carries complete/incomplete: the fill's contrast against the light page background is expressive, not informational (verified in the spec-check contrast set). This discharges the Phase 4 redundant-cue rule for the heatmap ahead of Phase 7's numeric-on-tap. Incomplete cell: {heatmap.cell.incomplete.fill}. Streak cap, legend, and full encoding: Phase 7.
+- **Ledger (Expenses):** three-column rows — description in {ledger.row.typography}, date/payer meta in {ledger.meta.typography} / {ledger.meta.color}, amount right-aligned in {ledger.amount.typography} / {ledger.amount.color} with `font-variant-numeric: tabular-nums` so columns of figures align. The balance line states "you owe" / "you're owed" in words with an explicit sign as the primary cue; color is secondary reinforcement (encoding: Phase 7).
+- **Checklist (Groceries):** rows of checkbox box ({checklist.box.size} square, border {checklist.box.border} at {checklist.box.border-width} — the form-boundary ink, 3:1 verified) + item label. Checked: box fills {checklist.checked.fill} with a check mark in {checklist.checked.mark}, label struck through in {checklist.checked.label} — three redundant cues (fill, mark shape, strikethrough), never color alone.
+- **Photo-card (Movies & TV · Food Reviews):** a 2-column grid, gap {photo-card.gap}; user imagery in original color inside hairline frames ({photo-card.frame.border} at {photo-card.frame.width}) — the frame is §Direction's imagery-containment device, not card chrome: no fill, no radius, no shadow. Caption in {photo-card.caption.typography} / {photo-card.caption.color} and meta in {photo-card.meta.typography} / {photo-card.meta.color} sit below the frame, unboxed.
+
+#### Primary CTA
+
+One per page (Von Restorff — the isolated item is the remembered one; a second accent block would dissolve the isolation). A bottom-fixed bar ({cta.bar.background}, top hairline {cta.bar.divider}, padding {cta.bar.padding}) holds a full-width block: fill {cta.background}, label in {cta.label.typography} / {cta.label.color}, minimum height {cta.min-height} (Fitts 1954 — the largest, closest target on the page for each page's named primary action). **No drawn border at rest** — a filled block wrapped in its own hairline box is card chrome, and the locked Borders rule allows hairline *dividers* only (the two licensed exceptions — the photo-card's imagery frame and the form-control boundary ink — don't apply: unlike an empty input or checkbox, this control is identified without a boundary by its fill, semibold label, width, and position, so the bar's top hairline stays the only structural line). The accent tint is the isolation device (Von Restorff): the block is the page's sole accent-tinted region. Focus-visible: outline in {cta.border.color} at {cta.border.width}, offset outside the block (WCAG 2.4.7 — the border tokens' one consumer). Pressed: {cta.background-active}, no transform. Disabled: {color.surface.active} fill, {color.text.secondary} label — visually quiet, still readable. Loading: label swaps to a progress phrase; the block never becomes a spinner-only target. Secondary actions are plain text at {cta.min-height} tap height, physically separated from the bar (JOURNEY.md: a rushed tap must not misfire).
+
+#### Form field + the bill edit form
+
+**Field molecule:** top-aligned label ({form-field.label.typography} / {form-field.label.color}) above the input ({form-field.input.typography} at 16px — the iOS auto-zoom floor from §Type scale — text {form-field.input.text} on {form-field.input.background}, boundary {form-field.input.border} at {form-field.input.border-width}). Fields inside a group sit {form-field.gap} apart; groups sit {form-field.group-gap} apart — the same rhythm tokens as everything else.
+
+**Validation:** on blur, never per keystroke ("reward early, punish late"). Error state = three redundant cues: boundary switches to {form-field.error.border}, an icon glyph appears, and a message in {form-field.error.text} sits under the field (microcopy: Phase 6, Yifrah's what/why/fix formula). Amount inputs are forgiving (Postel): "12", "12.5", "$12.50", and comma decimals all accepted, normalized on blur — the system absorbs format complexity (Tesler), the user is never corrected for a parseable answer.
+
+**The bill edit form** (the line-item edit screen, per the flow's Miller/Cowan flag): exactly three chunks — Items, Adjustments (tax · tip · discount), Split — each a labeled group (~4±1 held; the user compares the screen against a physical receipt, which is real working-memory load, not a menu-cap misuse). A **reconciliation row** (Nielsen #5, error prevention) is pinned above the CTA: the entered-items sum vs the detected bill total, both shown as figures. On mismatch it becomes a warning banner ({banner.surface.warning} / {banner.text.warning}, icon + text) naming both numbers; it warns, it never blocks — totals can legitimately differ, and the user's judgment wins.
+
+#### AI-parse status (Nielsen #1)
+
+Parsing a bill takes seconds — squarely in the 1–10s feedback band, so the surface is **staged determinate progress**, not a bare spinner: three stages named in bill terms, not OCR jargon (Nielsen #2) — *Capture* → *Reading the photo* → *Itemizing*. Done stages in {parse-status.stage.done.color} with a leading check glyph (shape + ink, not color alone), the active stage in {parse-status.stage.active.color}, pending in {parse-status.stage.pending.color}; stages sit {parse-status.gap} apart above a thin track ({parse-status.track.color}) whose fill ({parse-status.fill.color}) advances per completed stage — honest stage-level progress, never a fake percentage. The captured photo stays on screen, full-bleed between frame-edge hairlines ({dense-frame.edge.color} at {dense-frame.edge.width}) — the same edge treatment as every dense-frame module, never an inset framed box, which would read as card chrome (Never: hairline dividers are the only structural device) (Nielsen #6 — the user can verify what the system is reading). **Cancel is always present** (Nielsen #3): a plain-text exit at {cta.min-height} tap height that returns to capture with the photo retained; the capture screen also carries "enter items manually" as a standing secondary path (Nielsen #7 — manual entry is an always-available route, not a failure-only concession). Past ~10s a stage appends a still-working line and Cancel remains (the 10s+ rule). Motion: opacity fades within the §Motion budget; under reduced-motion, state changes are instant.
+
+#### Parse failure + manual entry (Nielsen #9)
+
+Failure is a first-class surface, never a toast. A banner ({banner.surface.error} / {banner.text.error}, leading icon glyph + text — kind is never encoded by hue alone) states what happened and why in plain terms, with zero blame toward the user or the photo (microcopy: Phase 6, Yifrah formula). The captured photo stays on screen (Nielsen #6). Exactly **two** recovery options (Hick — a rattled moment is the worst time for a menu): **Retry photo** (primary CTA styling, returns to capture) and **Enter items manually** (secondary, equal tap height). Manual entry is a real form, not a consolation: it shares the ledger interior (same row anatomy: description + right-aligned tabular-numeral amount), the same three-chunk edit form, and the same reconciliation row against the detected total when one exists — everything downstream (confirm & save, ledger update) is identical (Nielsen #4; Jakob — one learned shape). The AI path is an accelerator, never a gatekeeper.
+
+#### Redundant-cue discharge (the Phase 4 standing rule)
+
+Green accent + red error means every state distinction must survive without color (~10% of male users are red-green colorblind). Discharged per component:
+
+| Surface | Color layer | Non-color cue that carries the information |
+|---------|------------|--------------------------------------------|
+| Heatmap complete cell | {heatmap.cell.complete.fill} | In-cell mark in {heatmap.cell.complete.mark} |
+| Form validation error | {form-field.error.border} / {form-field.error.text} | Icon glyph + message + boundary state change |
+| Feedback banners (all four kinds) | {banner.surface.*} / {banner.text.*} | Leading icon glyph + plain-language text |
+| Ledger balance | Phase 7's encoding | "you owe" / "you're owed" words + explicit sign, primary |
+| Checklist checked | {checklist.checked.fill} | Check-mark shape + label strikethrough |
+| Parse stages | {parse-status.stage.done.color} | Check glyph + list position |
+| Pin state | {tool-card.pin.active-color} | Glyph shape (filled vs outline) + presence in the rail |
+
+<!-- spec-check:prose-end -->
+
 ## Open questions
 
 - ~~Exact display/body typefaces~~ — resolved Phase 4: Newsreader (display) + Inter (body), see Type section.
 - ~~Full functional-color set + redundant-cue rule~~ — resolved Phase 4: see Functional colors section. Redundant-cue rule stands as a requirement for Phase 5/Phase 7 to implement, not just document.
-- Component-level token tiers (global/alias/component, W3C DTCG format) and the launcher-card + four dense-data-family specs — Phase 5 (Design system).
+- ~~Component-level token tiers (global/alias/component, W3C DTCG format) and the launcher-card + four dense-data-family specs~~ — resolved Phase 5: see Design system section. Heatmap/ledger encoding detail (streak cap, legend, balance color semantics) remains with Phase 7; microcopy with Phase 6.
