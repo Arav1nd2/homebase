@@ -86,11 +86,15 @@
   --accent-text: var(--accent-11);
 
   /* Space — mode-independent, DESIGN.md §Design system global tier.
-     These numbers already equal Tailwind's own default 4px-multiplier
-     scale at each step (1,2,3,4,6,8,12,16,24 → 4,8,12,16,24,32,48,64,96px),
-     so ordinary Tailwind spacing utilities (p-6, gap-3, ...) already use
-     these exact values with no separate --spacing-* mapping needed. Only
-     the named, non-numeric tokens below need var()/arbitrary-value usage. */
+     These numbered steps already equal Tailwind's own default
+     4px-multiplier scale at some step (1,2,3,4,6,8,12,16,24 →
+     4,8,12,16,24,32,48,64,96px), so an ordinary Tailwind spacing utility
+     (p-6, gap-3, ...) already expresses any of them with no token
+     reference needed — these raw values stay unmapped into @theme on
+     purpose. The semantic, non-numeric aliases below (space-grouped,
+     tap-target, ...) *are* mapped into @theme's --spacing-* namespace
+     further down, so callers get a real utility class for those instead
+     of an arbitrary-value var() reference. */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -257,6 +261,25 @@
   --color-destructive: var(--error-9);
   --color-input: var(--border-input);
   --color-ring: var(--border-input);
+
+  /*
+   * Named spacing aliases, mapped into Tailwind's `--spacing-*` theme
+   * namespace so they resolve as plain utilities (px-page-margin,
+   * gap-related, min-h-tap-target, ...) instead of arbitrary-value
+   * var() classes — the same treatment as the color tokens above. The
+   * *numbered* space-1..9 steps stay unmapped on purpose (comment
+   * above): they already equal Tailwind's own default scale at some
+   * step, so a bare p-6/gap-3/etc. already expresses them with no
+   * token needed. Only these semantic, non-numeric names get a
+   * dedicated utility.
+   */
+  --spacing-dense: var(--space-dense);
+  --spacing-grouped: var(--space-grouped);
+  --spacing-related: var(--space-related);
+  --spacing-page-margin: var(--space-page-margin);
+  --spacing-between-group: var(--space-between-group);
+  --spacing-after-page-head: var(--space-after-page-head);
+  --spacing-tap-target: var(--tap-target);
 
   /* Radius: none anywhere in this system (DESIGN.md's Never section) —
      zeroing this one variable neutralizes every shadcn rounded-* utility

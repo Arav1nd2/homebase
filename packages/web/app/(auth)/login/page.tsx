@@ -15,7 +15,7 @@ import { emailInputSchema, verifyCodeInputSchema } from "@/lib/validation/auth";
 type Step = "email" | "code";
 
 const ctaClassName =
-  "min-h-[var(--tap-target)] w-full bg-accent-bg-subtle text-base leading-base font-semibold text-accent-text hover:bg-accent-bg-subtle-active active:bg-accent-bg-subtle-active";
+  "min-h-tap-target w-full bg-accent-bg-subtle text-base leading-base font-semibold text-accent-text hover:bg-accent-bg-subtle-active active:bg-accent-bg-subtle-active";
 
 // Two-step sign-in flow (email -> code), re-skinned in the shared shell
 // (004-auth-shell-migration) but functionally unchanged from
@@ -68,7 +68,7 @@ export default function LoginPage() {
   return (
     <>
       <PageHeader mark="⁂" title="Sign in" showBackToHub={false} />
-      <main className="flex flex-col gap-[var(--space-related)] px-[var(--space-page-margin)] py-[var(--space-6)]">
+      <main className="flex flex-col gap-related px-page-margin py-8">
         {error ? <ErrorState message={error} /> : null}
 
         {step === "email" ? (
@@ -78,7 +78,7 @@ export default function LoginPage() {
               event.stopPropagation();
               void emailForm.handleSubmit();
             }}
-            className="flex flex-col gap-[var(--space-between-group)]"
+            className="flex flex-col gap-between-group"
           >
             <emailForm.Field
               name="email"
@@ -121,7 +121,7 @@ export default function LoginPage() {
               event.stopPropagation();
               void codeForm.handleSubmit();
             }}
-            className="flex flex-col gap-[var(--space-between-group)]"
+            className="flex flex-col gap-between-group"
           >
             <p className="text-sm leading-sm text-text-secondary">We sent a 6-digit code to {email}.</p>
 
@@ -169,7 +169,7 @@ export default function LoginPage() {
                 setError(null);
                 codeForm.reset();
               }}
-              className="min-h-[var(--tap-target)] self-start text-sm leading-sm text-text-secondary underline decoration-border underline-offset-2"
+              className="min-h-tap-target self-start text-sm leading-sm text-text-secondary underline decoration-border underline-offset-2"
             >
               Use a different email
             </button>

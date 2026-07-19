@@ -28,7 +28,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
           <button
             type="button"
             onClick={onRetry}
-            className="min-h-[var(--tap-target)] self-start text-sm leading-sm font-medium text-text underline decoration-border underline-offset-2"
+            className="min-h-tap-target self-start text-sm leading-sm font-medium text-text underline decoration-border underline-offset-2"
           >
             Retry
           </button>

@@ -21,7 +21,7 @@ export type FormFieldProps = {
 // matching every other feedback surface in this app).
 export function FormField({ id, label, error, className, ...inputProps }: FormFieldProps) {
   return (
-    <div className="flex flex-col gap-[var(--space-grouped)]">
+    <div className="flex flex-col gap-grouped">
       <Label htmlFor={id} className="text-sm leading-sm font-normal text-text-secondary">
         {label}
       </Label>

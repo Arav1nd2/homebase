@@ -22,11 +22,11 @@ export type PageHeaderProps = {
 // (FR-007, FR-008) — only the back-to-hub affordance itself is optional.
 export function PageHeader({ mark, title, showBackToHub = true }: PageHeaderProps) {
   return (
-    <header className="flex flex-col gap-3 px-[var(--space-page-margin)] pt-[var(--space-6)]">
+    <header className="flex flex-col gap-3 px-page-margin pt-8">
       {showBackToHub ? (
         <Link
           href="/"
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center text-sm leading-sm text-text-secondary"
+          className="inline-flex min-h-tap-target w-fit items-center text-sm leading-sm text-text-secondary"
         >
           <span aria-hidden="true">‹ </span>
           HomeBase
