@@ -1,5 +1,37 @@
 <!--
 Sync Impact Report
+- Version change: 3.3.0 → 3.4.0
+- Modified constraint (MINOR: the principle's own text already
+  pre-authorized this exact contingency — "an actively maintained
+  equivalent if next-pwa becomes unmaintained" — so naming the actual
+  replacement is applying existing guidance, not redefining the
+  principle; the installability/service-worker requirement itself is
+  unchanged):
+  - IV. Installable, Reliable PWA on iOS Safari and Android Chrome —
+    `next-pwa` → Serwist (`@serwist/next`). Reason: researched during
+    006-pwa-installability planning (the feature actually closing the
+    Principle IV gap per the Bootstrap Sequencing Exception, split out
+    from 005-upi-payment-tracker so the two ship independently) —
+    next-pwa is no longer actively maintained and does not support
+    Turbopack; Serwist is its purpose-built successor for the Next.js
+    App Router, actively maintained, and works as a pure build-time
+    plugin that emits a static `public/sw.js` (no Edge Runtime route
+    requirement), which does not intersect with
+    `@opennextjs/cloudflare`'s known runtime-manifest issues (those are
+    all server-side `require()` calls against `.next/*.json`, unrelated
+    to a static service-worker asset). See
+    specs/006-pwa-installability/research.md for the full comparison.
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic Constitution Check gate —
+    compatible as-is)
+  - ✅ .specify/templates/spec-template.md (no principle-specific placeholders)
+  - ✅ .specify/templates/tasks-template.md (no principle-specific placeholders)
+- Follow-up TODOs: none
+-->
+
+<!--
+Sync Impact Report (previous amendment, retained for history)
 - Version change: 3.2.0 → 3.3.0
 - Added guidance (MINOR: new constraint under an existing principle, no
   existing principle redefined):
@@ -190,9 +222,9 @@ the wrong default and wastes effort on the less-used surface.
 HomeBase MUST remain installable as a Progressive Web App on both iOS
 (Safari "Add to Home Screen") and Android (Chrome install prompt), via a
 valid `manifest.json` (name, icons at required sizes, `display: standalone`,
-theme/background color) and a service worker managed through `next-pwa` (or
-an actively maintained equivalent if `next-pwa` becomes unmaintained — a
-replacement requires a constitution amendment noting the swap).
+theme/background color) and a service worker managed through Serwist
+(`@serwist/next`) — or a further actively maintained equivalent if Serwist
+itself becomes unmaintained, subject to the same amendment requirement.
 
 The service worker MUST cache the app shell and static assets so previously
 loaded screens render offline or on a flaky connection instead of a blank
@@ -447,4 +479,4 @@ begins; unresolved conflicts MUST be simplified away, resolved via the
 Bootstrap Sequencing Exception above, or the constitution amended first —
 never silently bypassed.
 
-**Version**: 3.3.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-15
+**Version**: 3.4.0 | **Ratified**: 2026-07-12 | **Last Amended**: 2026-07-19

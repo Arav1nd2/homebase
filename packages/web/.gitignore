@@ -1,0 +1,6 @@
+# Serwist build output (packages/web/app/sw.ts is the committed source;
+# these are generated fresh by `next build` on every build, per
+# @serwist/next's withSerwist config — see next.config.ts)
+public/sw.js
+public/sw.js.map
+public/swe-worker.*
