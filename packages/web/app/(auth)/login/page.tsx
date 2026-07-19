@@ -9,7 +9,7 @@ import { FormField } from "@/components/shared/form-field";
 import { ErrorState } from "@/components/shared/error-state";
 import { Button } from "@/components/ui/button";
 import { apiClient, ApiError, type ApiResponse } from "@/lib/api-client";
-import { AUTH_API_PATHS } from "@/lib/auth/api";
+import { AUTH_API_PATHS, type RequestCodeResponse, type VerifyCodeResponse } from "@/lib/auth/api";
 import { emailInputSchema, verifyCodeInputSchema } from "@/lib/validation/auth";
 
 type Step = "email" | "code";
@@ -34,7 +34,7 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await apiClient<ApiResponse<{ message: string }>>(AUTH_API_PATHS.requestCode, {
+        await apiClient<ApiResponse<RequestCodeResponse>>(AUTH_API_PATHS.requestCode, {
           method: "POST",
           body: JSON.stringify({ email: value.email }),
         });
@@ -51,7 +51,7 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        const body = await apiClient<ApiResponse<{ redirectTo: string }>>(AUTH_API_PATHS.verifyCode, {
+        const body = await apiClient<ApiResponse<VerifyCodeResponse>>(AUTH_API_PATHS.verifyCode, {
           method: "POST",
           body: JSON.stringify({ email, code: value.code }),
         });

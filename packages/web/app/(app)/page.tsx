@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ApiResponse } from "@/lib/api-client";
-import { AUTH_API_PATHS } from "@/lib/auth/api";
+import { AUTH_API_PATHS, type SignOutResponse } from "@/lib/auth/api";
 
 type SmokeTestRecord = {
   id: string;
@@ -27,7 +27,7 @@ export default function SmokeTestPage() {
     try {
       const res = await fetch(AUTH_API_PATHS.signOut, { method: "POST" });
       if (res.ok) {
-        const body = (await res.json()) as ApiResponse<{ redirectTo: string }>;
+        const body = (await res.json()) as ApiResponse<SignOutResponse>;
         router.push(body.data.redirectTo);
         router.refresh();
       }
