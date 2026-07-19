@@ -25,6 +25,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "HomeBase",
   description: "Personal life-management app",
+  // iOS Safari doesn't read the manifest's `icons` array for "Add to Home
+  // Screen" — it needs this link explicitly (contracts/pwa-manifest.md).
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

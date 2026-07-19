@@ -250,8 +250,3 @@ There's no automated rollback. To roll back by hand:
    approval (see Deployment above).
 
 Design and planning documents for individual features live under `specs/`.
-
-## Roadmap
-
-Installable PWA support (manifest, service worker, offline behavior) is
-planned as foundational work, ahead of further product features.

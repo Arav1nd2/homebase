@@ -24,6 +24,9 @@ const eslintConfig = [
       "playwright-report/**",
       "test-results/**",
       "next-env.d.ts",
+      "public/sw.js",
+      "public/sw.js.map",
+      "public/swe-worker.*",
     ],
   },
 ];
