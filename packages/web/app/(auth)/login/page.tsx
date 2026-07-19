@@ -8,13 +8,14 @@ import { PageHeader } from "@/components/shared/page-header";
 import { FormField } from "@/components/shared/form-field";
 import { ErrorState } from "@/components/shared/error-state";
 import { Button } from "@/components/ui/button";
-import { apiClient, ApiError } from "@/lib/api-client";
+import { apiClient, ApiError, type ApiResponse } from "@/lib/api-client";
+import { AUTH_API_PATHS } from "@/lib/auth/api";
 import { emailInputSchema, verifyCodeInputSchema } from "@/lib/validation/auth";
 
 type Step = "email" | "code";
 
 const ctaClassName =
-  "min-h-[var(--tap-target)] w-full bg-[var(--accent-bg-subtle)] text-base leading-base font-semibold text-[var(--accent-text)] hover:bg-[var(--accent-bg-subtle-active)] active:bg-[var(--accent-bg-subtle-active)]";
+  "min-h-[var(--tap-target)] w-full bg-accent-bg-subtle text-base leading-base font-semibold text-accent-text hover:bg-accent-bg-subtle-active active:bg-accent-bg-subtle-active";
 
 // Two-step sign-in flow (email -> code), re-skinned in the shared shell
 // (004-auth-shell-migration) but functionally unchanged from
@@ -33,7 +34,7 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await apiClient<{ data: { message: string } }>("/api/auth/request-code", {
+        await apiClient<ApiResponse<{ message: string }>>(AUTH_API_PATHS.requestCode, {
           method: "POST",
           body: JSON.stringify({ email: value.email }),
         });
@@ -50,7 +51,7 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        const body = await apiClient<{ data: { redirectTo: string } }>("/api/auth/verify-code", {
+        const body = await apiClient<ApiResponse<{ redirectTo: string }>>(AUTH_API_PATHS.verifyCode, {
           method: "POST",
           body: JSON.stringify({ email, code: value.code }),
         });
@@ -122,7 +123,7 @@ export default function LoginPage() {
             }}
             className="flex flex-col gap-[var(--space-between-group)]"
           >
-            <p className="text-sm leading-sm text-[var(--text-secondary)]">We sent a 6-digit code to {email}.</p>
+            <p className="text-sm leading-sm text-text-secondary">We sent a 6-digit code to {email}.</p>
 
             <codeForm.Field
               name="code"
@@ -168,7 +169,7 @@ export default function LoginPage() {
                 setError(null);
                 codeForm.reset();
               }}
-              className="min-h-[var(--tap-target)] self-start text-sm leading-sm text-[var(--text-secondary)] underline decoration-[var(--border)] underline-offset-2"
+              className="min-h-[var(--tap-target)] self-start text-sm leading-sm text-text-secondary underline decoration-border underline-offset-2"
             >
               Use a different email
             </button>

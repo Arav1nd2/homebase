@@ -22,18 +22,18 @@ export type FormFieldProps = {
 export function FormField({ id, label, error, className, ...inputProps }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-[var(--space-grouped)]">
-      <Label htmlFor={id} className="text-sm leading-sm font-normal text-[var(--text-secondary)]">
+      <Label htmlFor={id} className="text-sm leading-sm font-normal text-text-secondary">
         {label}
       </Label>
       <Input
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={cn(error && "border-[var(--error-9)] focus-visible:ring-[var(--error-9)]/50", className)}
+        className={cn(error && "border-error-9 focus-visible:ring-error-9/50", className)}
         {...inputProps}
       />
       {error ? (
-        <p id={`${id}-error`} role="alert" className="flex items-center gap-2 text-sm leading-sm text-[var(--error-11)]">
+        <p id={`${id}-error`} role="alert" className="flex items-center gap-2 text-sm leading-sm text-error-11">
           <span aria-hidden="true" className="font-display text-base leading-none">
             !
           </span>

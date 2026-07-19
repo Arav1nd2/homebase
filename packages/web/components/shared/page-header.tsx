@@ -26,7 +26,7 @@ export function PageHeader({ mark, title, showBackToHub = true }: PageHeaderProp
       {showBackToHub ? (
         <Link
           href="/"
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center text-sm leading-sm text-[var(--text-secondary)]"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center text-sm leading-sm text-text-secondary"
         >
           <span aria-hidden="true">‹ </span>
           HomeBase
@@ -34,11 +34,11 @@ export function PageHeader({ mark, title, showBackToHub = true }: PageHeaderProp
       ) : null}
       <div className="flex items-baseline gap-3">
         {mark ? (
-          <span className="font-display text-5xl leading-none text-[var(--text)]" aria-hidden="true">
+          <span className="font-display text-5xl leading-none text-text" aria-hidden="true">
             {mark}
           </span>
         ) : null}
-        <h1 className="font-display text-3xl leading-3xl font-regular text-[var(--text)]">{title}</h1>
+        <h1 className="font-display text-3xl leading-3xl font-regular text-text">{title}</h1>
       </div>
     </header>
   );

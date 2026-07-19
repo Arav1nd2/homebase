@@ -13,11 +13,11 @@ export function EmptyState({ message }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       <div className="flex items-center justify-center gap-4">
-        <span className="font-display text-5xl leading-none text-[var(--text-secondary)]" aria-hidden="true">
+        <span className="font-display text-5xl leading-none text-text-secondary" aria-hidden="true">
           [
         </span>
-        <p className="font-display text-lg leading-lg max-w-[40ch] text-[var(--text)]">{message}</p>
-        <span className="font-display text-5xl leading-none text-[var(--text-secondary)]" aria-hidden="true">
+        <p className="font-display text-lg leading-lg max-w-[40ch] text-text">{message}</p>
+        <span className="font-display text-5xl leading-none text-text-secondary" aria-hidden="true">
           ]
         </span>
       </div>
