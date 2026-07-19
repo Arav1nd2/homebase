@@ -2,8 +2,8 @@
 
 <!-- The structural and temporal design spec for HomeBase. Pairs with DESIGN.md (visual tokens — locked in a later phase). -->
 
-**Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Chart/table encoding for the habit heatmap + expense ledger (Phase 7, `data-viz`) still extends the Page specs section further.
-**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `VOICE.md` at project root for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply.
+**Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Phase 7 (Data surfaces, `data-viz`) extends the Habits and Expenses entries with a **Chart encoding** block each — the habit heatmap's streak ramp + legend and the expense ledger's diverging balance indicator. This closes the last section named in the design plan: all 7 page specs are now complete through Phase 7.
+**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `VOICE.md` at project root for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply; Phase 7 additions doctrine: `data-viz` (skills/data-viz/SKILL.md, references/chart-selection.md, references/viz-principles.md) — see each Chart encoding block and `.design-foundations/build/2026-07-17-homebase-phase-7-discovery.md` for the full citation trail.
 
 ---
 
@@ -351,6 +351,14 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - *Success (screen-reader only — the cell fill + streak increment ARE the visible confirmation; no separate toast):* "Today logged. [N]-day streak."
 - *Dense-data labels (plain register, Inter — `type.dense`/`type.micro`):* habit-selector tabs use the habit's own user-authored name (e.g. "Exercise," "Meditation"); stat labels are plain concrete nouns: "Current streak," "Longest streak," "Completion rate."
 
+**Chart encoding (Phase 7, `data-viz` — see DESIGN.md §Heatmap streak ramp + legend):**
+- *Chart type:* calendar heatmap — the Trend/time-series relationship (chart-selection decision table); position encodes the calendar's own two temporal axes (day-of-week, week), so color is the one remaining channel for a third dimension (Munzner's marks-and-channels framework).
+- *Encoding — exactly one preattentive attribute:* color luminance, on a sequential single-hue ramp built from the accent hue already locked in DESIGN.md. It encodes **streak depth** (how many consecutive days precede and include this one), not raw completion — completion itself stays a separate, already-redundant binary signal (fill-family presence + Phase 5's in-cell mark).
+- *Levels and cap (the edge case's fix):* 1–2 days, 3–6 days, 7–13 days, and a cap at 14+ days — a disclosed truncation (a legend states the cap plainly), not an unbounded scale. A legend renders once per heatmap: "Less" → four swatches → "More, capped at 14+ days."
+- *Redundant non-color cue:* every cell carries a permanent, always-on accessible name (date + complete/not-complete + streak-day count) independent of interaction; on tap/press, the same information surfaces visibly as an inline caption near the module header for sighted users — never color alone.
+- *Colorblind-safety:* the ramp's order is verified to survive simulated protanopia and deuteranopia in both light and dark mode (`.design-foundations/build/phase7-dataviz-check.mjs`) — a secondary check on top of the redundant cue above, not a substitute for it.
+- *No chart lies:* no axis exists to truncate (calendar position is categorical, not a value axis); no area/icon scaling; the cap is disclosed via the legend rather than hidden.
+
 **Primary CTA:** "Log today" (Yifrah/Nielsen #2 — names the action, not "Submit"/"Done") for the active habit (Fitts's law, Fitts 1954: the single highest-frequency action in the app — per the Job section's explicit "two taps" requirement — gets a large, full-width control in the thumb-reachable lower half of the viewport).
 **Exit / next:** Back-arrow to the launcher hub; no cross-tool navigation.
 
@@ -400,8 +408,16 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - *Error — post-confirm save fails (Yifrah: what happened + what's safe + fix):* "That save didn't go through. Your line items are safe — try Confirm & save again."
 - *Warning (non-blocking) — reconciliation mismatch (Exact voice attribute: both real figures stated, never "there's a mismatch"):* "Entered $21.90 · the bill reads $25.90. Tax or tip may explain the gap — you can still save."
 - *Success (screen-reader only):* "Split saved. [Name]'s share: $[amount]."
-- *Ledger balance wording (Exact attribute; the standing redundant-cue rule — words carry the sign, never color alone):* "You owe [Name] $18.50" / "[Name] owes you $12.00" / "All settled" (the zero-balance case gets its own truthful neutral wording, not a default to either hue — visual encoding is Phase 7's).
+- *Ledger balance wording (Exact attribute; the standing redundant-cue rule — words carry the sign, never color alone):* "You owe [Name] $18.50" / "[Name] owes you $12.00" / "All settled" (the zero-balance case gets its own truthful neutral wording, not a default to either hue — see Chart encoding below for the visual layer).
 - *Dense-data labels (plain register, Inter):* ledger row = description + date/payer meta + tabular-numeral amount; form field labels "Item," "Amount," "Tax," "Tip"; split-choice labels "Split evenly, two ways" / "By item."
+
+**Chart encoding (Phase 7, `data-viz` — see DESIGN.md §Ledger balance indicator):**
+- *Chart type:* a position-encoded diverging indicator — the Deviation-from-baseline relationship (chart-selection decision table), baseline = a true zero ("nobody owes anybody"). A marker's position along a shared zero-anchored hairline track, not a filled bar — position is the most accurate channel (Cleveland & McGill) and needs less ink than a bar (Tufte).
+- *Primary cue (unchanged from the microcopy above):* the explicit "you owe" / "you're owed" / "all settled" text + sign is primary; the marker below is secondary and `aria-hidden` — never the sole carrier of the sign.
+- *Color choice (non-blue, non-brown, fading to neutral at zero):* "you're owed" uses the app's own accent ink (the same ink already used for done-stage markers/progress fill elsewhere); "you owe" uses the warning/amber ink, not error/red — reusing red here would reconstruct the exact green/red pairing Phase 4's standing rule flags, and would overstate the tone (owing a normal split is not an error). "All settled" rests exactly on the zero tick in a genuinely neutral ink — its own true state, not a faded version of either extreme.
+- *Multiple counterparties:* one marker-row per person when more than one exists, sharing the same zero position and the same data-driven scale (sized to the largest balance shown, per Few's scale-consistency rule) — never an arbitrary fixed maximum. A single counterparty's marker sits at a fixed directional offset (not proportional), since there's nothing to scale against yet.
+- *Colorblind-safety:* all three states verified pairwise distinguishable under simulated protanopia and deuteranopia, both modes (`.design-foundations/build/phase7-dataviz-check.mjs`) — a secondary check on top of the words-first primary cue.
+- *No chart lies:* the scale starts at a true zero and is never truncated; no dual axis; no area/icon proportional encoding — length/position only.
 
 **Primary CTA:** "Add expense" (entry point) → "Confirm & save" on the parse-review screen (Fitts's law, Fitts 1954: large, bottom-fixed action bar, physically separated from the secondary "Edit" affordance so a rushed tap can't misfire the wrong action).
 **Exit / next:** Back-arrow to the launcher hub after save, or continue reviewing the ledger in place.

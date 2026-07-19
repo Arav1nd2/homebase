@@ -506,6 +506,18 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
         "text": { "$value": "{color.info.11}", "$type": "color" },
         "on-solid": { "$value": "{color.info.on-solid}", "$type": "color" }
       }
+    },
+    "chart": {
+      "streak": {
+        "level-1": { "$value": "{color.accent.5}", "$type": "color", "$description": "Phase 7 — habit heatmap streak-depth level 1 (1-2 day streak)" },
+        "level-2": { "$value": "{color.accent.6}", "$type": "color", "$description": "Streak-depth level 2 (3-6 days)" },
+        "level-3": { "$value": "{color.accent.7}", "$type": "color", "$description": "Streak-depth level 3 (7-13 days). Level 4/cap (14+ days) reuses {color.accent.solid} unchanged — the licensed habit day-complete intensity, preserved as this ramp's ceiling, never a fifth alias." }
+      },
+      "balance": {
+        "positive": { "$value": "{color.accent.11}", "$type": "color", "$description": "Phase 7 — ledger balance marker, you're owed. Reuses the accent ink already licensed elsewhere for done-stage markers/progress fill." },
+        "negative": { "$value": "{color.warning.11}", "$type": "color", "$description": "Ledger balance marker, you owe. Deliberately warning (amber), not error (red) — avoids reconstructing the flagged green/red pairing against the positive accent, and matches VOICE.md's non-alarmist register (owing a split is not an error state)." },
+        "neutral": { "$value": "{color.neutral.11}", "$type": "color", "$description": "Ledger balance marker, all settled — a genuinely neutral ink, not a faded positive or negative." }
+      }
     }
   },
   "space": {
@@ -602,7 +614,20 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
       },
       "incomplete": {
         "fill": { "$value": "{color.surface.active}", "$type": "color" }
+      },
+      "streak": {
+        "level-1": { "fill": { "$value": "{color.chart.streak.level-1}", "$type": "color" }, "mark": { "$value": "{color.text.primary}", "$type": "color" } },
+        "level-2": { "fill": { "$value": "{color.chart.streak.level-2}", "$type": "color" }, "mark": { "$value": "{color.text.primary}", "$type": "color" } },
+        "level-3": { "fill": { "$value": "{color.chart.streak.level-3}", "$type": "color" }, "mark": { "$value": "{color.text.primary}", "$type": "color" } }
       }
+    },
+    "legend": {
+      "typography": { "$value": "{type.micro}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "caption": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
     },
     "label": {
       "typography": { "$value": "{type.micro}", "$type": "typography" },
@@ -620,6 +645,19 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
     "meta": {
       "typography": { "$value": "{type.micro}", "$type": "typography" },
       "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "ledger-balance": {
+    "track": { "$value": "{color.border.subtle}", "$type": "color" },
+    "tick": { "$value": "{color.border.default}", "$type": "color" },
+    "marker": {
+      "positive": { "$value": "{color.chart.balance.positive}", "$type": "color" },
+      "negative": { "$value": "{color.chart.balance.negative}", "$type": "color" },
+      "neutral": { "$value": "{color.chart.balance.neutral}", "$type": "color" }
+    },
+    "label": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
     }
   },
   "checklist": {
@@ -772,10 +810,39 @@ The four dense-data families are one functional pattern (Kholmatova: shared UI b
 
 **Interiors (each family's own layout):**
 
-- **Heatmap (Habits):** a 7-column calendar grid of square cells, gap {heatmap.cell.gap}; weekday labels in {heatmap.label.typography} / {heatmap.label.color}. Complete cell: {heatmap.cell.complete.fill} — the one licensed solid-accent moment, exactly as locked — carrying an in-cell mark in {heatmap.cell.complete.mark} (v1 glyph: the asterisk, echoing the Habits mark). The mark, not the fill, carries complete/incomplete: the fill's contrast against the light page background is expressive, not informational (verified in the spec-check contrast set). This discharges the Phase 4 redundant-cue rule for the heatmap ahead of Phase 7's numeric-on-tap. Incomplete cell: {heatmap.cell.incomplete.fill}. Streak cap, legend, and full encoding: Phase 7.
-- **Ledger (Expenses):** three-column rows — description in {ledger.row.typography}, date/payer meta in {ledger.meta.typography} / {ledger.meta.color}, amount right-aligned in {ledger.amount.typography} / {ledger.amount.color} with `font-variant-numeric: tabular-nums` so columns of figures align. The balance line states "you owe" / "you're owed" in words with an explicit sign as the primary cue; color is secondary reinforcement (encoding: Phase 7).
+- **Heatmap (Habits):** a 7-column calendar grid of square cells, gap {heatmap.cell.gap}; weekday labels in {heatmap.label.typography} / {heatmap.label.color}. Complete cell: {heatmap.cell.complete.fill} — the one licensed solid-accent moment, exactly as locked — carrying an in-cell mark in {heatmap.cell.complete.mark} (v1 glyph: the asterisk, echoing the Habits mark). The mark, not the fill, carries complete/incomplete: the fill's contrast against the light page background is expressive, not informational (verified in the spec-check contrast set). This discharges the Phase 4 redundant-cue rule for the heatmap ahead of Phase 7's numeric-on-tap. Incomplete cell: {heatmap.cell.incomplete.fill}. Streak cap, legend, and full encoding: see §Heatmap streak ramp below.
+- **Ledger (Expenses):** three-column rows — description in {ledger.row.typography}, date/payer meta in {ledger.meta.typography} / {ledger.meta.color}, amount right-aligned in {ledger.amount.typography} / {ledger.amount.color} with `font-variant-numeric: tabular-nums` so columns of figures align. The balance line states "you owe" / "you're owed" in words with an explicit sign as the primary cue; color is secondary reinforcement — see §Ledger balance indicator below.
 - **Checklist (Groceries):** rows of checkbox box ({checklist.box.size} square, border {checklist.box.border} at {checklist.box.border-width} — the form-boundary ink, 3:1 verified) + item label. Checked: box fills {checklist.checked.fill} with a check mark in {checklist.checked.mark}, label struck through in {checklist.checked.label} — three redundant cues (fill, mark shape, strikethrough), never color alone.
 - **Photo-card (Movies & TV · Food Reviews):** a 2-column grid, gap {photo-card.gap}; user imagery in original color inside hairline frames ({photo-card.frame.border} at {photo-card.frame.width}) — the frame is §Direction's imagery-containment device, not card chrome: no fill, no radius, no shadow. Caption in {photo-card.caption.typography} / {photo-card.caption.color} and meta in {photo-card.meta.typography} / {photo-card.meta.color} sit below the frame, unboxed.
+
+#### Heatmap streak ramp + legend (Phase 7, `data-viz`)
+
+**Chart type:** calendar heatmap — the Trend/time-series relationship, cited to the chart-selection decision table (Few/Cairo/Munzner); position already encodes the two temporal axes (day-of-week, week), so color is the one channel left for a third dimension, per Munzner's marks-and-channels framework. Full citation and the data-relationship reasoning live in the Phase 7 discovery note; this section specifies the built tokens.
+
+**What the ramp encodes:** streak depth, not raw completion — completion itself stays the binary {heatmap.cell.complete.fill}/{heatmap.cell.incomplete.fill} split above, discharged by the in-cell mark. The ramp is a second, additional dimension layered on top of a completed cell: how many consecutive days precede and include it. Four levels, capped:
+
+| Streak depth | Fill | In-cell mark |
+|---|---|---|
+| 1–2 days | {heatmap.cell.streak.level-1.fill} | {heatmap.cell.streak.level-1.mark} |
+| 3–6 days | {heatmap.cell.streak.level-2.fill} | {heatmap.cell.streak.level-2.mark} |
+| 7–13 days | {heatmap.cell.streak.level-3.fill} | {heatmap.cell.streak.level-3.mark} |
+| 14+ days (cap) | {heatmap.cell.complete.fill} | {heatmap.cell.complete.mark} |
+
+The cap reuses the existing complete-cell tokens unchanged — the licensed habit day-complete intensity is preserved as this ramp's ceiling, never exceeded, never diluted to every completed day. The three lighter levels use a mark ink token distinct from the cap's own ({heatmap.cell.streak.level-1.mark} etc., not {heatmap.cell.complete.mark}) because the cap's ink is fixed (mode-independent, matching its own mode-independent fill) while the lighter levels' fills are mode-dependent — a single fixed ink cannot legibly serve both; each pairing is independently contrast-verified by the spec-check (see the pairs added this phase). The ramp's ordering (every step relative to every other, in both modes) is monotonic by construction and verified by direct computation, not visual guess — see the Phase 7 discovery note and `phase7-dataviz-check.mjs`.
+
+**Legend:** rendered once per heatmap, in {heatmap.legend.typography} / {heatmap.legend.color} — "Less" · four small swatches (incomplete → level-1 → level-2 → level-3 → cap) · "More, capped at 14+ days." The disclosed cap is what keeps an unbroken streak from breaking the scale (Cairo: a labeled truncation is not a lie).
+
+**Redundant non-color cue (never color alone):** every cell carries a permanent, always-on accessible name stating the date, complete/not-complete, and streak-day count in plain text — independent of any interaction, so it isn't gated behind a tap for assistive tech. On tap/press, the same information surfaces visibly for sighted users as an inline caption in {heatmap.caption.typography} / {heatmap.caption.color} near the module header — no new chrome, no floating tooltip (this system has no elevation layer).
+
+#### Ledger balance indicator (Phase 7, `data-viz`)
+
+**Chart type:** a position-encoded diverging indicator — the Deviation-from-baseline relationship (chart-selection decision table), where the baseline is a true zero ("nobody owes anybody"). Built as a marker's position along a shared, zero-anchored hairline track rather than a filled bar: position is the most accurate channel (Cleveland & McGill), it needs less ink than a filled bar (Tufte), and it avoids a second claim on the one licensed solid-accent-fill moment reserved for the habit day-complete cell above.
+
+**Anatomy:** a track in {ledger-balance.track} spans a fixed width; a center tick in {ledger-balance.tick} marks true zero. One marker per counterparty (a single row in the common two-person case): left of the tick in {ledger-balance.marker.negative} for "you owe," right of the tick in {ledger-balance.marker.positive} for "you're owed," resting exactly on the tick in {ledger-balance.marker.neutral} for "all settled." The marker is `aria-hidden` — the words-first balance line ("you owe $18.50" / "you're owed $12.00" / "all settled") is the primary, already-accessible cue; the marker is a sighted-only secondary reinforcement, never the sole carrier of the sign.
+
+**Scale:** when two or more counterparties are shown, every row shares the same zero position and the same scale, sized to the largest balance currently shown (Few's scale-consistency rule) — the track's extent reflects real data, never an arbitrary fixed maximum. With a single counterparty, the marker sits at a fixed directional offset rather than a proportional one, since there is nothing to scale relative to yet — this avoids implying a precision the single value doesn't carry.
+
+**Color choice:** {ledger-balance.marker.negative} deliberately draws from the warning family, not the error family — reusing error/red here would reconstruct the exact green/red pairing Phase 4's standing rule flags, and would overstate the tone (owing a normal split is not an error). {ledger-balance.marker.positive} reuses the accent ink already licensed elsewhere for done-stage markers and progress fill. {ledger-balance.marker.neutral} is a genuinely neutral ink, not a faded version of either extreme — the zero-balance state gets its own true representation, per the edge case.
 
 #### Primary CTA
 
@@ -804,9 +871,10 @@ Green accent + red error means every state distinction must survive without colo
 | Surface | Color layer | Non-color cue that carries the information |
 |---------|------------|--------------------------------------------|
 | Heatmap complete cell | {heatmap.cell.complete.fill} | In-cell mark in {heatmap.cell.complete.mark} |
+| Heatmap streak ramp (Phase 7) | {heatmap.cell.streak.level-1.fill} / level-2 / level-3 | Always-on accessible text per cell (date + streak-day count) + numeric caption on tap; ramp order also verified to survive CVD simulation as a secondary check |
 | Form validation error | {form-field.error.border} / {form-field.error.text} | Icon glyph + message + boundary state change |
 | Feedback banners (all four kinds) | {banner.surface.*} / {banner.text.*} | Leading icon glyph + plain-language text |
-| Ledger balance | Phase 7's encoding | "you owe" / "you're owed" words + explicit sign, primary |
+| Ledger balance (Phase 7) | {ledger-balance.marker.positive} / .negative / .neutral | "you owe" / "you're owed" / "all settled" words + explicit sign, primary — the marker is `aria-hidden` and secondary |
 | Checklist checked | {checklist.checked.fill} | Check-mark shape + label strikethrough |
 | Parse stages | {parse-status.stage.done.color} | Check glyph + list position |
 | Pin state | {tool-card.pin.active-color} | Glyph shape (filled vs outline) + presence in the rail |
@@ -818,3 +886,4 @@ Green accent + red error means every state distinction must survive without colo
 - ~~Exact display/body typefaces~~ — resolved Phase 4: Newsreader (display) + Inter (body), see Type section.
 - ~~Full functional-color set + redundant-cue rule~~ — resolved Phase 4: see Functional colors section. Redundant-cue rule stands as a requirement for Phase 5/Phase 7 to implement, not just document.
 - ~~Component-level token tiers (global/alias/component, W3C DTCG format) and the launcher-card + four dense-data-family specs~~ — resolved Phase 5: see Design system section. Heatmap/ledger encoding detail (streak cap, legend, balance color semantics) remains with Phase 7; microcopy with Phase 6.
+- ~~Heatmap streak ramp (cap + legend) and ledger balance diverging encoding~~ — resolved Phase 7: see §Heatmap streak ramp + legend and §Ledger balance indicator. Both colorblind-verified (`phase7-dataviz-check.mjs`) and checked against the Cairo lie taxonomy (Phase 7 discovery note).
