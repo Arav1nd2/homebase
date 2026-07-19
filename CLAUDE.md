@@ -11,6 +11,10 @@ npm workspaces monorepo:
 - `packages/send-email` — a small, separate Worker (`homebase-send-email-hook`) whose only job is to receive Supabase's Send Email Hook webhook, render the sign-in email, and send it via Resend. This is the one documented exception to "single deployment target" (see constitution below) — it exists only because that webhook needs its own internet-reachable endpoint.
 - `packages/e2e` — Playwright tests exercising both workers together, plus a fake Resend capture server so no real emails go out in local/CI runs.
 
+## Git workflow
+
+**Never push directly to `main`, under any circumstances.** All work lands on a feature branch and goes in through a PR. This applies even if a local branch's upstream happens to be configured as `origin/main` (verify `git rev-parse --abbrev-ref --symbolic-full-name @{u}` and the actual remote branch before pushing) and even if a commit/push would otherwise appear routine — `main` is deployed via CI/CD on push, so a direct push there can trigger an unreviewed production deploy. If asked to "raise a PR," push to a properly-named feature branch (`git push -u origin <branch>`, creating it on the remote if needed) and open the PR against `main` — never push to `main` itself to get there.
+
 ## Commands
 
 Setup:
