@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HomeBase — Launcher (wireframe mock)</title>
+<!-- No DESIGN.md found — wireframe mode: greyscale defaults. Run /design-for-ai to establish tokens. -->
+<!--
+  PAGE SPEC (scaffolded — JOURNEY.md does not exist yet; Phase 1-2 have not run)
+  Purpose: the home base / hub — browse and launch into any tool. Not a nav bar
+           switching within one frame; this screen IS the hub you browse from.
+  Entry points: app open / PWA launch; "back" from any tool returns here.
+  Content blocks: pinned quick-starts row (customizable) + full scrollable shelf
+           of tool cards, one per module. Shelf is open-ended by design — the
+           six named tools are today's data, not a hard-coded limit.
+  States: empty (no pins yet / first launch), loading (skeleton cards),
+           error (tool summaries failed to load), success (populated, shown as
+           the primary render below). Mini reference panels at the foot of the
+           page stand in for the other three so the full spec is visible in one
+           file, per this checkpoint's "cheap, throwaway" brief.
+  Primary CTA: tapping a card (whole card is the target — Fitts's law; cards
+           sit at varying scroll positions so each one needs to be its own
+           full-size thumb target, not just a single bottom button).
+  Exit: none — this page is the hub; navigating into a tool is the exit.
+-->
+<style>
+  /* === WIREFRAME TOKENS (greyscale — no DESIGN.md yet) === */
+  :root {
+    --background: #ffffff;
+    --surface: #f5f5f5;
+    --surface-hover: #ebebeb;
+    --border-subtle: #e0e0e0;
+    --border: #bdbdbd;
+    --border-strong: #9e9e9e;
+    --text-secondary: #616161;
+    --text: #212121;
+    --accent-solid: #424242;
+    --accent-on-solid: #ffffff;
+    --accent-text: #212121;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    display: flex;
+    justify-content: center;
+  }
+
+  .viewport {
+    width: 100%;
+    max-width: 390px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-inline: 1px solid var(--border-subtle);
+  }
+
+  /* === HEADER — generous chrome margin, literary-scale hierarchy stands in here === */
+  header {
+    padding: 28px 20px 16px;
+  }
+  header .eyebrow {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+
+  main { flex: 1; padding-bottom: 40px; }
+
+  section.block { margin-top: 28px; }
+
+  .block-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 20px;
+    margin-bottom: 12px;
+  }
+  .block-heading h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .block-heading .hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  /* === PINNED QUICK-STARTS — horizontal scroll row === */
+  .pinned-row {
+    display: flex;
+    gap: 12px;
+    padding: 4px 20px 8px;
+    overflow-x: auto;
+  }
+  .pin-card {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 92px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .pin-card .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--border);
+  }
+  .pin-card .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .pin-card.add-pin {
+    background: transparent;
+    border: 2px dashed var(--border);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+  }
+
+  /* === SHELF — the extensible, open-ended tool list === */
+  .shelf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px;
+  }
+  .tool-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 72px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .tool-card .icon {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--border);
+  }
+  .tool-card .copy { flex: 1; min-width: 0; }
+  .tool-card .name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+  .tool-card .meta {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tool-card .chevron {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    color: var(--border-strong);
+  }
+
+  .tool-card.add-tool {
+    background: transparent;
+    border: 2px dashed var(--border);
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    text-align: center;
+  }
+
+  .cta-note {
+    padding: 4px 20px 0;
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* === STATES STRIP — compact reference panels, not the primary render === */
+  .states-strip {
+    margin-top: 40px;
+    padding: 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .states-strip h2 {
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+  }
+  .state-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .state-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .state-panel .state-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .skeleton-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .skeleton-box {
+    height: 14px;
+    border-radius: 4px;
+    background: var(--surface-hover);
+  }
+  .empty-copy {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+  .error-copy {
+    font-size: 0.8125rem;
+    color: var(--text);
+  }
+  .retry-chip {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="viewport">
+
+  <header>
+    <div class="eyebrow">[Good afternoon]</div>
+    <h1>HomeBase</h1>
+  </header>
+
+  <main>
+    <!-- ZONE 1: pinned quick-starts (customizable, separate from shelf order) -->
+    <section class="block" aria-label="Quick starts">
+      <div class="block-heading">
+        <h2>Quick starts</h2>
+        <span class="hint">[Hold to reorder]</span>
+      </div>
+      <div class="pinned-row">
+        <div class="pin-card">
+          <div class="icon"></div>
+          <div class="label">Habits</div>
+        </div>
+        <div class="pin-card">
+          <div class="icon"></div>
+          <div class="label">Groceries</div>
+        </div>
+        <div class="pin-card">
+          <div class="icon"></div>
+          <div class="label">Movies &amp; TV</div>
+        </div>
+        <div class="pin-card add-pin">+ Pin a tool</div>
+      </div>
+    </section>
+
+    <!-- ZONE 2: full shelf — deliberately open-ended, not hard-coded to six -->
+    <section class="block" aria-label="All tools">
+      <div class="block-heading">
+        <h2>All tools</h2>
+        <span class="hint">[Scrollable]</span>
+      </div>
+      <div class="shelf-list">
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Habit tracker</div>
+            <div class="meta">[12-day streak on Reading]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Movie &amp; TV tracker</div>
+            <div class="meta">[3 shows in progress]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Expense splitter</div>
+            <div class="meta">[You owe Sam $12.40]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Restaurant reviews</div>
+            <div class="meta">[8 places logged]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Recipe book</div>
+            <div class="meta">[Try tonight: something new]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="tool-card">
+          <div class="icon"></div>
+          <div class="copy">
+            <div class="name">Grocery tracking</div>
+            <div class="meta">[5 items to buy]</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+        <!-- deliberately present: signals the shelf accepts new tool types
+             as data entries, not new components (open-ended requirement) -->
+        <div class="tool-card add-tool">+ Add a tool — the shelf grows here, no redesign needed</div>
+      </div>
+      <p class="cta-note">[Tap any card → opens that tool. Whole card is the target.]</p>
+    </section>
+
+    <!-- STATES STRIP — empty / loading / error, compact reference only.
+         Success is the primary render above. -->
+    <section class="states-strip" aria-label="Other page states (reference)">
+      <h2>Other states (reference — not the primary render)</h2>
+      <div class="state-panels">
+        <div class="state-panel">
+          <div class="state-label">Empty — first-ever launch</div>
+          <p class="empty-copy">[No quick starts pinned yet. Pin a tool above to bring it here.]</p>
+        </div>
+        <div class="state-panel">
+          <div class="state-label">Loading</div>
+          <div class="skeleton-row">
+            <div class="skeleton-box" style="width:44px;height:44px;border-radius:10px;"></div>
+            <div style="flex:1;">
+              <div class="skeleton-box" style="width:60%;margin-bottom:6px;"></div>
+              <div class="skeleton-box" style="width:40%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="state-panel">
+          <div class="state-label">Error — tool summaries failed to load</div>
+          <p class="error-copy">[Couldn't refresh your tools. Showing what's saved on this device.]</p>
+          <span class="retry-chip">Retry</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</div>
+</body>
+</html>

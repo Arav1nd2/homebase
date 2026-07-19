@@ -42,3 +42,13 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+
+# Agents
+.agents/
+
+# Playwright
+.playwright-mcp/
+
+# design-for-ai workflow scratch (research/plan/build process docs, screenshots) — not deliverables
+.design-foundations/
