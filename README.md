@@ -207,10 +207,9 @@ approval step in GitHub.
    `production` with at least one required reviewer — this is the
    deploy approval gate.
 3. **Secrets**, scoped to the `production` environment — these are the
-   single source of truth for every credential this project uses (see the
-   constitution's Additional Constraints); `deploy.yml` syncs them to both
-   Workers on every run, so nothing is ever set by hand directly against
-   Cloudflare:
+   single source of truth for every credential this project uses;
+   `deploy.yml` syncs them to both Workers on every run, so nothing is
+   ever set by hand directly against Cloudflare:
    - `CLOUDFLARE_API_TOKEN` — an "Edit Cloudflare Workers" token scoped to
      your account
    - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard, or
