@@ -515,7 +515,7 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
       },
       "balance": {
         "positive": { "$value": "{color.accent.11}", "$type": "color", "$description": "Phase 7 — ledger balance marker, you're owed. Reuses the accent ink already licensed elsewhere for done-stage markers/progress fill." },
-        "negative": { "$value": "{color.warning.11}", "$type": "color", "$description": "Ledger balance marker, you owe. Deliberately warning (amber), not error (red) — avoids reconstructing the flagged green/red pairing against the positive accent, and matches VOICE.md's non-alarmist register (owing a split is not an error state)." },
+        "negative": { "$value": "{color.warning.11}", "$type": "color", "$description": "Ledger balance marker, you owe. Deliberately warning (amber), not error (red) — avoids reconstructing the flagged green/red pairing against the positive accent, and matches design/VOICE.md's non-alarmist register (owing a split is not an error state)." },
         "neutral": { "$value": "{color.neutral.11}", "$type": "color", "$description": "Ledger balance marker, all settled — a genuinely neutral ink, not a faded positive or negative." }
       }
     }

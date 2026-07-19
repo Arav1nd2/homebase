@@ -3,7 +3,7 @@
 <!-- The structural and temporal design spec for HomeBase. Pairs with DESIGN.md (visual tokens — locked in a later phase). -->
 
 **Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Phase 7 (Data surfaces, `data-viz`) extends the Habits and Expenses entries with a **Chart encoding** block each — the habit heatmap's streak ramp + legend and the expense ledger's diverging balance indicator. This closes the last section named in the design plan: all 7 page specs are now complete through Phase 7.
-**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `VOICE.md` at project root for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply; Phase 7 additions doctrine: `data-viz` (skills/data-viz/SKILL.md, references/chart-selection.md, references/viz-principles.md) — see each Chart encoding block and `.design-foundations/build/2026-07-17-homebase-phase-7-discovery.md` for the full citation trail.
+**Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `design/VOICE.md` for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply; Phase 7 additions doctrine: `data-viz` (skills/data-viz/SKILL.md, references/chart-selection.md, references/viz-principles.md) — see each Chart encoding block and `.design-foundations/build/2026-07-17-homebase-phase-7-discovery.md` for the full citation trail.
 
 ---
 
@@ -318,8 +318,8 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** A card's summary badge fails to load — the card stays fully tappable (icon/label are static and unaffected); only the badge shows a muted inline marker, never blocking entry to the tool.
 - **Success:** Quick-starts row (if populated) + full alphabetical shelf, all cards tappable with badges resolved.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
-- *Empty (quick-starts invite — deliberately PLAIN register, not literary; VOICE.md's register-split note):* "Pin the tools you open daily." Trailing affordance label: "Add a pin."
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (quick-starts invite — deliberately PLAIN register, not literary; design/VOICE.md's register-split note):* "Pin the tools you open daily." Trailing affordance label: "Add a pin."
 - *Loading (badge skeleton; screen-reader only — visual stays a skeleton line):* "Loading [tool label]'s badge."
 - *Badge error (plain register; Yifrah-lite — no fix is needed since no user action caused it, so reassurance stands in for the "fix" step):* visible glyph is a muted em dash; screen-reader text: "[Tool label]'s count is unavailable right now. The tool still opens."
 - *Pin/unpin fails to persist (Yifrah: what happened + fix; no blame):* "That pin didn't save. Try again." Toggle visibly reverts to its prior state, never a false pinned/unpinned display.
@@ -344,7 +344,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** Log-today action fails to save — inline error at the control itself; today's cell stays in its pre-tap state (no false success shown); retry is the same tap.
 - **Success:** Habit(s) exist; selected habit's heatmap and streak reflect the latest logged state.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
 - *Empty (literary register — display serif at `--text-lg`, framed by the signature bracket, per DESIGN.md's Expressive moments):* "Nothing kept yet. Name the first thing worth doing daily — the streak begins the moment you do." First-run CTA: "Name a habit."
 - *Error — log-today fails to save (Yifrah: what → why → fix; no blame on the tap):* "Today didn't save. The connection may have dropped. Tap Log again; nothing else was lost."
 - *Loading (screen-reader only; visual stays a skeleton grid):* "Loading Habits."
@@ -376,7 +376,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** A save/log action fails — inline error on the add-a-watch form; entry preserved for retry, not discarded.
 - **Success:** Watch history populated, newest entries at the top.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
 - *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "Not yet remembered. Log the first one — the poster keeps the rest."
 - *Error — save/log fails (Yifrah: what → why → fix; entry preserved, no blame):* "That watch didn't save. Check your connection and try again. Your entry is still here."
 - *Loading (screen-reader only; visual stays skeleton poster cards):* "Loading watch history."
@@ -401,10 +401,10 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** AI parse fails — the first-class failure flow (see "Split an expense" flow above): retry-vs-manual-entry, never a dead-end generic error toast.
 - **Success:** Parsed (or manually entered) line-items confirmed and saved; ledger/balance updated.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`; this page carries the plan's single highest-stakes microcopy moment):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`; this page carries the plan's single highest-stakes microcopy moment):**
 - *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "No bill has passed through here yet. Photograph the next one — the math can be its problem, not yours."
 - *Loading — AI-parse stages (plain register, present-progressive, real-world terms per Nielsen #2, not OCR jargon):* "Capture" → "Reading the photo…" → "Itemizing…". Cancel label: "Cancel." Standing secondary path: "Enter items manually" (always present, not a failure-only concession).
-- *Error — AI-parse failure, the highest-stakes moment (Yifrah what→why→fix, zero blame toward the user's photo or the AI; corrects the Phase 5 mock's provisional "We couldn't read this photo..." line, which used the named "we"-centers-the-company anti-pattern — see `VOICE.md`'s worked example):* "The bill didn't come through clearly enough to read. Low light or a tilted photo can do that. Retry the photo, or enter the items yourself: either way they land in the same ledger." Buttons: **Retry photo** (primary) / **Enter items manually** (secondary) — exactly two options (Hick's law).
+- *Error — AI-parse failure, the highest-stakes moment (Yifrah what→why→fix, zero blame toward the user's photo or the AI; corrects the Phase 5 mock's provisional "We couldn't read this photo..." line, which used the named "we"-centers-the-company anti-pattern — see `design/VOICE.md`'s worked example):* "The bill didn't come through clearly enough to read. Low light or a tilted photo can do that. Retry the photo, or enter the items yourself: either way they land in the same ledger." Buttons: **Retry photo** (primary) / **Enter items manually** (secondary) — exactly two options (Hick's law).
 - *Error — post-confirm save fails (Yifrah: what happened + what's safe + fix):* "That save didn't go through. Your line items are safe — try Confirm & save again."
 - *Warning (non-blocking) — reconciliation mismatch (Exact voice attribute: both real figures stated, never "there's a mismatch"):* "Entered $21.90 · the bill reads $25.90. Tax or tip may explain the gap — you can still save."
 - *Success (screen-reader only):* "Split saved. [Name]'s share: $[amount]."
@@ -435,7 +435,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** Save fails — inline error on the add-review form; entry preserved for retry (protects the narrow post-meal window named in the Job section's anxiety force).
 - **Success:** New review saved and visible at the top of the list.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
 - *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "No table remembered yet. Jot the next one down before the taste fades."
 - *Error — save fails (Yifrah: what → why → fix; protects the narrow post-meal window named in the Job section's anxiety force):* "That review didn't save. Check your connection and try again. Nothing you wrote is lost."
 - *Loading (screen-reader only; visual stays skeleton cards):* "Loading reviews."
@@ -459,7 +459,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** Save fails mid-entry — draft content (title/ingredients/steps typed so far) is preserved, never wiped (protects against compounding the Job section's transcription-effort anxiety into a lost-work anxiety).
 - **Success:** Recipe saved and reachable from the library.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
 - *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "The book is still blank. Write in the first one worth keeping."
 - *Error — save fails mid-entry (Yifrah: what → why → fix; prevents transcription-effort anxiety compounding into lost-work anxiety, per the Job section):* "This recipe didn't save. Check your connection and try again. Everything you've written is still here."
 - *Loading (screen-reader only; visual stays skeleton placeholders):* "Loading your recipes."
@@ -482,7 +482,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** Add/check action fails to sync — the item stays visible locally (optimistic UI) with an inline sync-pending marker, so a mid-aisle failure never silently loses the item.
 - **Success:** List reflects the latest additions/checks in real time.
 
-**Microcopy (Phase 6, `content-design` — see `VOICE.md`):**
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
 - *Empty (literary register — display serif at `--text-lg`, bracket-framed):* "The list is empty, for now. Add what's running low before you forget."
 - *Error — add/check fails to sync (Yifrah: what happened + reassurance + fix; no "we," no "Oops," item never appears lost):* "This item didn't sync yet. It's still on your list. Tap to try again."
 - *Loading (screen-reader only; visual stays skeleton rows):* "Loading your list."
