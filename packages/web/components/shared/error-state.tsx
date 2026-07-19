@@ -17,18 +17,18 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-3 border-b border-[var(--error-9)] bg-[var(--error-3)] px-6 py-4"
+      className="flex items-start gap-3 border-b border-error-9 bg-error-3 px-6 py-4"
     >
-      <span className="font-display text-xl leading-none text-[var(--error-11)]" aria-hidden="true">
+      <span className="font-display text-xl leading-none text-error-11" aria-hidden="true">
         !
       </span>
       <div className="flex flex-col gap-3">
-        <p className="text-sm leading-sm text-[var(--error-11)]">{message}</p>
+        <p className="text-sm leading-sm text-error-11">{message}</p>
         {onRetry ? (
           <button
             type="button"
             onClick={onRetry}
-            className="min-h-[var(--tap-target)] self-start text-sm leading-sm font-medium text-[var(--text)] underline decoration-[var(--border)] underline-offset-2"
+            className="min-h-tap-target self-start text-sm leading-sm font-medium text-text underline decoration-border underline-offset-2"
           >
             Retry
           </button>

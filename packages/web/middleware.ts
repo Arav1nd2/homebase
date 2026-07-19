@@ -3,8 +3,8 @@ import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
 
 /**
- * Single enforcement point for FR-001 (protect everything by default) and
- * FR-013 (never show /login to an already-signed-in visitor) — for PAGE
+ * Single enforcement point for FR-005 (protect everything by default) and
+ * FR-007 (never show /login to an already-signed-in visitor) — for PAGE
  * navigation only. API routes are deliberately left alone here: each
  * Route Handler enforces its own auth via `getSessionOrThrow()`
  * (constitution Principle V), returning a clean JSON 401 rather than an
@@ -13,11 +13,10 @@ import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
  * (001-foundational-infra FR-016) without middleware needing to know
  * about it. `request-code`/`verify-code`/`sign-out` are the auth routes
  * that don't need a session check of their own (see contracts/auth-api.md).
- * `/styleguide` (003-ui-shell-foundation) is also exempt — it's a kernel/
- * dev-facing example screen with no real user data (spec Assumptions).
- * TODO: remove the route (and this exemption) once auth is migrated and
- * real tool screens exist to demonstrate the shell instead — flagged by
- * the maintainer during 003's implementation, not yet scheduled.
+ * `/login` lives under `app/(auth)/` and every protected screen under
+ * `app/(app)/` (004-auth-shell-migration) — route groups don't affect the
+ * URL, so this check still matches on the real pathname, not folder
+ * membership.
  *
  * Uses `getUser()`, not `getSession()` — `getSession()` only reads the JWT
  * out of the cookie without contacting Supabase, so a forged/stale cookie
@@ -36,7 +35,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && pathname !== "/login" && pathname !== "/styleguide") {
+  if (!user && pathname !== "/login") {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);

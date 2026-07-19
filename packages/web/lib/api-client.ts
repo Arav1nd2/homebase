@@ -5,6 +5,9 @@ type ApiErrorBody = {
   };
 };
 
+/** Shared success-response shape (Constitution Principle V: `{ data: ... }`). */
+export type ApiResponse<T> = { data: T };
+
 export class ApiError extends Error {
   code: string;
 

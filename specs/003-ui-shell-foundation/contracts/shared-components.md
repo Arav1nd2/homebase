@@ -13,13 +13,20 @@ implementation.
 export type PageHeaderProps = {
   mark?: string;      // e.g. "¶", "§" — omit for the launcher/hub itself, which JOURNEY.md's page spec shows with no mark (research.md §8)
   title: string;      // canonical name only (JOURNEY.md's Canonical labeling table) — no per-caller phrasing variants
+  showBackToHub?: boolean; // defaults to true — see 004-auth-shell-migration note below
 };
 
 export function PageHeader(props: PageHeaderProps): JSX.Element;
 ```
 
 **Guarantees to callers**:
-- Always renders the back-to-hub affordance (FR-006) — no prop suppresses it.
+- Renders the back-to-hub affordance by default (FR-006); every tool
+  screen call site is unaffected. **Superseded by
+  004-auth-shell-migration's FR-014**: the affordance is now optional via
+  `showBackToHub` (default `true`) — the auth screens are the first caller
+  to pass `false`, since a signed-out visitor has no hub to return to.
+  Originally this guarantee had no suppressing prop at all; that no longer
+  holds.
 - Never renders a nav bar or search control (FR-007, FR-008).
 - `mark`, when present, is `aria-hidden` — callers must not rely on it for
   accessible content; `title` alone must be a complete accessible page
