@@ -87,19 +87,33 @@ test("an offline write attempt fails visibly with no infinite spinner and no fal
   await signIn(page, WRITE_EMAIL);
   await primeServiceWorkerCache(page);
 
+  // Establish a known baseline record while still online. `/api/smoke`'s
+  // GET returns the single globally-latest record, not one scoped to this
+  // user (see app/api/smoke/route.ts) — so asserting "the record doesn't
+  // contain the offline message" isn't reliable on its own: on a freshly
+  // reset CI database, with fullyParallel tests, no record may exist yet
+  // at all, and Playwright's negated `.not.toContainText()` treats "no
+  // matching element" as a failure rather than a vacuous pass. Writing a
+  // known baseline first makes the assertion below self-contained.
+  const baselineMessage = `baseline-${Date.now()}`;
+  await page.getByPlaceholder("Type a message").fill(baselineMessage);
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("smoke-record")).toContainText(baselineMessage);
+
   await context.setOffline(true);
 
-  const message = `offline-write-${Date.now()}`;
-  await page.getByPlaceholder("Type a message").fill(message);
+  const offlineMessage = `offline-write-${Date.now()}`;
+  await page.getByPlaceholder("Type a message").fill(offlineMessage);
   await page.getByRole("button", { name: "Save" }).click();
 
   // Next.js's own route announcer also carries `role="alert"`, so scope to
   // the actual error text rather than the bare role.
   await expect(page.getByText(/could not save the smoke-test record/i)).toBeVisible({ timeout: 5_000 });
 
-  // No false success confirmation and no button left stuck in a "Saving…" state.
+  // No false success confirmation and no button left stuck in a "Saving…"
+  // state — the record shown is still the baseline, not the offline attempt.
   await expect(page.getByRole("button", { name: "Save" })).toBeEnabled();
-  await expect(page.getByTestId("smoke-record")).not.toContainText(message);
+  await expect(page.getByTestId("smoke-record")).toContainText(baselineMessage);
 
   await context.setOffline(false);
 });
