@@ -1,0 +1,320 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Dark mode is attribute-based (next-themes, attribute="data-theme"), not
+ * Tailwind v4's default prefers-color-scheme-only `dark:` variant — this
+ * matches the exact toggle mechanism already prototyped in the design
+ * phase's rendered mocks (research.md §2). Without this, `dark:` classes
+ * would silently fall back to OS-only dark mode.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Tier 1 (global, raw values) + Tier 2 (alias, semantic) design tokens,
+ * transcribed verbatim from DESIGN.md's DTCG blocks — cross-checked
+ * against the already-reviewed CSS translation in
+ * .design-foundations/build/2026-07-17-homebase-phase-{5,7}-mock.html
+ * (research.md §3). Colors live here (not inside @theme) because dark
+ * mode needs to override the raw values below; @theme's color mappings
+ * further down just reference these by var(), so they inherit the
+ * override automatically with no per-mode duplication.
+ */
+:root {
+  /* Tier 1 — neutral ramp */
+  --neutral-1: #fcfdfc;
+  --neutral-2: #f8f9f8;
+  --neutral-3: #eef1ef;
+  --neutral-4: #e5e9e6;
+  --neutral-5: #dae0dc;
+  --neutral-6: #cdd4d0;
+  --neutral-7: #bdc6c0;
+  --neutral-8: #a4aea7;
+  --neutral-9: #aebbb3;
+  --neutral-10: #9ca8a0;
+  --neutral-11: #5e6561;
+  --neutral-12: #2b2f2d;
+
+  /* Tier 1 — accent (sage/green) ramp */
+  --accent-1: #fafefb;
+  --accent-2: #f4fbf6;
+  --accent-3: #e6f5eb;
+  --accent-4: #d9eee0;
+  --accent-5: #c9e7d4;
+  --accent-6: #b7ddc5;
+  --accent-7: #a2d0b4;
+  --accent-8: #82ba98;
+  --accent-9: #84caa0;
+  --accent-10: #74b68f;
+  --accent-11: #486d57;
+  --accent-12: #203327;
+  --accent-on-solid: #06100a;
+
+  /* Tier 1 — functional colors */
+  --error-3: #ffebe9;
+  --error-9: #c56c65;
+  --error-11: #86534f;
+  --success-3: #e6f6e6;
+  --success-9: #84cc86;
+  --success-11: #486e49;
+  --warning-3: #f6f0e4;
+  --warning-9: #ceb47e;
+  --warning-11: #6f6144;
+  --info-3: #e7f2fa;
+  --info-9: #7aabce;
+  --info-11: #4c677a;
+  --error-on-solid: #150a09;
+  --success-on-solid: #081008;
+  --warning-on-solid: #110d04;
+  --info-on-solid: #060e15;
+
+  /* Tier 2 — semantic aliases (reference Tier 1 only, per DESIGN.md's tier discipline) */
+  --background: var(--neutral-1);
+  --surface: var(--neutral-2);
+  --surface-hover: var(--neutral-3);
+  --surface-active: var(--neutral-4);
+  --border-subtle: var(--neutral-6);
+  --border: var(--neutral-7);
+  --border-strong: var(--neutral-8);
+  --border-input: var(--neutral-11);
+  --text: var(--neutral-12);
+  --text-secondary: var(--neutral-11);
+  --accent-bg-subtle: var(--accent-3);
+  --accent-solid: var(--accent-9);
+  --accent-solid-hover: var(--accent-10);
+  --accent-text: var(--accent-11);
+
+  /* Space — mode-independent, DESIGN.md §Design system global tier.
+     These numbers already equal Tailwind's own default 4px-multiplier
+     scale at each step (1,2,3,4,6,8,12,16,24 → 4,8,12,16,24,32,48,64,96px),
+     so ordinary Tailwind spacing utilities (p-6, gap-3, ...) already use
+     these exact values with no separate --spacing-* mapping needed. Only
+     the named, non-numeric tokens below need var()/arbitrary-value usage. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-dense: var(--space-1);
+  --space-grouped: var(--space-2);
+  --space-related: var(--space-4);
+  --space-page-margin: var(--space-5);
+  --space-between-group: var(--space-6);
+  --space-after-page-head: var(--space-7);
+  --tap-target: 44px;
+  --glyph: 20px;
+  --hairline: 1px;
+}
+
+[data-theme="dark"] {
+  --neutral-1: #121312;
+  --neutral-2: #191a19;
+  --neutral-3: #212321;
+  --neutral-4: #282b29;
+  --neutral-5: #2f3431;
+  --neutral-6: #383d3a;
+  --neutral-7: #444b46;
+  --neutral-8: #5a635d;
+  --neutral-9: #aebbb3;
+  --neutral-10: #c2cec6;
+  --neutral-11: #b2bab5;
+  --neutral-12: #e5e9e6;
+
+  --accent-1: #111312;
+  --accent-2: #161b18;
+  --accent-3: #1a251e;
+  --accent-4: #1e2f24;
+  --accent-5: #20392a;
+  --accent-6: #234431;
+  --accent-7: #29533c;
+  --accent-8: #386d4f;
+  --accent-9: #84caa0;
+  --accent-10: #9adcb4;
+  --accent-11: #9bc3aa;
+  --accent-12: #d7efe0;
+  --accent-on-solid: #06100a;
+
+  --error-3: #2d1d1c;
+  --error-9: #c56c65;
+  --error-11: #e0a7a1;
+  --success-3: #1a261a;
+  --success-9: #84cc86;
+  --success-11: #9bc49b;
+  --warning-3: #262219;
+  --warning-9: #ceb47e;
+  --warning-11: #c5b696;
+  --info-3: #1b2329;
+  --info-9: #7aabce;
+  --info-11: #9fbcd1;
+  --error-on-solid: #150a09;
+  --success-on-solid: #081008;
+  --warning-on-solid: #110d04;
+  --info-on-solid: #060e15;
+
+  --background: var(--neutral-1);
+  --surface: var(--neutral-2);
+  --surface-hover: var(--neutral-3);
+  --surface-active: var(--neutral-4);
+  --border-subtle: var(--neutral-6);
+  --border: var(--neutral-7);
+  --border-strong: var(--neutral-8);
+  --border-input: var(--neutral-11);
+  --text: var(--neutral-12);
+  --text-secondary: var(--neutral-11);
+  --accent-bg-subtle: var(--accent-3);
+  --accent-solid: var(--accent-9);
+  --accent-solid-hover: var(--accent-10);
+  --accent-text: var(--accent-11);
+}
+
+@theme {
+  /*
+   * Tailwind utility mappings (FR-001: components consume tokens as
+   * Tailwind classes, never raw var()). Every entry below is a thin
+   * alias to a :root/[data-theme="dark"] variable above — no raw hex or
+   * px value is restated here, so dark mode continues to apply with zero
+   * duplication (T016).
+   */
+  --color-neutral-1: var(--neutral-1);
+  --color-neutral-2: var(--neutral-2);
+  --color-neutral-3: var(--neutral-3);
+  --color-neutral-4: var(--neutral-4);
+  --color-neutral-5: var(--neutral-5);
+  --color-neutral-6: var(--neutral-6);
+  --color-neutral-7: var(--neutral-7);
+  --color-neutral-8: var(--neutral-8);
+  --color-neutral-9: var(--neutral-9);
+  --color-neutral-10: var(--neutral-10);
+  --color-neutral-11: var(--neutral-11);
+  --color-neutral-12: var(--neutral-12);
+
+  --color-accent-1: var(--accent-1);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+  --color-accent-4: var(--accent-4);
+  --color-accent-5: var(--accent-5);
+  --color-accent-6: var(--accent-6);
+  --color-accent-7: var(--accent-7);
+  --color-accent-8: var(--accent-8);
+  --color-accent-9: var(--accent-9);
+  --color-accent-10: var(--accent-10);
+  --color-accent-11: var(--accent-11);
+  --color-accent-12: var(--accent-12);
+  --color-accent-on-solid: var(--accent-on-solid);
+
+  --color-error-3: var(--error-3);
+  --color-error-9: var(--error-9);
+  --color-error-11: var(--error-11);
+  --color-success-3: var(--success-3);
+  --color-success-9: var(--success-9);
+  --color-success-11: var(--success-11);
+  --color-warning-3: var(--warning-3);
+  --color-warning-9: var(--warning-9);
+  --color-warning-11: var(--warning-11);
+  --color-info-3: var(--info-3);
+  --color-info-9: var(--info-9);
+  --color-info-11: var(--info-11);
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-border-subtle: var(--border-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-input: var(--border-input);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent-bg-subtle: var(--accent-bg-subtle);
+  --color-accent-solid: var(--accent-solid);
+  --color-accent-solid-hover: var(--accent-solid-hover);
+  --color-accent-text: var(--accent-text);
+
+  /*
+   * shadcn/ui's vendored components (components/ui) expect a generic
+   * role-based palette (primary/secondary/muted/destructive/ring/input).
+   * Bridged to our tokens rather than shadcn's own default oklch grays.
+   * Note: shadcn's "accent" role means "a neutral hover/highlight tint,"
+   * a different concept than DESIGN.md's "accent" tier (the sage/green
+   * brand ramp) — deliberately mapped to a neutral surface tone, not
+   * --accent-solid, to avoid every hover state reading as brand-colored.
+   */
+  --color-primary: var(--accent-solid);
+  --color-primary-foreground: var(--accent-on-solid);
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-active);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--error-9);
+  --color-input: var(--border-input);
+  --color-ring: var(--border-input);
+
+  /* Radius: none anywhere in this system (DESIGN.md's Never section) —
+     zeroing this one variable neutralizes every shadcn rounded-* utility
+     app-wide without editing vendored component files. */
+  --radius: 0px;
+
+  /*
+   * Type — mode-independent (no dark-mode variant), so these live only
+   * here, not duplicated in :root — @theme already compiles to real
+   * root-level custom properties AND generates the matching utility
+   * classes (font-display, text-3xl, leading-xl, font-semibold, ...) in
+   * one step. `--font-display`/`--font-sans` reference next/font's
+   * generated CSS variables (wired in app/layout.tsx, T017), falling
+   * back to DESIGN.md's own fallback stack.
+   */
+  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-body: var(--font-inter), -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-body);
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --text-xs: 0.75rem;
+  --leading-xs: 1.4;
+  --text-sm: 0.875rem;
+  --leading-sm: 1.45;
+  --text-base: 1rem;
+  --leading-base: 1.5;
+  --text-lg: 1.125rem;
+  --leading-lg: 1.45;
+  --text-xl: 1.25rem;
+  --leading-xl: 1.4;
+  --text-2xl: 1.5rem;
+  --leading-2xl: 1.3;
+  --text-3xl: 2rem;
+  --leading-3xl: 1.2;
+  --text-4xl: 2.5rem;
+  --leading-4xl: 1.15;
+  --text-5xl: 4.5rem;
+  --leading-5xl: 1;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

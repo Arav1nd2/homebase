@@ -13,6 +13,11 @@ import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
  * (001-foundational-infra FR-016) without middleware needing to know
  * about it. `request-code`/`verify-code`/`sign-out` are the auth routes
  * that don't need a session check of their own (see contracts/auth-api.md).
+ * `/styleguide` (003-ui-shell-foundation) is also exempt — it's a kernel/
+ * dev-facing example screen with no real user data (spec Assumptions).
+ * TODO: remove the route (and this exemption) once auth is migrated and
+ * real tool screens exist to demonstrate the shell instead — flagged by
+ * the maintainer during 003's implementation, not yet scheduled.
  *
  * Uses `getUser()`, not `getSession()` — `getSession()` only reads the JWT
  * out of the cookie without contacting Supabase, so a forged/stale cookie
@@ -31,7 +36,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && pathname !== "/login") {
+  if (!user && pathname !== "/login" && pathname !== "/styleguide") {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);

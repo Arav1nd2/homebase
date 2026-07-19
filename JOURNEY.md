@@ -19,7 +19,7 @@
 
 - **Functional job:** consolidate scattered personal tracking into one entry point.
 - **Emotional job:** feel unhurried and in control, not scattered or anxious about what's been forgotten.
-- **Social job:** be (and be seen by a partner as) someone whose life admin is handled, not chaotic.
+- **Social job:** be (and be seen by others in the household as) someone whose life admin is handled, not chaotic.
 
 | Force | HomeBase |
 |---|---|
@@ -45,7 +45,7 @@
 
 ### Movies & TV
 
-> When my partner and I are deciding what to watch and can't remember if we've already seen something or what we thought of it, I want a quick, individually-logged watch history with ratings, so I can avoid re-watching by accident and remember what was actually good.
+> When my housemate and I are deciding what to watch and can't remember if we've already seen something or what we thought of it, I want a quick, individually-logged watch history with ratings, so I can avoid re-watching by accident and remember what was actually good.
 
 - **Functional job:** log watched movies/shows with a rating and short note.
 - **Emotional job:** feel the small nostalgic satisfaction of browsing past watches, not the chore of data entry.
@@ -60,7 +60,7 @@
 
 ### Expenses
 
-> When my partner or a friend and I split a bill and don't want to do the mental math or manually itemize a receipt, I want to photograph the bill and have it parsed into a split automatically, so I can settle up without friction or an awkward money conversation.
+> When a housemate or a friend and I split a bill and don't want to do the mental math or manually itemize a receipt, I want to photograph the bill and have it parsed into a split automatically, so I can settle up without friction or an awkward money conversation.
 
 - **Functional job:** photograph a bill → AI parses it into line-items and a split → confirm or edit → save.
 - **Emotional job:** feel confident the math is right, not anxious about a money conversation.
@@ -75,7 +75,7 @@
 
 ### Food Reviews
 
-> When my partner and I try a new restaurant and want to remember what was good or bad for next time, I want a quick place to jot a rating and note right after eating, so I can decide with confidence whether to go back.
+> When my housemate and I try a new restaurant and want to remember what was good or bad for next time, I want a quick place to jot a rating and note right after eating, so I can decide with confidence whether to go back.
 
 - **Functional job:** log a restaurant visit with a rating, a short note, and optionally a photo.
 - **Emotional job:** feel like the keeper of a shared taste record, not the author of a formal public review.
@@ -423,7 +423,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 **Exit / next:** Back-arrow to the launcher hub after save, or continue reviewing the ledger in place.
 
 ### Food Reviews
-**Purpose:** Capture a rating and short note right after eating, in the couple's own private voice, before the moment passes.
+**Purpose:** Capture a rating and short note right after eating, in the household's own private voice, before the moment passes.
 **Entry points:** Launcher shelf card, shortly after a meal out.
 **Content blocks:**
 1. Header — "Food Reviews" H1 + back-to-hub affordance.
