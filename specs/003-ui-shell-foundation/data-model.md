@@ -40,14 +40,23 @@ type PageHeaderProps = {
   mark?: string;
   /** Canonical page title (e.g. "Habits", "Expenses") — matches JOURNEY.md's canonical labeling table. */
   title: string;
-  /** Back-to-hub affordance is always rendered; no prop to suppress it (FR-006, FR-007/FR-008 — the shell owns navigation-back, not the caller). */
+  /**
+   * Back-to-hub affordance, default `true`. **Superseded by
+   * 004-auth-shell-migration's FR-014**: originally always rendered with
+   * no suppressing prop; the auth screens (no hub exists pre-auth) are
+   * the first caller to pass `false`. Every tool-screen call site is
+   * unaffected by this change.
+   */
+  showBackToHub?: boolean;
 };
 ```
 
-**Validation rule**: `PageHeader` always renders the back-to-hub
-affordance and never renders a persistent nav bar or search control —
-these are not configurable per the shell's own constraints (FR-007,
-FR-008), so there is deliberately no prop that could turn them on.
+**Validation rule**: `PageHeader` never renders a persistent nav bar or
+search control — not configurable per the shell's own constraints
+(FR-007, FR-008), so there is deliberately no prop that could turn them
+on. The back-to-hub affordance itself is configurable as of
+004-auth-shell-migration (see above); the nav-bar/search prohibition is
+not.
 
 ## State Pattern
 

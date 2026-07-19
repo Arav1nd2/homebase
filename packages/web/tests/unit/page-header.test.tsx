@@ -8,10 +8,15 @@ afterEach(() => {
 });
 
 describe("PageHeader", () => {
-  it("always renders a back-to-hub affordance, with no prop to suppress it", () => {
+  it("renders a back-to-hub affordance by default", () => {
     render(<PageHeader title="Habits" />);
     const back = screen.getByRole("link", { name: /homebase/i });
     expect(back).toHaveAttribute("href", "/");
+  });
+
+  it("omits the back-to-hub affordance when showBackToHub is false", () => {
+    render(<PageHeader title="Sign in" showBackToHub={false} />);
+    expect(screen.queryByRole("link", { name: /homebase/i })).not.toBeInTheDocument();
   });
 
   it("renders the canonical title as the page's H1", () => {

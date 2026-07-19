@@ -80,6 +80,7 @@
   --text: var(--neutral-12);
   --text-secondary: var(--neutral-11);
   --accent-bg-subtle: var(--accent-3);
+  --accent-bg-subtle-active: var(--accent-4);
   --accent-solid: var(--accent-9);
   --accent-solid-hover: var(--accent-10);
   --accent-text: var(--accent-11);
@@ -166,6 +167,7 @@
   --text: var(--neutral-12);
   --text-secondary: var(--neutral-11);
   --accent-bg-subtle: var(--accent-3);
+  --accent-bg-subtle-active: var(--accent-4);
   --accent-solid: var(--accent-9);
   --accent-solid-hover: var(--accent-10);
   --accent-text: var(--accent-11);
@@ -230,6 +232,7 @@
   --color-text: var(--text);
   --color-text-secondary: var(--text-secondary);
   --color-accent-bg-subtle: var(--accent-bg-subtle);
+  --color-accent-bg-subtle-active: var(--accent-bg-subtle-active);
   --color-accent-solid: var(--accent-solid);
   --color-accent-solid-hover: var(--accent-solid-hover);
   --color-accent-text: var(--accent-text);
@@ -295,17 +298,28 @@
   --leading-5xl: 1;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/*
+ * Layered explicitly (`@layer base`): Tailwind v4's own utilities all
+ * live inside `@layer utilities`, and per the CSS Cascade Layers spec any
+ * *unlayered* rule beats *every* layered rule regardless of specificity
+ * or source order. An unlayered reset here would silently win over every
+ * padding/margin utility in the app (arbitrary-value or not) — this was
+ * exactly that bug until 004-auth-shell-migration caught it by actually
+ * rendering a real form and noticing the missing gutters.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-body {
-  background: var(--background);
-  color: var(--text);
+  body {
+    background: var(--background);
+    color: var(--text);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
