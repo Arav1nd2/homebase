@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI — History — mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<!--
+  PAGE SPEC (this checkpoint's cheap brief — JOURNEY.md has no UPI content yet;
+  page structure drawn from the design plan's Phase 5 scope + specs/005-upi-payment-tracker/spec.md,
+  User Story 2, FR-012/013/014)
+  Purpose: app(app)/upi-tracker/history/page.tsx — list, filter/group, and
+           summarize tracked UPI transactions.
+  Content blocks: shell header (back-to-hub + theme toggle + mark/H1),
+           filter/group affordances (tag/status/date), a per-tag/per-period
+           summary as plain numeric rows (explicitly not a chart — "a kept
+           notebook, not a productivity dashboard"), and the transaction list
+           itself (Ledger family extended with tag chips + a 4-value status
+           redundant-cue).
+  States shown: this file renders the "success/populated" state only (the
+           primary render for this checkpoint); empty/loading/error/edit
+           states are Phase 5's job, not this cheap mock's.
+  Primary CTA: none dominant on this page — "+ Add manually" is a secondary
+           text affordance (Phase 5 scope), not a page-owning action.
+  Exit: back control to HomeBase.
+
+  DERIVED PLACEHOLDERS FOR THIS MOCK (Phase 2/3 not yet built):
+  - Tag color ramp: 6 swatches generated via palette.mjs (--chroma muted
+    --harmony mono, one run per hue), hues 195/268/285/303/321/339 —
+    chosen to sit outside a +/-25 degree band around each locked functional
+    hue (error 25, warning 85, info 240) and the accent hue (157.5), so nothing
+    in this ramp reads as a same-family color to any of those. Chip pairing
+    uses each hue's -3 (tinted bg) + -11 (ink text) — NOT -9 solid, since
+    DESIGN.md reserves solid -9 fill "at that intensity" for the habit
+    day-complete cell only (see DESIGN.md's Expressive moments + CTA
+    rationale). Zero border-radius on chips, per the locked no-radius rule.
+  - Status indicator: icon glyph (lucide-style line icon, stroke=currentColor)
+    + text label per state, reusing the four already-locked functional hues
+    1:1 (success->success, failed->error, pending->info, unconfirmed->warning)
+    at their already-contrast-verified -11 ink (DESIGN.md's own functional-11-
+    on-neutral-2 report, both modes) — words are the primary cue, color is
+    reinforcement only, per the standing colorblind-safety rule.
+  - Shell chrome: back control keeps "‹ HomeBase" — per the mock brief this
+    stays as the top-level label on both mocked pages (not a context-aware
+    "‹ UPI" step-back), since the full context-aware back-control logic is
+    Phase 3's formal job, not this cheap mock's. Theme toggle is functional,
+    same as the landing page.
+  - Page head: H1 "History" (this route's own canonical label) with the "‡"
+    UPI identity mark still present — a plausible, throwaway reading of how
+    a 3-level IA's sub-page carries both the tool's identity and its own
+    page name; Phase 1 has not yet formally decided this.
+-->
+<style>
+  /* === DESIGN TOKENS — copied verbatim from DESIGN.md (Verse Margin, locked) === */
+  :root {
+    --neutral-1: #fcfdfc; --neutral-2: #f8f9f8; --neutral-3: #eef1ef; --neutral-4: #e5e9e6;
+    --neutral-5: #dae0dc; --neutral-6: #cdd4d0; --neutral-7: #bdc6c0; --neutral-8: #a4aea7;
+    --neutral-9: #aebbb3; --neutral-10: #9ca8a0; --neutral-11: #5e6561; --neutral-12: #2b2f2d;
+    --accent-1: #fafefb; --accent-2: #f4fbf6; --accent-3: #e6f5eb; --accent-4: #d9eee0;
+    --accent-5: #c9e7d4; --accent-6: #b7ddc5; --accent-7: #a2d0b4; --accent-8: #82ba98;
+    --accent-9: #84caa0; --accent-10: #74b68f; --accent-11: #486d57; --accent-12: #203327;
+    --accent-on-solid: #06100a;
+    --error-3: #ffebe9; --error-9: #c56c65; --error-11: #86534f;
+    --success-3: #e6f6e6; --success-9: #84cc86; --success-11: #486e49;
+    --warning-3: #f6f0e4; --warning-9: #ceb47e; --warning-11: #6f6144;
+    --info-3: #e7f2fa; --info-9: #7aabce; --info-11: #4c677a;
+    --background: var(--neutral-1); --surface: var(--neutral-2); --surface-hover: var(--neutral-3);
+    --surface-active: var(--neutral-4); --border-subtle: var(--neutral-6); --border: var(--neutral-7);
+    --border-strong: var(--neutral-8); --text-secondary: var(--neutral-11); --text: var(--neutral-12);
+    --accent-bg-subtle: var(--accent-3); --accent-solid: var(--accent-9); --accent-solid-hover: var(--accent-10);
+    --accent-text: var(--accent-11); --border-input: var(--neutral-11);
+
+    --font-display: "Newsreader", ui-serif, Georgia, serif;
+    --font-body: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --text-xs: 0.75rem; --leading-xs: 1.4;
+    --text-sm: 0.875rem; --leading-sm: 1.45;
+    --text-base: 1rem; --leading-base: 1.5;
+    --text-xl: 1.25rem; --leading-xl: 1.4;
+    --text-3xl: 2rem; --leading-3xl: 1.2;
+    --text-5xl: 4.5rem; --leading-5xl: 1;
+
+    --space-1: 4px; --space-2: 8px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+    --tap-target: 44px; --glyph: 20px; --hairline: 1px;
+
+    /* Tag ramp — generated this session via palette.mjs, one run per hue
+       (--chroma muted --harmony mono). -3/-11 pairing per hue, both modes. */
+    --tag-teal-3: #e6f4f3;    --tag-teal-11: #486b6a;
+    --tag-indigo-3: #eaf0ff;  --tag-indigo-11: #4f6193;
+    --tag-violet-3: #eeefff;  --tag-violet-11: #5f5d8f;
+    --tag-plum-3: #f4edff;    --tag-plum-11: #6c5889;
+    --tag-magenta-3: #faeafd; --tag-magenta-11: #795380;
+    --tag-rose-3: #ffe9f7;    --tag-rose-11: #815172;
+  }
+
+  [data-theme="dark"] {
+    --neutral-1: #121312; --neutral-2: #191a19; --neutral-3: #212321; --neutral-4: #282b29;
+    --neutral-5: #2f3431; --neutral-6: #383d3a; --neutral-7: #444b46; --neutral-8: #5a635d;
+    --neutral-9: #aebbb3; --neutral-10: #c2cec6; --neutral-11: #b2bab5; --neutral-12: #e5e9e6;
+    --accent-1: #111312; --accent-2: #161b18; --accent-3: #1a251e; --accent-4: #1e2f24;
+    --accent-5: #20392a; --accent-6: #234431; --accent-7: #29533c; --accent-8: #386d4f;
+    --accent-9: #84caa0; --accent-10: #9adcb4; --accent-11: #9bc3aa; --accent-12: #d7efe0;
+    --accent-on-solid: #06100a;
+    --error-3: #2d1d1c; --error-9: #c56c65; --error-11: #e0a7a1;
+    --success-3: #1a261a; --success-9: #84cc86; --success-11: #9bc49b;
+    --warning-3: #262219; --warning-9: #ceb47e; --warning-11: #c5b696;
+    --info-3: #1b2329; --info-9: #7aabce; --info-11: #9fbcd1;
+    --border-input: var(--neutral-11);
+
+    --tag-teal-3: #1a2424;    --tag-teal-11: #9ac0bf;
+    --tag-indigo-3: #1c2231;  --tag-indigo-11: #a1b6ed;
+    --tag-violet-3: #202030;  --tag-violet-11: #b2b1e9;
+    --tag-plum-3: #251f2e;    --tag-plum-11: #c1ace2;
+    --tag-magenta-3: #291d2b; --tag-magenta-11: #d0a6d8;
+    --tag-rose-3: #2c1d27;    --tag-rose-11: #daa4c8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #dfe1df; }
+  body {
+    font-family: var(--font-body);
+    background: var(--background);
+    color: var(--text);
+    line-height: var(--leading-base);
+    -webkit-font-smoothing: antialiased;
+  }
+  .viewport {
+    max-width: 390px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .t-section-label { font-family: var(--font-body); font-size: var(--text-xl); font-weight: 600; line-height: var(--leading-xl); }
+
+  /* === shell chrome (Phase 3 placeholder — throwaway for this checkpoint) === */
+  .shell-header { padding-top: var(--space-6); }
+  .chrome-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-5);
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: var(--tap-target);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .theme-toggle {
+    width: var(--tap-target);
+    height: var(--tap-target);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+  }
+  .theme-toggle:focus-visible { outline: 1px solid var(--border-input); outline-offset: 2px; }
+  .theme-toggle svg { width: var(--glyph); height: var(--glyph); }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+  .page-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-5) 0;
+  }
+  .mark {
+    font-family: var(--font-display);
+    font-size: var(--text-5xl);
+    line-height: var(--leading-5xl);
+    color: var(--text);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-3xl);
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  main { padding-bottom: var(--space-7); }
+
+  /* === filter/group row — plain rectangular affordances, zero radius === */
+  .filter-row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding: var(--space-6) var(--space-5) 0;
+  }
+  .filter-chip {
+    min-height: var(--tap-target);
+    padding: 0 var(--space-4);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: var(--hairline) solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    cursor: pointer;
+  }
+  .filter-chip:focus-visible { outline: 1px solid var(--border-input); outline-offset: -1px; }
+  .filter-chip .caret { color: var(--text-secondary); font-size: var(--text-xs); }
+
+  /* === dense-frame — shared chrome for both the summary and the tx list === */
+  .dense-frame { margin-top: var(--space-6); padding: 0 var(--space-5); }
+  .frame-header {
+    padding-bottom: var(--space-2);
+  }
+  .frame-body {
+    border-top: var(--hairline) solid var(--border);
+    border-bottom: var(--hairline) solid var(--border);
+  }
+
+  /* === summary — PLAIN NUMERIC ROWS, explicitly not a chart === */
+  .summary-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-top: var(--hairline) solid var(--border-subtle);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    color: var(--text);
+  }
+  .summary-row:first-child { border-top: none; }
+  .summary-row .amount { font-variant-numeric: tabular-nums; font-weight: 500; }
+  .summary-row.total {
+    font-weight: 600;
+    border-top: var(--hairline) solid var(--border);
+    margin-top: 2px;
+  }
+
+  /* === transaction rows — Ledger family extended with tag chips + status === */
+  .tx-row {
+    padding: var(--space-2) 0;
+    border-top: var(--hairline) solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tx-row:first-child { border-top: none; }
+  .tx-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+  .tx-payee { font-family: var(--font-body); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--text); }
+  .tx-amount {
+    font-family: var(--font-body); font-size: var(--text-sm); line-height: var(--leading-sm);
+    font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .tx-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+  .tx-date { font-family: var(--font-body); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--text-secondary); }
+  .tx-status {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500; line-height: var(--leading-xs);
+  }
+  .tx-status svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .status-success { color: var(--success-11); }
+  .status-failed { color: var(--error-11); }
+  .status-pending { color: var(--info-11); }
+  .status-unconfirmed { color: var(--warning-11); }
+
+  .tx-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .tag {
+    font-family: var(--font-body); font-size: var(--text-xs); line-height: var(--leading-xs);
+    padding: 2px 6px;
+    /* Radius: none — the locked rule applies to chips too; no pill shape. */
+  }
+  .tag-groceries { background: var(--tag-teal-3); color: var(--tag-teal-11); }
+  .tag-rent      { background: var(--tag-indigo-3); color: var(--tag-indigo-11); }
+  .tag-dining    { background: var(--tag-violet-3); color: var(--tag-violet-11); }
+  .tag-travel    { background: var(--tag-plum-3); color: var(--tag-plum-11); }
+  .tag-utilities { background: var(--tag-magenta-3); color: var(--tag-magenta-11); }
+  .tag-friends   { background: var(--tag-rose-3); color: var(--tag-rose-11); }
+
+  .add-manually {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding: 0 var(--space-5);
+    margin-top: var(--space-2);
+    color: var(--accent-text);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+  }
+  .back-link:focus-visible, .add-manually:focus-visible { outline: 1px solid var(--border-input); outline-offset: -1px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="viewport">
+
+  <header class="shell-header">
+    <div class="chrome-row">
+      <a href="./upi-landing.html" class="back-link" aria-label="Back to HomeBase">
+        <span aria-hidden="true">‹</span> HomeBase
+      </a>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Switch to dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <line x1="12" y1="2" x2="12" y2="4.5"></line>
+          <line x1="12" y1="19.5" x2="12" y2="22"></line>
+          <line x1="4.2" y1="4.2" x2="6" y2="6"></line>
+          <line x1="18" y1="18" x2="19.8" y2="19.8"></line>
+          <line x1="2" y1="12" x2="4.5" y2="12"></line>
+          <line x1="19.5" y1="12" x2="22" y2="12"></line>
+          <line x1="4.2" y1="19.8" x2="6" y2="18"></line>
+          <line x1="18" y1="6" x2="19.8" y2="4.2"></line>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="page-head">
+      <span class="mark" aria-hidden="true">‡</span>
+      <h1>History</h1>
+    </div>
+  </header>
+
+  <main>
+    <div class="filter-row" role="group" aria-label="Filter and group transactions">
+      <button type="button" class="filter-chip">Tag <span class="caret" aria-hidden="true">▾</span></button>
+      <button type="button" class="filter-chip">Status <span class="caret" aria-hidden="true">▾</span></button>
+      <button type="button" class="filter-chip">Date <span class="caret" aria-hidden="true">▾</span></button>
+    </div>
+
+    <section class="dense-frame" aria-label="Summary for this month">
+      <h2 class="frame-header t-section-label">This month</h2>
+      <div class="frame-body">
+        <div class="summary-row"><span>Groceries</span><span class="amount">₹4,250.00</span></div>
+        <div class="summary-row"><span>Rent</span><span class="amount">₹18,000.00</span></div>
+        <div class="summary-row"><span>Dining</span><span class="amount">₹2,180.00</span></div>
+        <div class="summary-row"><span>Travel</span><span class="amount">₹1,340.00</span></div>
+        <div class="summary-row"><span>Friends</span><span class="amount">₹1,850.00</span></div>
+        <div class="summary-row total"><span>Total</span><span class="amount">₹27,620.00</span></div>
+      </div>
+    </section>
+
+    <section class="dense-frame" aria-label="Transactions" style="margin-bottom: var(--space-6);">
+      <h2 class="frame-header t-section-label">Transactions</h2>
+      <div class="frame-body">
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Ramesh Kirana Store</span>
+            <span class="tx-amount">₹450.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">Today, 6:42 PM</span>
+            <span class="tx-status status-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Success
+            </span>
+          </div>
+          <div class="tx-tags"><span class="tag tag-groceries">Groceries</span></div>
+        </article>
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Anjali Sharma</span>
+            <span class="tx-amount">₹1,200.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">Today, 2:15 PM</span>
+            <span class="tx-status status-pending">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>
+              Pending
+            </span>
+          </div>
+          <div class="tx-tags">
+            <span class="tag tag-friends">Friends</span>
+            <span class="tag tag-dining">Dining</span>
+          </div>
+        </article>
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Swiggy</span>
+            <span class="tx-amount">₹389.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">Yesterday, 9:03 PM</span>
+            <span class="tx-status status-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Success
+            </span>
+          </div>
+          <div class="tx-tags"><span class="tag tag-dining">Dining</span></div>
+        </article>
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Landlord — Rajesh</span>
+            <span class="tx-amount">₹18,000.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">3 days ago</span>
+            <span class="tx-status status-unconfirmed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9.5a3 3 0 0 1 5.8 1c0 2-2.9 2.1-2.9 3.9"></path><line x1="12" y1="17.5" x2="12" y2="17.51"></line></svg>
+              Unconfirmed
+            </span>
+          </div>
+          <div class="tx-tags"><span class="tag tag-rent">Rent</span></div>
+        </article>
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Uber</span>
+            <span class="tx-amount">₹210.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">3 days ago</span>
+            <span class="tx-status status-failed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              Failed
+            </span>
+          </div>
+          <div class="tx-tags"><span class="tag tag-travel">Travel</span></div>
+        </article>
+
+        <article class="tx-row">
+          <div class="tx-top">
+            <span class="tx-payee">Priya Patel</span>
+            <span class="tx-amount">₹650.00</span>
+          </div>
+          <div class="tx-meta">
+            <span class="tx-date">5 days ago</span>
+            <span class="tx-status status-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Success
+            </span>
+          </div>
+          <div class="tx-tags">
+            <span class="tag tag-utilities">Utilities</span>
+            <span class="tag tag-friends">Friends</span>
+            <span class="tag tag-groceries">Groceries</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <a href="#" class="add-manually">+ Add manually</a>
+  </main>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function setTheme(mode) {
+      root.setAttribute('data-theme', mode);
+      btn.setAttribute('aria-pressed', String(mode === 'dark'));
+      btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    setTheme(mq.matches ? 'dark' : 'light');
+    btn.addEventListener('click', function () {
+      setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+</script>
+</body>
+</html>

@@ -57,11 +57,11 @@ DB schema changes: edit `packages/web/db/schema.ts` → `npm run db:generate-mig
 
 **Environment parity is a hard constraint**: local dev, CI, and production must all resolve infrastructure access (DB, bindings) through the exact same code path — the real Workers runtime, never a parallel Node-only branch. This isn't stylistic: a prior `globalThis`-based fallback let CI pass against a working local DB while the real Hyperdrive path was broken in prod, shipping an outage.
 
-**Governance**: `.specify/memory/constitution.md` is the authoritative, actively-amended source of project conventions (currently v3.3.0) — read it before making structural decisions. Key checkable rules it enforces:
+**Governance**: `.specify/memory/constitution.md` is the authoritative, actively-amended source of project conventions (currently v3.4.0) — read it before making structural decisions. Key checkable rules it enforces:
 - `any` and non-null assertions (`!`) are forbidden without an inline justifying comment (ESLint-enforced in `packages/web/eslint.config.mjs`).
 - Drizzle tables: `camelCase` singular variable name, `PascalCase` singular SQL table name, every table has `id`/`createdAt`/`updatedAt`/an ownership column; schema changes always ship as committed `drizzle-kit generate` migrations.
 - Route Handlers live under `app/api/<module>/...`, check the Supabase session before any DB touch, return errors as `{ error: { message, code } }`, and validate input via Zod.
-- Mobile-first, phone-viewport-first design; installable PWA (manifest + service worker) is a MUST but is a currently-open gap tracked in the README roadmap, permitted under the constitution's "Bootstrap Sequencing Exception" until the first real module ships.
+- Mobile-first, phone-viewport-first design; installable PWA (manifest + service worker) is a MUST, closed by `specs/006-pwa-installability` — `app/sw.ts` built via Serwist (`@serwist/next`) into `public/sw.js`, plus `app/manifest.ts`. The Bootstrap Sequencing Exception that permitted deferring this is now satisfied; new modules are ordinary module development, not bootstrap.
 - E2E sign-in tests must each use a unique email — a past shared-email race caused intermittent OTP-capture failures that looked like infra bugs.
 - No new dependency, service, or abstraction without a concrete current need (Principle VIII) — this project has one maintainer and no team to design abstractions for.
 
