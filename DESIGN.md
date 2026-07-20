@@ -3,6 +3,7 @@
 **Extended:** Phase 4 (Type + color), 2026-07-18 — full type scale + complete functional-color tokens added below; base DNA (archetype/composition/motion/base tokens) unchanged from the Phase 3 lock.
 **Extended:** Phase 5 (Design system), 2026-07-18 — three-tier W3C DTCG token hierarchy + component specs added below (§Design system); no locked value changed.
 **Extended:** UPI plan, Phase 2 (Tag ramp + status indicator + ToolCard), 2026-07-20 — an 8-swatch categorical tag-color ramp, a Transaction-status redundant-cue row, and UPI's ToolCard instantiation added below; no locked value changed.
+**Extended:** UPI plan, Phase 3 (Shell chrome — back control, theme toggle, icon-usage rule), 2026-07-20 — a unified `PageHeader` back-control contract (hub / step / sub-page), a visible theme-toggle control wired to `next-themes`, and the icon-usage standing rule added below; no locked value changed. `specs/003-ui-shell-foundation/research.md` §2 flagged for correction (its no-visible-toggle rationale is now superseded — see the new §Shell chrome — PageHeader subsection).
 
 **Archetype:** Sage (primary) with a Caregiver inflection on motion + tone only
 **Register:** calm structure · expressive at: empty states set as short verse, the habit day-complete accent fill, oversize punctuation at page heads
@@ -811,6 +812,24 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
     "failed":      { "color": { "$value": "{color.feedback.error.text}", "$type": "color" } },
     "pending":     { "color": { "$value": "{color.feedback.info.text}", "$type": "color" } },
     "unconfirmed": { "color": { "$value": "{color.feedback.warning.text}", "$type": "color" } }
+  },
+  "shell-header": {
+    "back": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "gap": { "$value": "{space.grouped}", "$type": "dimension" },
+      "icon-size": { "$value": "{size.control-glyph}", "$type": "dimension" },
+      "icon-color": { "$value": "{color.text.secondary}", "$type": "color" },
+      "label": {
+        "typography": { "$value": "{type.dense}", "$type": "typography" },
+        "color": { "$value": "{color.text.secondary}", "$type": "color" }
+      }
+    },
+    "theme-toggle": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "min-width": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "icon-size": { "$value": "{size.control-glyph}", "$type": "dimension" },
+      "icon-color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
   }
 }
 ```
@@ -825,7 +844,7 @@ Atomic inventory (Frost 2013 — a composition model, not a file structure):
 |-------|-------|
 | Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row |
 | Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list |
-| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form |
+| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form · PageHeader (back control + theme toggle, Phase 3) |
 | Templates | page head (mark + H1, then {space.after-page-head}) + stacked module frames — arrangements already specified per page in JOURNEY.md |
 | Pages | JOURNEY.md's seven page specs with real content |
 
@@ -864,6 +883,48 @@ One organism renders every tool on the launcher, in both contexts. Adding a tool
 **States:** default · pressed ({tool-card.pressed.background} row wash, no transform) · focus-visible (outline in {color.border.input}, offset outside the row) · badge loading ({color.surface.active} skeleton line; mark + label render immediately — they are static data) · badge error (muted inline dash in {tool-card.badge.color}; the card stays fully tappable, per JOURNEY.md's launcher error state) · disabled: not a state this organism has — tools are never disabled or hidden (IA rule: presence is not contingent on data).
 
 **A11y:** the row is a single link (semantic `a`, no ARIA patch needed); accessible name = label + badge text (the mark is `aria-hidden` — it is identity, not information). Pin state is conveyed by glyph shape (filled vs outline) plus presence in the quick-start rail — location and shape cues, never color alone; toggle carries `aria-pressed`.
+
+#### Icon usage — standing system rule (Phase 3, UPI plan, 2026-07-20)
+
+This phase licenses `lucide-react` (already a project dependency — no new install) for real icon glyphs, scoped narrowly. It does **not** reverse ToolCard's "the mark IS the icon" rule above — tool identity marks (Habits `*`, Expenses `§`, UPI `₹`, and every other `ToolCard.mark`) stay typographic, unchanged, no exceptions. The scope test, stated once so any future control can be checked against it: **an icon is licensed only for a functional control that has no existing typographic answer** — a gap-fill, never a stylistic upgrade over working typographic chrome.
+
+Four controls currently pass this test — two from this phase, two from the UPI plan's earlier Phase 2 (`.design-foundations/plans/2026-07-20-upi-shell-nav.md`):
+
+| Control | Licensed by | Why no typographic answer exists |
+|---|---|---|
+| Theme toggle | Phase 3 (below) | No prior control of any kind — nothing to displace, nothing typographic to prefer |
+| Back chevron | Phase 3 (below) | The current `‹` is a bare Unicode character pressed into service, not a mark drawn from this system's own type ladder — the signature Newsreader punctuation (§Signature move) is reserved for page-head identity and was never meant to double as chrome. Replacing it with `ChevronLeft` corrects a placeholder; it doesn't reverse a design decision |
+| Camera controls (scan viewfinder) | Phase 2 | UPI's capture screen has no prior surface at all |
+| Transaction-status glyph | Phase 2 | A 4-state distinction (pending/success/failed/unconfirmed) with no existing typographic device to carry it |
+
+Every other functional glyph already specified in this document — the checklist check mark, the pin toggle's filled/outline shape, the parse-status stage check — is unaffected; this rule doesn't reopen them. It governs new controls only, and any future one must clear the same test before reaching for `lucide-react` instead of type.
+
+#### Shell chrome — PageHeader (Phase 3, `design-systems` + `usability`, 2026-07-20)
+
+The shared `PageHeader` (`packages/web/components/shared/page-header.tsx`) renders on every tool screen and the launcher; this phase gives it a context-aware back control and adds a theme toggle, both app-wide (all 7 tools + launcher) — not UPI-scoped chrome. Same closed-contract discipline as ToolCard above: a new navigational context is a new `back` value handled here, never a bespoke header built beside this one.
+
+**Back control — one contract, three navigational behaviors:**
+
+| `back` value | Behavior | Who uses it |
+|---|---|---|
+| `{ mode: "hub" }` (default) | Renders "‹ HomeBase", links to `/` — unchanged from today's implementation | All 6 pre-UPI tools' single page; UPI's own Scan/landing state (Level 2 of the 3-level IA — JOURNEY.md §Navigation model, UPI's 3-level exception) |
+| `{ mode: "step", onBack }` | Renders "‹ Back" (exact copy: Phase 6), calls `onBack()` instead of navigating — moves the client-side step machine backward one step, no route change | UPI's Amount/Tag/Pay/Confirm steps — the flow is mid-transaction; a "back to hub" tap here would silently abandon it, which is why this is its own mode and not a reuse of `hub` |
+| `{ mode: "parent", href, label }` | Renders "‹ [label]", links to `href` — one level up, not to the hub | UPI's Level-3 sub-pages (`/history`, `/tags`, `/new`) — back goes to the UPI spoke (Scan/landing), matching JOURNEY.md's explicit rule: "a Level-3 page's 'back' goes up to the UPI spoke... not straight to the hub." A second tap from there is an ordinary `hub` back, unchanged |
+| `false` | Renders nothing — no back control at all | The login page's existing exception (a signed-out visitor has no hub to return to); today's `showBackToHub={false}` maps onto this value directly and may stay as a backward-compatible alias at the implementation layer |
+
+Because `{ mode: "hub" }` is the default when the prop is omitted entirely, every existing call site across the other six tools is unaffected — the plan's own no-regression constraint, satisfied by construction rather than a special case. Visual treatment is identical across all three navigational modes (only the label text and the tap destination change): a leading `ChevronLeft` icon at {shell-header.back.icon-size} in {shell-header.back.icon-color}, then the label in {shell-header.back.label.typography} / {shell-header.back.label.color}, gap {shell-header.back.gap} — the same plain-text-and-hairline register as the rest of this system, an icon added only per the rule above, not card or button chrome. Minimum tap height {shell-header.back.min-height} (= {size.interactive.min}, 44px — Fitts's law, Fitts 1954, this project's standing tap-target floor, cited not re-derived).
+
+**Theme toggle:**
+
+An icon-only button, {shell-header.theme-toggle.min-height} × {shell-header.theme-toggle.min-width} minimum (44px square — Fitts 1954, same floor), positioned at the header row's trailing edge, opposite the back control — a two-end row, not centered, per the Never section's standing anti-center-axis rule. Wired to `next-themes`' `setTheme`: on tap, flips the *resolved* theme explicitly (`light` ⇄ `dark`), giving a persistent manual override rather than a one-shot nudge back to `system` — the same `data-theme` mechanism `specs/003-ui-shell-foundation/research.md` §2 already validated for verification-only use, now shipped as a real user control too.
+
+- **Icon states:** `Sun` renders when the resolved theme is light (tapping switches to dark); `Moon` renders when the resolved theme is dark (tapping switches to light) — the glyph reports current state, matching how the pin toggle's filled/outline shape already reports state elsewhere in this system, rather than one static icon that never changes.
+- **`aria-pressed`:** modeled as a two-state toggle (WAI-ARIA toggle-button pattern) — `true` when dark mode is the resolved theme, `false` when light. The accessible name states the action, not the current state ("Switch to dark mode" / "Switch to light mode" — exact copy: Phase 6, matching how every other control in this document defers its words), so the pressed state and the name don't repeat the same fact.
+- **Icon color, both modes (DW-3.2 — no new computation, the already-locked base pairs):** {shell-header.theme-toggle.icon-color} resolves to {color.text.secondary} — the identical ink the back control uses — against {color.background}. This exact ink is already contrast-verified above (§Color tokens' contrast report) against {color.surface.default}: **light 5.65:1, dark 8.79:1**, both clearing the 4.5:1 AA target with real margin. {color.background} is, in both modes, the more extreme of the two neutral surfaces relative to {color.text.secondary}'s mid-tone — lighter than {color.surface.default} in light mode, darker than it in dark mode (see §Color tokens above for the underlying values) — so the already-verified surface pairing is the conservative floor, not an assumption stretched past what was measured. Both icon states (`Sun` and `Moon`) share this one ink token; only the glyph shape changes with mode, not the color — one verified ratio pair covers all four cells (2 icons × 2 modes).
+
+**Regression guard (the plan's dirty case):** the login page's `back={false}` case renders no back control, exactly as today's `showBackToHub={false}` — a rendering omission, not a behavior change, so nothing about the `hub`/`step`/`parent` modes above touches it. The theme toggle is unaffected by `back`'s value and renders regardless of it — dark/light preference isn't gated behind sign-in, unlike the hub link, which needs a hub to point at.
+
+**`specs/003-ui-shell-foundation/research.md` §2 — flagged for correction:** that section's rejection of a visible toggle states: *"A manual visible toggle switch — rejected because no theme-switch control exists anywhere in `JOURNEY.md`'s locked page specs across all 7 pages; inventing one would add UI surface the design system never asked for."* JOURNEY.md's UPI Navigation-model amendment and this section now both specify one, so that sentence is superseded, not merely outdated — it must be corrected, not left standing beside the component spec it now contradicts. A short correction note pointing here has been added directly to that file; a full rewrite of §2 is implementation-phase work, not this phase's.
 
 #### Dense-frame — the shared functional pattern
 
@@ -980,3 +1041,4 @@ Green accent + red error means every state distinction must survive without colo
 - ~~Component-level token tiers (global/alias/component, W3C DTCG format) and the launcher-card + four dense-data-family specs~~ — resolved Phase 5: see Design system section. Heatmap/ledger encoding detail (streak cap, legend, balance color semantics) remains with Phase 7; microcopy with Phase 6.
 - ~~Heatmap streak ramp (cap + legend) and ledger balance diverging encoding~~ — resolved Phase 7: see §Heatmap streak ramp + legend and §Ledger balance indicator. Both colorblind-verified (`phase7-dataviz-check.mjs`) and checked against the Cairo lie taxonomy (Phase 7 discovery note).
 - ~~UPI's tag color ramp, transaction-status redundant cue, and ToolCard glyph~~ — resolved UPI-plan Phase 2 (2026-07-20): see §Tag color ramp, §Transaction status indicator, and the ToolCard section's new UPI instantiation. Ramp colorblind-verified (`upi-tag-ramp-check.mjs`) with a disclosed limitation (8% of simulated swatch pairs fall under the near-identity floor — accepted because tag color is never the sole identity channel, the text label always is). `mark: "₹"`'s Newsreader glyph coverage is assumed, not yet visually confirmed — flagged for the phase that first renders the launcher shelf with UPI present.
+- ~~PageHeader's back-control behavior for UPI's 3-level exception, a visible theme toggle, and the icon-usage scope~~ — resolved UPI-plan Phase 3 (2026-07-20): see §Icon usage and §Shell chrome — PageHeader. Back control unified into one `hub`/`step`/`parent`/`false` contract (all 6 pre-UPI tools default to `hub`, unaffected); theme toggle wired to `next-themes`, both icon states verified against the already-locked neutral-11/background pairing (light 5.65:1, dark 8.79:1). `specs/003-ui-shell-foundation/research.md` §2's no-visible-toggle rationale is now superseded — a correction note was added directly to that file rather than silently left contradicting this section.
