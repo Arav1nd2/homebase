@@ -571,6 +571,16 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 | Pay | n/a | Deep-link construction + redirect handoff — brief, no long-running fetch | No UPI app installed (FR-020) → clear, actionable message; transaction preserved at its pre-redirect (pending) state for retry, never silent | Redirect proceeds; transaction persisted (status: pending) before the redirect fires (SC-004) → advances to Confirm on return |
 | Confirm | n/a | n/a — the prompt is instant on return (Page Visibility signal) | Status update fails to save → inline error; retry is the same tap; no data lost | User answers success/failed → status saved. No answer + navigates away → status resolves to "unconfirmed" (FR-010), never a stuck state |
 
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, Scan step before any payment scanned — literary register at `--text-lg`, bracket-framed):* "No transaction yet. Scan a UPI code or enter one by hand — it takes just a moment."
+- *Error — camera denied (FR-022; Yifrah: what → why → fix; routes to manual entry as the real solution, not an apology):* "Camera access is blocked. Your device requires permission to use the camera. Grant it to scan, or enter the payee and amount below."
+- *Error — malformed/invalid QR (FR-021; Yifrah what→why→fix, zero blame toward the code or user's photo quality — matches the Expenses AI-parse precedent, `VOICE.md` §Worked example):* "The code didn't scan as a UPI QR. It might be a different kind of code, or the photo was unclear or tilted. Try scanning again, or enter the payee and amount manually."
+- *Error — no UPI app installed (FR-020; Yifrah what→why→fix; plainly names the cause, offers a live path forward):* "No UPI app was found. Your device doesn't have Google Pay, PhonePe, or another UPI app installed. Install one and try again, or enter this transaction manually."
+- *Loading — camera permission-pending (screen-reader only; visual stays neutral pending state):* "Requesting camera access."
+- *Loading — tags fetching (screen-reader only; visual stays skeleton chips):* "Loading your tags."
+- *Success (screen-reader only):* "Scanned. [Payee name] · [amount] detected." / "[Tag] created." / "[Tag] selected." / "Redirecting to your UPI app." / "Payment recorded: [status]."
+- *Dense-data labels (plain register, Inter — `type.dense`/`type.body`):* form field "Amount" (pre-filled or empty, as appropriate); tag-chip section is "Tag this payment (optional)"; "Pay" CTA button on step 4; "Confirm payment" on step 5 with radio options "Success" and "Failed"; secondary links "Enter manually" (Scan step) and "History" (standing link from Scan step).
+
 **Primary CTA:** Step-scoped, not one page-level CTA (Fitts's law, Fitts 1954: each step's own dominant action is the largest target for that step) — "Pay" (step 4) is the flow's single commit point and its highest-stakes CTA.
 **Exit / next:** After Confirm resolves (any outcome), the user remains at the Scan step, ready for the next transaction (matching FR-001's "every time," not just first use). The standing secondary link to History (from Scan) is the flow's other exit — see the Flows entry "Scan, tag, and pay (UPI)" above for the full branching path.
 
@@ -590,6 +600,13 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** A filter/group action or an inline edit fails to save — inline error at the affected row/control; the list keeps its last-known-good state, never blanked.
 - **Success:** Filtered/grouped transaction list populated; summary totals reflect the current filter; newest transactions first.
 
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, History page before any transactions — literary register at `--text-lg`, bracket-framed):* "Nothing tracked yet. Every payment you tag builds this record."
+- *Error — filter/edit fails to save (Yifrah: what → why → fix; no data lost, state reverts, reassurance):* "That change didn't save. The list stayed as it was. Try again."
+- *Loading (screen-reader only; visual stays skeleton rows inside the dense-frame chrome):* "Loading your transaction history."
+- *Success (screen-reader only):* "History updated."
+- *Dense-data labels (plain register, Inter):* filter/group row labels "By tag" / "By status" / "By date"; summary-row label "Subtotal" (plain concrete noun, followed by the tag or period name); transaction-row anatomy (inherited from Ledger, extended with tag chips + status cue — see Phase 5 spec for the full row design): payee name + amount + tag chips + status cue + date/time + inline edit affordance; edit row affordance label "Edit" (the control itself, not a separate row, per the Phase 5 structure); "+ Add manually" secondary link label.
+
 **Primary CTA:** None page-dominant — filter/group controls and "+ Add manually" are secondary affordances, matching Expenses' own non-owning history/ledger pattern.
 **Exit / next:** Back control to the UPI spoke (the Scan/landing step) — this page's "up" level in the 3-level IA, not straight to the hub (IA §Navigation model — UPI's 3-level exception, above; the shared PageHeader's context-aware back-control mechanics that implement this are a later shell-chrome phase's job).
 
@@ -607,6 +624,12 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Error:** Save fails — draft content (payee/amount/tag(s)/date/status entered so far) is preserved, never wiped, matching the transcription-effort-to-lost-work protection already established for Recipes' page spec.
 - **Success:** Transaction created, identical in structure to a scanned one (FR-016); user returns to History, where it now appears in the list.
 
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Error — save fails (Yifrah: what → why → fix; protects against lost-work anxiety, matching Recipes' own pattern):* "That transaction didn't save. Check your connection and try again. Everything you've entered is still here."
+- *Loading (screen-reader only; visual stays skeleton chip placeholders):* "Loading your tags."
+- *Success (screen-reader only):* "Saved. Transaction added to your history."
+- *Dense-data labels (plain register, Inter):* form fields "Payee name," "Amount," "Tag(s) (optional)," "Date," "Status"; status radio options "Success" / "Failed" / "Pending" / "Unconfirmed"; "Save" button.
+
 **Primary CTA:** "Save" (Fitts's law, Fitts 1954: large, bottom-fixed action on the entry form).
 **Exit / next:** Back to History on save, or via a back control to History if abandoned without saving — this page is a Level-3 sub-page of History, not its peer (IA §Navigation model — UPI's 3-level exception, above).
 
@@ -623,6 +646,13 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - **Loading:** Tag list fetching — skeleton row placeholders.
 - **Error:** Rename/recolor/delete fails to save — the affected row reverts to its prior state with an inline error, never a false-success display (matching the Launcher pin-toggle's own revert-on-failure pattern).
 - **Success:** Tag list reflects the current set. A rename/recolor is immediately visible on every transaction that already carries the tag, since the tag is a reference, not a copy (FR-017). A delete removes the tag from future selection while every historical transaction keeps its label — visibly distinct but never blank (FR-017's other half; the full visual treatment for "visibly distinct" is a later phase's job — this phase fixes only that the label must survive, never blank or error).
+
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, Tags page before any tags created — literary register at `--text-lg`, bracket-framed):* "No tags yet. The first one shapes how you'll track everything."
+- *Error — rename/recolor/delete fails (Yifrah: what → why → fix; row reverts to prior state, no false success):* "That change didn't stick. The tag stayed as it was. Try again."
+- *Loading (screen-reader only; visual stays skeleton rows):* "Loading your tags."
+- *Success (screen-reader only):* "Tag added." / "Tag renamed." / "Tag recolored." / "Tag deleted."
+- *Dense-data labels (plain register, Inter):* tag-row anatomy: tag name + color swatch + affordance buttons/icons; affordance labels "Rename," "Change color," "Delete"; delete confirmation dialog prompt "Delete [tag name]?" with "Delete" (primary, destructive intent) and "Cancel" (secondary); "Add a tag" form field and button label.
 
 **Primary CTA:** "Add a tag" (Fitts's law, Fitts 1954: standard-size, single-thumb-reachable — a lower-frequency administrative action per the Job section's forces, so it does not need the flow's bottom-fixed-bar treatment).
 **Exit / next:** Back to History — this page is a Level-3 sub-page of History (IA §Navigation model — UPI's 3-level exception, above).
