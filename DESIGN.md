@@ -4,6 +4,7 @@
 **Extended:** Phase 5 (Design system), 2026-07-18 — three-tier W3C DTCG token hierarchy + component specs added below (§Design system); no locked value changed.
 **Extended:** UPI plan, Phase 2 (Tag ramp + status indicator + ToolCard), 2026-07-20 — an 8-swatch categorical tag-color ramp, a Transaction-status redundant-cue row, and UPI's ToolCard instantiation added below; no locked value changed.
 **Extended:** UPI plan, Phase 3 (Shell chrome — back control, theme toggle, icon-usage rule), 2026-07-20 — a unified `PageHeader` back-control contract (hub / step / sub-page), a visible theme-toggle control wired to `next-themes`, and the icon-usage standing rule added below; no locked value changed. `specs/003-ui-shell-foundation/research.md` §2 flagged for correction (its no-visible-toggle rationale is now superseded — see the new §Shell chrome — PageHeader subsection).
+**Extended:** UPI plan, Phase 4 (Flow screens — scan/amount/tag/pay/confirm), 2026-07-21 — the capture screen's four states (permission-pending, active-scanning, malformed-QR error, camera-denied fallback), the amount and tag steps' token reuse, and the pay/confirm steps' two-option error and response shapes added below; no locked value changed. One new component-tier token group (`capture`) added, every value referencing existing alias tokens — no new color, no new `palette.mjs` run.
 
 **Archetype:** Sage (primary) with a Caregiver inflection on motion + tone only
 **Register:** calm structure · expressive at: empty states set as short verse, the habit day-complete accent fill, oversize punctuation at page heads
@@ -813,6 +814,23 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
     "pending":     { "color": { "$value": "{color.feedback.info.text}", "$type": "color" } },
     "unconfirmed": { "color": { "$value": "{color.feedback.warning.text}", "$type": "color" } }
   },
+  "capture": {
+    "frame": {
+      "border": { "$value": "{color.border.default}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" },
+      "background": { "$value": "{color.surface.default}", "$type": "color" }
+    },
+    "reticle": {
+      "corner-color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "copy": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "status-icon": {
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
   "shell-header": {
     "back": {
       "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
@@ -842,9 +860,9 @@ Atomic inventory (Frost 2013 — a composition model, not a file structure):
 
 | Level | Units |
 |-------|-------|
-| Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row |
-| Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list |
-| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form · PageHeader (back control + theme toggle, Phase 3) |
+| Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row · capture frame · reticle corner · camera status glyph (Phase 4) |
+| Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list · tag chip (swatch + selection check, Phase 4) |
+| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form · PageHeader (back control + theme toggle, Phase 3) · Capture screen + Confirm-prompt (Phase 4) |
 | Templates | page head (mark + H1, then {space.after-page-head}) + stacked module frames — arrangements already specified per page in JOURNEY.md |
 | Pages | JOURNEY.md's seven page specs with real content |
 
@@ -856,6 +874,8 @@ Pattern selections (usability bridge — the principle picks the pattern):
 | Bill edit form | Three chunks (items / adjustments / split), on-blur validation, forgiving amount parsing, reconciliation row | Miller/Cowan ~4±1 · "reward early, punish late" · Postel · Nielsen #5 error prevention |
 | AI-parse feedback | Staged determinate progress over a bare spinner; cancel always present | Nielsen #1 visibility of status · the 1–10s feedback band · Nielsen #3 user control |
 | Parse failure | Plain-language failure surface with exactly two recovery options; photo kept on screen | Nielsen #9 error recovery · Hick (two options) · Nielsen #6 recognition over recall |
+| Capture screen (Phase 4, UPI) | Persistent hairline-frame chrome across all four states; a static icon + text for the wait state, never a spinner | Nielsen #1 visibility of status · §Motion's no-ambient-motion rule · Nielsen #6 (the feed stays visible through error, matching the parse-failure precedent) |
+| Confirm-prompt (Phase 4, UPI) | Two-option response (Success primary CTA / Failed secondary text); no third "unconfirmed" button | Hick–Hyman 1952 · FR-010's non-response default, not a user choice |
 
 #### ToolCard — the launcher organism
 
@@ -996,6 +1016,41 @@ UPI transactions carry one of 4 states — pending / success / failed / unconfir
 
 **Why `pending`->info and `unconfirmed`->warning (not the reverse):** pending is a normal, expected in-flight state (the payment is genuinely being processed) — info's calm blue fits Norman's affordance-signaling better than borrowing warning's amber for a non-problem. Unconfirmed is a real open question (the user tapped confirm and the app never got a definitive answer) — warning's "needs your attention" register fits better than info's fully-routine tone, and it avoids implying outright failure, which error/{color.feedback.error.text} would.
 
+#### Capture screen — Scan step (Phase 4, UPI plan, `journey` + `usability`, 2026-07-21)
+
+The main flow's Level-2 landing state (JOURNEY.md's "UPI (main flow)" page spec, step 1 "Scan") — the first camera-based surface in HomeBase, with no persistent nav beneath it (JOURNEY.md's IA §Navigation model — UPI's 3-level exception). PageHeader renders `{ mode: "hub" }` here (§Shell chrome — PageHeader), unchanged, since this step is the tool's own top level, not mid-transaction; the standing secondary link to History (per the approved mock, `design/mocks/upi-landing.html`, and JOURNEY.md's content-block 1) is the IA amendment's other escape hatch.
+
+Four states, per DW-4.1 — permission-pending, active-scanning, malformed-QR error, camera-denied fallback. All four sit inside the same capture frame ({capture.frame.background} within {capture.frame.border} at {capture.frame.width} — the same hairline-frame device the photo-card family already uses for contained imagery, never a card). Across every state, the shell header, the standing "View transaction history" secondary link, and the tertiary "Can't scan? Enter manually" link stay present and unchanged (Nielsen #1, #3) — no state is ever a dead end.
+
+- **Permission-pending** (before the browser grants or denies access): a static `Camera` glyph (lucide-react, {capture.status-icon.color} — licensed under the already-approved "camera controls" row, §Icon usage) centers in the frame with a one-line status note in {capture.copy.typography}/{capture.copy.color} (exact words: Phase 6). Static, not animated: §Motion's "no ambient or looping motion" rule rules out a spinner here — a fixed icon + text is this system's own existing precedent for a wait state, the same static-placeholder logic the dense-frame families already use for their skeleton loading rows.
+- **Active-scanning** (the mock's rendered state, unchanged): the reticle — four corner brackets in {capture.reticle.corner-color}, `aria-hidden` since the frame's own `role="img"` accessible name already states "scanning for a UPI QR code" — plus the same copy treatment with different words. This phase promotes the mock's ad-hoc CSS into the {capture.*} tokens above; no new visual decision is made here.
+- **Malformed-QR error** (FR-021): an inline banner reusing the existing feedback tokens verbatim — {banner.surface.error}/{banner.text.error}, leading icon + text (§Redundant-cue discharge's "Feedback banners" row — no new color pair) — appears below the still-visible frame (Nielsen #6: the camera feed stays live, matching the AI-parse-failure precedent of keeping the captured photo on screen). Two recovery options, per Hick's law and the Expenses-failure precedent: **Retry scanning** (the banner's own action, resets the reticle, no route change) and the screen's already-standing **"Can't scan? Enter manually"** tertiary link — reused, not duplicated, so the error state doesn't stack a third control alongside two that already exist structurally on the page.
+- **Camera-denied fallback** (FR-022): a *fallback*, not an error state — DW-4.1's own wording ("camera-denied fallback," distinct from "malformed-QR error") and JOURNEY.md's flow ("inline manual payee/amount entry fallback… never a dead end") both name a single, direct path forward, not a two-option recovery menu; Hick's law has nothing to reduce when there is exactly one way forward. The frame shows a static `CameraOff` glyph (same licensing as `Camera` above) plus a one-line note (Phase 6); the manual payee + amount fields render beneath it using the existing {form-field.*} tokens unchanged — the same fields the Amount step already uses, so nothing downstream forks on whether a transaction originated from a scan or this fallback.
+
+Step-to-step transitions (Scan → Amount → Tag → Pay → Confirm) use the already-locked 200-300ms opacity-fade + small-transform budget (§Motion) — no new motion token minted here; `prefers-reduced-motion` collapses every one of them to instant exactly as already specified, not re-derived. Every step past Scan uses Phase 3's `{ mode: "step", onBack }` PageHeader contract (§Shell chrome — PageHeader already names this exact case) — no redundant back element is drawn on any step.
+
+#### Amount step (Phase 4, UPI plan, `usability`)
+
+Reuses the form-field molecule unchanged (§Form field + the bill edit form) — no new tokens. Input at {form-field.input.typography} (16px, the already-locked iOS auto-zoom floor), boundary {form-field.input.border}, label {form-field.label.typography}/{form-field.label.color}. Forgiving parsing (Postel's law, already the locked rule for amount inputs system-wide) applies identically here: pre-filled and editable when the QR carried an amount, empty and editable when it didn't (FR-003) — one field, not two variants. Validation is the existing on-blur pattern: a zero, negative, or non-numeric amount blocks proceeding (FR-004) and renders the same three redundant cues every other form-field error already uses — {form-field.error.border}, an icon glyph, and message text in {form-field.error.text} (words: Phase 6) — no bespoke amount-step error styling invented.
+
+#### Tag step (Phase 4, UPI plan, `design-systems` + `usability`)
+
+Existing tags render as tappable chips using Phase 2's ramp unchanged — {tag-chip.swatch.\<hue\>.fill}/{tag-chip.swatch.\<hue\>.text}, {tag-chip.typography} (reuses {type.micro}), zero border-radius (the locked no-radius rule). Every chip always shows its swatch, selected or not — the swatch is identity, not selection (§Tag color ramp: "the tag's own text label is always rendered alongside its swatch"). Selection needs its own cue, not a new color: a selected chip gains a leading check glyph rendered in that same chip's own {tag-chip.swatch.\<hue\>.text} ink — the identical, already-verified pair (all 8 hues, both modes, in the spec-check's contrast gate), zero new tokens and zero new contrast computation — plus `aria-pressed`, mirroring exactly how the ToolCard pin toggle already discharges selection by shape (filled vs. outline) rather than color (§ToolCard "A11y"). Zero, one, or many chips may be selected (FR-007) — no forced single choice.
+
+"Add new tag" is inline (FR-006), matching Groceries' own quick-add molecule (input + add action — no dedicated Tier-3 entry there either, so this stays parity, not a gap): a single {form-field.input.*}-styled entry, submitted without leaving the flow. A newly created tag is auto-assigned the next swatch by the already-stated cycling rule (§Tag color ramp: creation order, `index mod 8`) — no new assignment logic invented here. Zero-tags-yet (first-ever use) still renders the "add new tag" affordance alone, fully usable (JOURNEY.md's Tag-step empty state) — no dead end.
+
+#### Pay step + no-UPI-app error (Phase 4, UPI plan, `usability`)
+
+Tapping "Pay" (the flow's one primary CTA, {cta.*} unchanged) constructs the UPI deep link and redirects (FR-008); the transaction is persisted at `pending` status before the redirect fires (SC-004), which is what makes every branch below safe. The handoff itself is brief — JOURNEY.md's own state table calls it "no long-running fetch," below the 1-10s feedback band the staged AI-parse pattern exists for — so it gets a single plain status line in {type.dense}/{color.text.secondary} (words: Phase 6), not the multi-stage {parse-status.*} treatment Expenses uses: that pattern is reserved for genuinely multi-second waits (Nielsen #1's feedback-band distinction), and reusing it for an instant handoff would be theater, not information.
+
+**No UPI app available (FR-020):** the existing feedback tokens again — {banner.surface.error}/{banner.text.error} — state what happened; the already-saved pending transaction (SC-004: no transaction is ever silently lost) is the fix half of Yifrah's shape here, since there's nothing to retry-and-lose. Two recovery options: **Retry** as the primary CTA ({cta.*} unchanged, attempts the redirect again) and a secondary plain-text **"Back to Scan"** at {cta.min-height} tap height, physically separated from the bar — the same "secondary actions are plain text, physically separated" rule already stated under §Primary CTA below, not a new pattern.
+
+#### Confirm-prompt (Phase 4, UPI plan, `usability` + `color`)
+
+Shown on return to the tool (Page Visibility signal, FR-009). Exactly two response options, per DW-4.3 and Hick's law: **Success** as the primary CTA ({cta.*} unchanged — the affirmative/expected path gets the same treatment Expenses' "Confirm as-is" already does) and **Failed** as the secondary plain-text option beside it (the same physically-separated convention as above) — no third button for "unconfirmed": that status is never a user choice, it's what a non-answer resolves to (FR-010) if the user navigates away instead of answering, never a stuck state (JOURNEY.md's Confirm-step spec).
+
+Once resolved — by either answer, or by the no-response default — the transaction's status renders using Phase 2's transaction-status component unchanged: the plain-language word plus its distinct icon glyph, both in {transaction-status.\<state\>.color} (success/failed/pending/unconfirmed — §Transaction status indicator). This is DW-4.3's "status indicator's redundant cue applied" discharged by direct reuse, not a new instance — the confirm-prompt doesn't invent its own color language, it hands off to the one that already exists.
+
 #### Primary CTA
 
 One per page (Von Restorff — the isolated item is the remembered one; a second accent block would dissolve the isolation). A bottom-fixed bar ({cta.bar.background}, top hairline {cta.bar.divider}, padding {cta.bar.padding}) holds a full-width block: fill {cta.background}, label in {cta.label.typography} / {cta.label.color}, minimum height {cta.min-height} (Fitts 1954 — the largest, closest target on the page for each page's named primary action). **No drawn border at rest** — a filled block wrapped in its own hairline box is card chrome, and the locked Borders rule allows hairline *dividers* only (the two licensed exceptions — the photo-card's imagery frame and the form-control boundary ink — don't apply: unlike an empty input or checkbox, this control is identified without a boundary by its fill, semibold label, width, and position, so the bar's top hairline stays the only structural line). The accent tint is the isolation device (Von Restorff): the block is the page's sole accent-tinted region. Focus-visible: outline in {cta.border.color} at {cta.border.width}, offset outside the block (WCAG 2.4.7 — the border tokens' one consumer). Pressed: {cta.background-active}, no transform. Disabled: {color.surface.active} fill, {color.text.secondary} label — visually quiet, still readable. Loading: label swaps to a progress phrase; the block never becomes a spinner-only target. Secondary actions are plain text at {cta.min-height} tap height, physically separated from the bar (JOURNEY.md: a rushed tap must not misfire).
@@ -1031,6 +1086,7 @@ Green accent + red error means every state distinction must survive without colo
 | Parse stages | {parse-status.stage.done.color} | Check glyph + list position |
 | Pin state | {tool-card.pin.active-color} | Glyph shape (filled vs outline) + presence in the rail |
 | Transaction status (Phase 2, UPI) | {transaction-status.success.color} / .failed / .pending / .unconfirmed | Plain-language word (Success/Failed/Pending/Unconfirmed) + a distinct lucide icon glyph per state (CheckCircle2/XCircle/Clock/HelpCircle) — reuses the four already-verified functional inks, no new color |
+| Tag chip selection (Phase 4, UPI) | {tag-chip.swatch.\<hue\>.text} — the identical ink the chip's own label already uses, no new color | Leading check-glyph presence/absence + `aria-pressed` — selection is a shape/ARIA cue, exactly like the ToolCard pin toggle's filled-vs-outline convention, never a new color pairing |
 
 <!-- spec-check:prose-end -->
 
@@ -1042,3 +1098,4 @@ Green accent + red error means every state distinction must survive without colo
 - ~~Heatmap streak ramp (cap + legend) and ledger balance diverging encoding~~ — resolved Phase 7: see §Heatmap streak ramp + legend and §Ledger balance indicator. Both colorblind-verified (`phase7-dataviz-check.mjs`) and checked against the Cairo lie taxonomy (Phase 7 discovery note).
 - ~~UPI's tag color ramp, transaction-status redundant cue, and ToolCard glyph~~ — resolved UPI-plan Phase 2 (2026-07-20): see §Tag color ramp, §Transaction status indicator, and the ToolCard section's new UPI instantiation. Ramp colorblind-verified (`upi-tag-ramp-check.mjs`) with a disclosed limitation (8% of simulated swatch pairs fall under the near-identity floor — accepted because tag color is never the sole identity channel, the text label always is). `mark: "₹"`'s Newsreader glyph coverage is assumed, not yet visually confirmed — flagged for the phase that first renders the launcher shelf with UPI present.
 - ~~PageHeader's back-control behavior for UPI's 3-level exception, a visible theme toggle, and the icon-usage scope~~ — resolved UPI-plan Phase 3 (2026-07-20): see §Icon usage and §Shell chrome — PageHeader. Back control unified into one `hub`/`step`/`parent`/`false` contract (all 6 pre-UPI tools default to `hub`, unaffected); theme toggle wired to `next-themes`, both icon states verified against the already-locked neutral-11/background pairing (light 5.65:1, dark 8.79:1). `specs/003-ui-shell-foundation/research.md` §2's no-visible-toggle rationale is now superseded — a correction note was added directly to that file rather than silently left contradicting this section.
+- ~~The flow screens' four capture states, the amount/tag steps' token reuse, and the pay/confirm steps' two-option error and response shapes~~ — resolved UPI-plan Phase 4 (2026-07-21): see §Capture screen — Scan step, §Amount step, §Tag step, §Pay step + no-UPI-app error, and §Confirm-prompt. Camera-denied is specified as a *fallback* (a single direct path, per JOURNEY.md's own wording) rather than a Hick's-law two-option error menu; the two-option constraint applies to malformed-QR, no-UPI-app, and the confirm-prompt, each reusing existing {banner.\*}/{cta.\*} tokens with zero new color computation. Tag-chip selection is discharged by shape (a leading check glyph in the swatch's own already-verified ink) plus `aria-pressed`, not a new color pairing. One new component-tier token group (`capture`) was added, every value resolving through the alias tier — no new global color, no new `palette.mjs` run.
