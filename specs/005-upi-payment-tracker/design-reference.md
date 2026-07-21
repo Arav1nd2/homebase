@@ -42,13 +42,16 @@ From `design/VOICE.md`:
 
 ## Open gaps
 
-The original 7 gaps this file flagged are now resolved (name, mark, toolType, tag ramp, status indicator, page specs, empty-state register — see citations above). What's still open, surfaced honestly rather than papered over:
+The original 7 gaps this file flagged are resolved (name, mark, toolType, tag ramp, status indicator, page specs, empty-state register — see citations above). Two follow-on gaps found during this pass are now resolved too:
 
-1. **Shell-chrome implementation has no task anywhere.** The `PageHeader` back-control/theme-toggle spec (`DESIGN.md:956-981`) is a cross-cutting change to `specs/003-ui-shell-foundation`'s actual component, affecting all 7 tools + launcher — but no task in this feature's `tasks.md`, nor any other feature's, currently covers writing that code. Needs either a task added here (as a shared-dependency note) or a small standalone addendum before any UI task that assumes the new back-control contract gets built.
-2. **`₹` glyph coverage is assumed, not confirmed** (DESIGN.md's own flagged open question) — needs a quick visual check in Newsreader Display, naturally done whenever the launcher shelf is first built with UPI present (no launcher UI exists in code yet — `app/(app)/page.tsx` is still the pre-shell smoke-test page).
-3. **Tags-management entry point from History is unplaced.** `JOURNEY.md:639` explicitly defers "filter row vs. a dedicated affordance" to "a later phase's job" — that phase hasn't happened; implementation will need to make this specific call.
-4. The two mocks are stale relative to final tokens (cosmetic — see Mock reference above).
+- ~~Shell-chrome implementation has no task anywhere~~ — **Resolved 2026-07-21:** `tasks.md` gained T046/T047 (the `PageHeader.tsx` back-control/theme-toggle change, explicitly flagged as shared-shell scope, wired as a real dependency into T015/T027/T033/T038).
+- ~~Tags-management entry point from History is unplaced~~ — **Resolved 2026-07-21:** a standing "Manage tags" secondary link on the History page, alongside "+ Add manually," not folded into the filter row (`JOURNEY.md`'s History and Tags page specs, `tasks.md` T027).
+
+What's still open:
+
+1. **`₹` glyph coverage is assumed, not confirmed** (DESIGN.md's own flagged open question) — needs a quick visual check in Newsreader Display, naturally done whenever the launcher shelf is first built with UPI present (no launcher UI exists in code yet — `app/(app)/page.tsx` is still the pre-shell smoke-test page).
+2. The two mocks (`design/mocks/upi-landing.html`, `upi-history.html`) are stale relative to final tokens (cosmetic — see Mock reference above).
 
 ## Recommendation
 
-**Safe to proceed to `/speckit-implement`** for the previously-blocked UI tasks (T015-T020, T027-T028, T032-T033, T038) — every visual/token question those tasks needed is now answered in `DESIGN.md`/`JOURNEY.md` with concrete, citable values, not placeholders. Two things worth doing first: (1) add a task or short note covering the actual `PageHeader.tsx` code change (gap #1 above) so it doesn't get invented ad hoc inside a component file; (2) resolve the Tags-entry-point placement (gap #3) before or during T038.
+**Safe to proceed to `/speckit-implement`** — every gap that mattered for the UI tasks (T015-T038) is now resolved with concrete, citable values in `DESIGN.md`/`JOURNEY.md`, not placeholders. The two remaining items above are minor and don't block starting.

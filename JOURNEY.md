@@ -593,6 +593,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 2. Summary — per-tag/per-period totals as plain numeric rows, not a chart (§Direction: "a kept notebook, not a productivity dashboard"); a transaction carrying multiple tags counts its full amount toward each tag's total (FR-014, no proportional splitting).
 3. Transaction list — the Ledger dense-frame family extended with tag chips + a 4-value status cue (visual/token detail: a later phase of this plan); newest first; inline edit affordance per transaction (FR-015).
 4. "+ Add manually" — secondary link to `/new`.
+5. "Manage tags" — secondary link to `/tags` (resolved 2026-07-21: a standing secondary link alongside "+ Add manually," not folded into the filter row's Tag control — keeps that row a pure filter, no mixed actions).
 
 **States:**
 - **Empty (an IA-level answer, not just a visual one):** First-ever use — zero transactions recorded yet. Because History is reachable only from within UPI (never listed on the hub), an empty History must not read as a dead end: the filter row, the "+ Add manually" link, and the page's own back control all stay present and usable — there is nothing yet to summarize or list, so the summary and transaction-list blocks are replaced by an empty-state message, but the page itself is never orphaned. This extends Phase 1's original zero-data-tool IA rule (presence is never contingent on data) one level deeper than it has applied before.
@@ -636,7 +637,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 ### UPI — Tags
 <!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/tags/page.tsx. A Level-3 page, reached only from History. -->
 **Purpose:** Create, rename, recolor, and delete tags; keep the tag list tidy over time (FR-017).
-**Entry points:** A tag-management entry point from History (exact placement — filter row vs. a dedicated affordance — is a later phase's job; this phase fixes only that Tags is reachable from History, per the IA amendment's fixed chain landing → History → {Tags, New}).
+**Entry points:** History's "Manage tags" secondary link (resolved 2026-07-21 — a standing link alongside "+ Add manually," not folded into the filter row's Tag control), per the IA amendment's fixed chain landing → History → {Tags, New}.
 **Content blocks:**
 1. Tag list — each row: name, color swatch, rename/recolor/delete affordances.
 2. "Add a tag" entry (secondary to the flow's own inline tag creation, FR-006 — this is the full-management surface, not the fast path).
