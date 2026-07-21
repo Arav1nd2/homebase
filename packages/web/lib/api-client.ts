@@ -43,5 +43,11 @@ export async function apiClient<T>(path: string, init?: RequestInit): Promise<T>
     );
   }
 
+  // A 204 (e.g. DELETE) has no body to parse — .json() would throw on
+  // the empty string.
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }

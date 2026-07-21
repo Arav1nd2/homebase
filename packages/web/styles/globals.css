@@ -68,6 +68,28 @@
   --warning-on-solid: #110d04;
   --info-on-solid: #060e15;
 
+  /* Tag color ramp (Phase 2, UPI plan, DESIGN.md §Tag color ramp) — 8
+     swatches, one palette.mjs run per hue, fill = each hue's -4 step,
+     text = each hue's -11 step. A categorical aid for user-defined
+     transaction tags, never the tag's sole identity (the text label is
+     always rendered alongside). */
+  --tag-teal-fill: #d8edec;
+  --tag-teal-text: #486b6b;
+  --tag-indigo-fill: #e0e7ff;
+  --tag-indigo-text: #555f91;
+  --tag-violet-fill: #e6e5ff;
+  --tag-violet-text: #605c8e;
+  --tag-orchid-fill: #ebe3ff;
+  --tag-orchid-text: #6a598a;
+  --tag-plum-fill: #f2e0fd;
+  --tag-plum-text: #745585;
+  --tag-magenta-fill: #f9def9;
+  --tag-magenta-text: #7c517d;
+  --tag-rose-fill: #fcdef1;
+  --tag-rose-text: #815172;
+  --tag-berry-fill: #fedeea;
+  --tag-berry-text: #835268;
+
   /* Tier 2 — semantic aliases (reference Tier 1 only, per DESIGN.md's tier discipline) */
   --background: var(--neutral-1);
   --surface: var(--neutral-2);
@@ -160,6 +182,24 @@
   --warning-on-solid: #110d04;
   --info-on-solid: #060e15;
 
+  /* Tag color ramp — dark-mode fills/text for the same 8 hues. */
+  --tag-teal-fill: #1d2e2d;
+  --tag-teal-text: #9ac0c0;
+  --tag-indigo-fill: #23283f;
+  --tag-indigo-text: #a7b4eb;
+  --tag-violet-fill: #29273e;
+  --tag-violet-text: #b3b0e8;
+  --tag-orchid-fill: #2d253c;
+  --tag-orchid-text: #bface3;
+  --tag-plum-fill: #32243a;
+  --tag-plum-text: #caa8dd;
+  --tag-magenta-fill: #362236;
+  --tag-magenta-text: #d4a5d5;
+  --tag-rose-fill: #382231;
+  --tag-rose-text: #daa4c8;
+  --tag-berry-fill: #39222c;
+  --tag-berry-text: #dda5bc;
+
   --background: var(--neutral-1);
   --surface: var(--neutral-2);
   --surface-hover: var(--neutral-3);
@@ -224,6 +264,23 @@
   --color-info-3: var(--info-3);
   --color-info-9: var(--info-9);
   --color-info-11: var(--info-11);
+
+  --color-tag-teal-fill: var(--tag-teal-fill);
+  --color-tag-teal-text: var(--tag-teal-text);
+  --color-tag-indigo-fill: var(--tag-indigo-fill);
+  --color-tag-indigo-text: var(--tag-indigo-text);
+  --color-tag-violet-fill: var(--tag-violet-fill);
+  --color-tag-violet-text: var(--tag-violet-text);
+  --color-tag-orchid-fill: var(--tag-orchid-fill);
+  --color-tag-orchid-text: var(--tag-orchid-text);
+  --color-tag-plum-fill: var(--tag-plum-fill);
+  --color-tag-plum-text: var(--tag-plum-text);
+  --color-tag-magenta-fill: var(--tag-magenta-fill);
+  --color-tag-magenta-text: var(--tag-magenta-text);
+  --color-tag-rose-fill: var(--tag-rose-fill);
+  --color-tag-rose-text: var(--tag-rose-text);
+  --color-tag-berry-fill: var(--tag-berry-fill);
+  --color-tag-berry-text: var(--tag-berry-text);
 
   --color-background: var(--background);
   --color-surface: var(--surface);

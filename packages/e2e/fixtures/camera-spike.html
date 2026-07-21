@@ -1,0 +1,71 @@
+<!doctype html>
+<!--
+  Minimal test page for the T007 spike (research.md §10): opens the rear
+  camera via getUserMedia, draws frames to an off-screen canvas on a
+  requestAnimationFrame loop, and decodes each frame with jsQR — the same
+  mechanism components/upi-tracker/qr-scanner.tsx implements for real.
+  This fixture exists only to prove the Playwright fake-video-device
+  mechanism can drive a real getUserMedia + jsQR decode in this project's
+  Chromium version, independent of the full Next.js app.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Camera spike</title>
+  </head>
+  <body>
+    <!--
+      IMPORTANT (the spike's actual finding): a `display:none` <video>
+      never has its frames decoded/painted in Chromium, so drawImage()
+      from it onto the canvas silently produces black frames forever —
+      no error, no signal, just an eternally-blank decode. The video
+      element must stay in the visible render tree (off-screen
+      positioning or 0-opacity is fine; `display:none` is not). The
+      real qr-scanner.tsx component must follow the same rule.
+    -->
+    <video id="video" autoplay playsinline muted width="480" height="480"></video>
+    <canvas id="canvas" style="display: none"></canvas>
+    <div id="result"></div>
+    <div id="status">idle</div>
+    <script src="./jsQR.js"></script>
+    <script>
+      async function start() {
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        const resultEl = document.getElementById("result");
+        const statusEl = document.getElementById("status");
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+          });
+          video.srcObject = stream;
+          statusEl.textContent = "streaming";
+        } catch (err) {
+          statusEl.textContent = "error:" + err.name;
+          return;
+        }
+
+        function tick() {
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+            if (decoded) {
+              resultEl.textContent = decoded.data;
+              statusEl.textContent = "decoded";
+              return;
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      start();
+    </script>
+  </body>
+</html>

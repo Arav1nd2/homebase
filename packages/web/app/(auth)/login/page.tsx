@@ -67,7 +67,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <PageHeader mark="⁂" title="Sign in" showBackToHub={false} />
+      <PageHeader mark="⁂" title="Sign in" back={false} />
       <main className="flex flex-col gap-related px-page-margin py-8">
         {error ? <ErrorState message={error} /> : null}
 
