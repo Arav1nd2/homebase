@@ -1,23 +1,17 @@
 import { expect, test, type Browser } from "@playwright/test";
-import { getLatestOtpCodeFor } from "./fake-resend";
+import { signInAs } from "./auth-helper";
 
 // Own dedicated email — see auth-signin.spec.ts for why (Supabase's 60s
 // per-email resend cooldown vs. parallel test workers).
 const ALLOWED_EMAIL = "test-session@example.com";
 
-// Signs in via the UI and returns the resulting storage state (cookies),
-// simulating "the session this device already has."
+// Signs in and returns the resulting storage state (cookies), simulating
+// "the session this device already has."
 async function signInAndCaptureSession(browser: Browser) {
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto("/login");
-  await page.getByLabel("Email address").fill(ALLOWED_EMAIL);
-  await page.getByRole("button", { name: "Send me a code" }).click();
-  const code = await getLatestOtpCodeFor(ALLOWED_EMAIL);
-  await page.getByLabel("Enter the code").fill(code);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await signInAs(page, ALLOWED_EMAIL);
 
   const storageState = await context.storageState();
   await context.close();

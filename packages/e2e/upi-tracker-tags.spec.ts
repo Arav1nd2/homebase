@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 // quickstart.md Scenario 6 (User Story 4).
 test("renaming a tag propagates live to its transactions; deleting excludes it from selection but preserves history (US4)", async ({

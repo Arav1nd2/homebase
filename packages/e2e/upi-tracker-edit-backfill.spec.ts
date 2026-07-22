@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 // quickstart.md Scenario 5 (User Story 3). VPAs embed a run-unique suffix
 // so repeated local runs against the same persistent dev database never

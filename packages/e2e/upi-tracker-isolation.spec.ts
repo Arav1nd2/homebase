@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 // quickstart.md Scenario 7 (FR-018): a second allow-listed user has zero
 // visibility into the first user's tags/transactions, including direct
