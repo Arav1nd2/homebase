@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI — landing/scan — mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<!--
+  PAGE SPEC (this checkpoint's cheap brief — JOURNEY.md has no UPI content yet;
+  page structure drawn from the design plan's Phase 4 scope + specs/005-upi-payment-tracker/spec.md)
+  Purpose: app(app)/upi-tracker/page.tsx's idle/landing step — the camera opens
+           immediately in QR-scan mode, no tap required (FR-001).
+  Entry points: Launcher quick-start pin or shelf card.
+  Content blocks: shell header (back-to-hub + theme toggle + mark/H1), camera
+           viewfinder with scan reticle, direct link to History (this session's
+           explicit requirement — there is no persistent nav, so the landing
+           state itself must carry the escape hatch to History/Tags), and a
+           minor camera-denied fallback line (FR-022).
+  States shown: this file renders the "active-scanning" state only (the
+           primary render for this checkpoint); malformed-QR / camera-denied /
+           permission-pending states are Phase 4's job, not this cheap mock's.
+  Primary CTA: none — scanning is passive/automatic, not button-triggered.
+  Exit: back control to HomeBase; secondary link to History.
+
+  DERIVED PLACEHOLDERS FOR THIS MOCK (Phase 2/3 not yet built — see the
+  mock dispatch brief for full rationale):
+  - ToolCard mark for UPI: "‡" (double dagger) — distinct from Expenses' "§"
+    and Recipes' "¶", rendered exactly per the locked signature-move token
+    (display serif, text-5xl, leading-none, aria-hidden).
+  - Shell chrome: back control keeps the exact existing copy "‹ HomeBase"
+    (packages/web/components/shared/page-header.tsx) since this screen is
+    top-level within UPI, not mid-flow-step. Theme toggle is new: a sun/moon
+    icon button, opposite end of the same header row, ≥44px tap target,
+    functional (toggles [data-theme] using DESIGN.md's own dark redeclaration
+    block verbatim) so both modes can be judged on real pixels.
+-->
+<style>
+  /* === DESIGN TOKENS — copied verbatim from DESIGN.md (Verse Margin, locked) === */
+  :root {
+    --neutral-1: #fcfdfc; --neutral-2: #f8f9f8; --neutral-3: #eef1ef; --neutral-4: #e5e9e6;
+    --neutral-5: #dae0dc; --neutral-6: #cdd4d0; --neutral-7: #bdc6c0; --neutral-8: #a4aea7;
+    --neutral-9: #aebbb3; --neutral-10: #9ca8a0; --neutral-11: #5e6561; --neutral-12: #2b2f2d;
+    --accent-1: #fafefb; --accent-2: #f4fbf6; --accent-3: #e6f5eb; --accent-4: #d9eee0;
+    --accent-5: #c9e7d4; --accent-6: #b7ddc5; --accent-7: #a2d0b4; --accent-8: #82ba98;
+    --accent-9: #84caa0; --accent-10: #74b68f; --accent-11: #486d57; --accent-12: #203327;
+    --accent-on-solid: #06100a;
+    --error-3: #ffebe9; --error-9: #c56c65; --error-11: #86534f;
+    --success-3: #e6f6e6; --success-9: #84cc86; --success-11: #486e49;
+    --warning-3: #f6f0e4; --warning-9: #ceb47e; --warning-11: #6f6144;
+    --info-3: #e7f2fa; --info-9: #7aabce; --info-11: #4c677a;
+    --background: var(--neutral-1); --surface: var(--neutral-2); --surface-hover: var(--neutral-3);
+    --surface-active: var(--neutral-4); --border-subtle: var(--neutral-6); --border: var(--neutral-7);
+    --border-strong: var(--neutral-8); --text-secondary: var(--neutral-11); --text: var(--neutral-12);
+    --accent-bg-subtle: var(--accent-3); --accent-solid: var(--accent-9); --accent-solid-hover: var(--accent-10);
+    --accent-text: var(--accent-11); --border-input: var(--neutral-11);
+
+    --font-display: "Newsreader", ui-serif, Georgia, serif;
+    --font-body: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --text-xs: 0.75rem; --leading-xs: 1.4;
+    --text-sm: 0.875rem; --leading-sm: 1.45;
+    --text-base: 1rem; --leading-base: 1.5;
+    --text-lg: 1.125rem; --leading-lg: 1.45;
+    --text-xl: 1.25rem; --leading-xl: 1.4;
+    --text-2xl: 1.5rem; --leading-2xl: 1.3;
+    --text-3xl: 2rem; --leading-3xl: 1.2;
+    --text-5xl: 4.5rem; --leading-5xl: 1;
+
+    --space-1: 4px; --space-2: 8px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+    --tap-target: 44px; --glyph: 20px; --hairline: 1px;
+  }
+
+  [data-theme="dark"] {
+    --neutral-1: #121312; --neutral-2: #191a19; --neutral-3: #212321; --neutral-4: #282b29;
+    --neutral-5: #2f3431; --neutral-6: #383d3a; --neutral-7: #444b46; --neutral-8: #5a635d;
+    --neutral-9: #aebbb3; --neutral-10: #c2cec6; --neutral-11: #b2bab5; --neutral-12: #e5e9e6;
+    --accent-1: #111312; --accent-2: #161b18; --accent-3: #1a251e; --accent-4: #1e2f24;
+    --accent-5: #20392a; --accent-6: #234431; --accent-7: #29533c; --accent-8: #386d4f;
+    --accent-9: #84caa0; --accent-10: #9adcb4; --accent-11: #9bc3aa; --accent-12: #d7efe0;
+    --accent-on-solid: #06100a;
+    --error-3: #2d1d1c; --error-9: #c56c65; --error-11: #e0a7a1;
+    --success-3: #1a261a; --success-9: #84cc86; --success-11: #9bc49b;
+    --warning-3: #262219; --warning-9: #ceb47e; --warning-11: #c5b696;
+    --info-3: #1b2329; --info-9: #7aabce; --info-11: #9fbcd1;
+    --border-input: var(--neutral-11);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #dfe1df; }
+  body {
+    font-family: var(--font-body);
+    background: var(--background);
+    color: var(--text);
+    line-height: var(--leading-base);
+    -webkit-font-smoothing: antialiased;
+  }
+  .viewport {
+    max-width: 390px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === type utility classes (component tier, per DESIGN.md's type.* tokens) === */
+  .t-section-label { font-family: var(--font-body); font-size: var(--text-xl); font-weight: 600; line-height: var(--leading-xl); }
+  .t-dense { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 400; line-height: var(--leading-sm); }
+  .t-micro { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 400; line-height: var(--leading-xs); }
+  .t-cta-label { font-family: var(--font-body); font-size: var(--text-base); font-weight: 600; line-height: var(--leading-base); }
+
+  /* === shell chrome (Phase 3 placeholder — throwaway for this checkpoint) === */
+  .shell-header { padding-top: var(--space-6); }
+  .chrome-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-5);
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: var(--tap-target);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .theme-toggle {
+    width: var(--tap-target);
+    height: var(--tap-target);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+  }
+  .theme-toggle:focus-visible {
+    outline: 1px solid var(--border-input);
+    outline-offset: 2px;
+  }
+  .theme-toggle svg { width: var(--glyph); height: var(--glyph); }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+  .page-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-5) 0;
+  }
+  .mark {
+    font-family: var(--font-display);
+    font-size: var(--text-5xl);
+    line-height: var(--leading-5xl);
+    color: var(--text);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-3xl);
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  main { padding-bottom: var(--space-7); }
+
+  /* === camera viewfinder — hairline frame, no card chrome === */
+  .viewfinder-wrap { padding: var(--space-7) var(--space-5) 0; }
+  .viewfinder {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    background: var(--surface);
+    border: var(--hairline) solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+  }
+  .reticle {
+    position: relative;
+    width: 180px;
+    height: 180px;
+  }
+  .reticle .corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--text-secondary);
+  }
+  .reticle .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .reticle .tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+  .reticle .bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+  .reticle .br { bottom: 0; right: 0; border-left: none; border-top: none; }
+  .viewfinder-copy {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 0 var(--space-6);
+    max-width: 260px;
+  }
+
+  /* === secondary / tertiary nav links (plain text at tap-target height) === */
+  .secondary-link, .tertiary-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--tap-target);
+    padding: 0 var(--space-5);
+    text-decoration: none;
+    border-top: var(--hairline) solid var(--border-subtle);
+  }
+  .secondary-link {
+    margin-top: var(--space-6);
+    color: var(--accent-text);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+  }
+  .tertiary-link {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    justify-content: flex-start;
+    gap: var(--space-2);
+  }
+  .secondary-link:focus-visible, .tertiary-link:focus-visible, .back-link:focus-visible {
+    outline: 1px solid var(--border-input);
+    outline-offset: -1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="viewport">
+
+  <header class="shell-header">
+    <div class="chrome-row">
+      <a href="#" class="back-link" aria-label="Back to HomeBase">
+        <span aria-hidden="true">‹</span> HomeBase
+      </a>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Switch to dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <line x1="12" y1="2" x2="12" y2="4.5"></line>
+          <line x1="12" y1="19.5" x2="12" y2="22"></line>
+          <line x1="4.2" y1="4.2" x2="6" y2="6"></line>
+          <line x1="18" y1="18" x2="19.8" y2="19.8"></line>
+          <line x1="2" y1="12" x2="4.5" y2="12"></line>
+          <line x1="19.5" y1="12" x2="22" y2="12"></line>
+          <line x1="4.2" y1="19.8" x2="6" y2="18"></line>
+          <line x1="18" y1="6" x2="19.8" y2="4.2"></line>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="page-head">
+      <span class="mark" aria-hidden="true">‡</span>
+      <h1>UPI</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="viewfinder-wrap" aria-label="Camera QR scan viewfinder">
+      <div class="viewfinder" role="img" aria-label="Camera preview, scanning for a UPI QR code">
+        <div class="reticle" aria-hidden="true">
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+        </div>
+        <p class="viewfinder-copy">Point your camera at a UPI QR code</p>
+      </div>
+    </section>
+
+    <a href="./upi-history.html" class="secondary-link">
+      <span>View transaction history</span>
+      <span aria-hidden="true">›</span>
+    </a>
+    <a href="#" class="tertiary-link">Can't scan? Enter manually</a>
+  </main>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function setTheme(mode) {
+      root.setAttribute('data-theme', mode);
+      btn.setAttribute('aria-pressed', String(mode === 'dark'));
+      btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    // DESIGN.md: light is the primary surface, dark is a first-class second
+    // mode — never the default/hero. System preference is honored only as
+    // the toggle's initial guess, not a forced dark-default.
+    setTheme(mq.matches ? 'dark' : 'light');
+    btn.addEventListener('click', function () {
+      setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+</script>
+</body>
+</html>

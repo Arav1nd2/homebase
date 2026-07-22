@@ -2,6 +2,9 @@
 **Date:** 2026-07-18 · **Status:** confirmed
 **Extended:** Phase 4 (Type + color), 2026-07-18 — full type scale + complete functional-color tokens added below; base DNA (archetype/composition/motion/base tokens) unchanged from the Phase 3 lock.
 **Extended:** Phase 5 (Design system), 2026-07-18 — three-tier W3C DTCG token hierarchy + component specs added below (§Design system); no locked value changed.
+**Extended:** UPI plan, Phase 2 (Tag ramp + status indicator + ToolCard), 2026-07-20 — an 8-swatch categorical tag-color ramp, a Transaction-status redundant-cue row, and UPI's ToolCard instantiation added below; no locked value changed.
+**Extended:** UPI plan, Phase 3 (Shell chrome — back control, theme toggle, icon-usage rule), 2026-07-20 — a unified `PageHeader` back-control contract (hub / step / sub-page), a visible theme-toggle control wired to `next-themes`, and the icon-usage standing rule added below; no locked value changed. `specs/003-ui-shell-foundation/research.md` §2 flagged for correction (its no-visible-toggle rationale is now superseded — see the new §Shell chrome — PageHeader subsection).
+**Extended:** UPI plan, Phase 4 (Flow screens — scan/amount/tag/pay/confirm), 2026-07-21 — the capture screen's four states (permission-pending, active-scanning, malformed-QR error, camera-denied fallback), the amount and tag steps' token reuse, and the pay/confirm steps' two-option error and response shapes added below; no locked value changed. One new component-tier token group (`capture`) added, every value referencing existing alias tokens — no new color, no new `palette.mjs` run.
 
 **Archetype:** Sage (primary) with a Caregiver inflection on motion + tone only
 **Register:** calm structure · expressive at: empty states set as short verse, the habit day-complete accent fill, oversize punctuation at page heads
@@ -160,6 +163,18 @@ Generated via `scripts/palette.mjs --seed 157.5 --chroma muted --harmony mono` (
   --success-on-solid: #081008;
   --warning-on-solid: #110d04;
   --info-on-solid: #060e15;
+
+  /* Tag color ramp (Phase 2, UPI) — 8 swatches, one palette.mjs run per hue
+     (--seed <hue> --chroma muted --harmony mono), fill = each hue's -4 step,
+     text = each hue's -11 step. See §Tag color ramp for the full derivation. */
+  --tag-teal-fill: #d8edec;       --tag-teal-text: #486b6b;
+  --tag-indigo-fill: #e0e7ff;     --tag-indigo-text: #555f91;
+  --tag-violet-fill: #e6e5ff;     --tag-violet-text: #605c8e;
+  --tag-orchid-fill: #ebe3ff;     --tag-orchid-text: #6a598a;
+  --tag-plum-fill: #f2e0fd;       --tag-plum-text: #745585;
+  --tag-magenta-fill: #f9def9;    --tag-magenta-text: #7c517d;
+  --tag-rose-fill: #fcdef1;       --tag-rose-text: #815172;
+  --tag-berry-fill: #fedeea;      --tag-berry-text: #835268;
 }
 
 [data-theme="dark"] {
@@ -218,6 +233,16 @@ Generated via `scripts/palette.mjs --seed 157.5 --chroma muted --harmony mono` (
   --success-on-solid: #081008;
   --warning-on-solid: #110d04;
   --info-on-solid: #060e15;
+
+  /* Tag color ramp (Phase 2, UPI) — dark-mode fills/text for the same 8 hues. */
+  --tag-teal-fill: #1d2e2d;       --tag-teal-text: #9ac0c0;
+  --tag-indigo-fill: #23283f;     --tag-indigo-text: #a7b4eb;
+  --tag-violet-fill: #29273e;     --tag-violet-text: #b3b0e8;
+  --tag-orchid-fill: #2d253c;     --tag-orchid-text: #bface3;
+  --tag-plum-fill: #32243a;       --tag-plum-text: #caa8dd;
+  --tag-magenta-fill: #362236;    --tag-magenta-text: #d4a5d5;
+  --tag-rose-fill: #382231;       --tag-rose-text: #daa4c8;
+  --tag-berry-fill: #39222c;      --tag-berry-text: #dda5bc;
 }
 ```
 
@@ -395,6 +420,16 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
       "9": { "$value": "#7aabce", "$type": "color" },
       "11": { "$value": "#4c677a", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9fbcd1" } } },
       "on-solid": { "$value": "#060e15", "$type": "color" }
+    },
+    "tag": {
+      "teal":    { "fill-raw": { "$value": "#d8edec", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#1d2e2d" } } }, "text-raw": { "$value": "#486b6b", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#9ac0c0" } } } },
+      "indigo":  { "fill-raw": { "$value": "#e0e7ff", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#23283f" } } }, "text-raw": { "$value": "#555f91", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#a7b4eb" } } } },
+      "violet":  { "fill-raw": { "$value": "#e6e5ff", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#29273e" } } }, "text-raw": { "$value": "#605c8e", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#b3b0e8" } } } },
+      "orchid":  { "fill-raw": { "$value": "#ebe3ff", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#2d253c" } } }, "text-raw": { "$value": "#6a598a", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#bface3" } } } },
+      "plum":    { "fill-raw": { "$value": "#f2e0fd", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#32243a" } } }, "text-raw": { "$value": "#745585", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#caa8dd" } } } },
+      "magenta": { "fill-raw": { "$value": "#f9def9", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#362236" } } }, "text-raw": { "$value": "#7c517d", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#d4a5d5" } } } },
+      "rose":    { "fill-raw": { "$value": "#fcdef1", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#382231" } } }, "text-raw": { "$value": "#815172", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#daa4c8" } } } },
+      "berry":   { "fill-raw": { "$value": "#fedeea", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#39222c" } } }, "text-raw": { "$value": "#835268", "$type": "color", "$extensions": { "homebase.mode": { "dark": "#dda5bc" } } } }
     }
   },
   "font": {
@@ -518,6 +553,16 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
         "negative": { "$value": "{color.warning.11}", "$type": "color", "$description": "Ledger balance marker, you owe. Deliberately warning (amber), not error (red) — avoids reconstructing the flagged green/red pairing against the positive accent, and matches design/VOICE.md's non-alarmist register (owing a split is not an error state)." },
         "neutral": { "$value": "{color.neutral.11}", "$type": "color", "$description": "Ledger balance marker, all settled — a genuinely neutral ink, not a faded positive or negative." }
       }
+    },
+    "tag": {
+      "teal":    { "fill": { "$value": "{color.tag.teal.fill-raw}", "$type": "color" },    "text": { "$value": "{color.tag.teal.text-raw}", "$type": "color" } },
+      "indigo":  { "fill": { "$value": "{color.tag.indigo.fill-raw}", "$type": "color" },  "text": { "$value": "{color.tag.indigo.text-raw}", "$type": "color" } },
+      "violet":  { "fill": { "$value": "{color.tag.violet.fill-raw}", "$type": "color" },  "text": { "$value": "{color.tag.violet.text-raw}", "$type": "color" } },
+      "orchid":  { "fill": { "$value": "{color.tag.orchid.fill-raw}", "$type": "color" },  "text": { "$value": "{color.tag.orchid.text-raw}", "$type": "color" } },
+      "plum":    { "fill": { "$value": "{color.tag.plum.fill-raw}", "$type": "color" },    "text": { "$value": "{color.tag.plum.text-raw}", "$type": "color" } },
+      "magenta": { "fill": { "$value": "{color.tag.magenta.fill-raw}", "$type": "color" }, "text": { "$value": "{color.tag.magenta.text-raw}", "$type": "color" } },
+      "rose":    { "fill": { "$value": "{color.tag.rose.fill-raw}", "$type": "color" },    "text": { "$value": "{color.tag.rose.text-raw}", "$type": "color" } },
+      "berry":   { "fill": { "$value": "{color.tag.berry.fill-raw}", "$type": "color" },   "text": { "$value": "{color.tag.berry.text-raw}", "$type": "color" } }
     }
   },
   "space": {
@@ -748,6 +793,93 @@ Why the CTA is not the accent solid: §Expressive moments reserves solid accent-
       "warning": { "$value": "{color.feedback.warning.text}", "$type": "color" },
       "info": { "$value": "{color.feedback.info.text}", "$type": "color" }
     }
+  },
+  "tag-chip": {
+    "typography": { "$value": "{type.micro}", "$type": "typography" },
+    "swatch": {
+      "teal":    { "fill": { "$value": "{color.tag.teal.fill}", "$type": "color" },    "text": { "$value": "{color.tag.teal.text}", "$type": "color" } },
+      "indigo":  { "fill": { "$value": "{color.tag.indigo.fill}", "$type": "color" },  "text": { "$value": "{color.tag.indigo.text}", "$type": "color" } },
+      "violet":  { "fill": { "$value": "{color.tag.violet.fill}", "$type": "color" },  "text": { "$value": "{color.tag.violet.text}", "$type": "color" } },
+      "orchid":  { "fill": { "$value": "{color.tag.orchid.fill}", "$type": "color" },  "text": { "$value": "{color.tag.orchid.text}", "$type": "color" } },
+      "plum":    { "fill": { "$value": "{color.tag.plum.fill}", "$type": "color" },    "text": { "$value": "{color.tag.plum.text}", "$type": "color" } },
+      "magenta": { "fill": { "$value": "{color.tag.magenta.fill}", "$type": "color" }, "text": { "$value": "{color.tag.magenta.text}", "$type": "color" } },
+      "rose":    { "fill": { "$value": "{color.tag.rose.fill}", "$type": "color" },    "text": { "$value": "{color.tag.rose.text}", "$type": "color" } },
+      "berry":   { "fill": { "$value": "{color.tag.berry.fill}", "$type": "color" },   "text": { "$value": "{color.tag.berry.text}", "$type": "color" } }
+    },
+    "deleted": {
+      "text": { "$value": "{color.text.secondary}", "$type": "color", "$description": "Phase 5 — a deleted tag's chip on a historical transaction: muted ink, no fill (row background shows through), dashed border below" },
+      "border": { "$value": "{color.border.subtle}", "$type": "color" },
+      "border-width": { "$value": "{border.hairline}", "$type": "dimension" }
+    }
+  },
+  "summary-row": {
+    "typography": { "$value": "{type.dense}", "$type": "typography" },
+    "color": { "$value": "{color.text.primary}", "$type": "color" },
+    "amount": {
+      "typography": { "$value": "{type.dense-emphasis}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "total": {
+      "typography": { "$value": "{type.section-label}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "divider": { "$value": "{color.border.subtle}", "$type": "color" }
+  },
+  "tag-management": {
+    "row": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "divider": { "$value": "{color.border.subtle}", "$type": "color" }
+    },
+    "name": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "action": {
+      "rename-recolor": { "$value": "{color.accent.text}", "$type": "color" },
+      "delete": { "$value": "{color.feedback.error.text}", "$type": "color" }
+    }
+  },
+  "transaction-status": {
+    "typography": { "$value": "{type.micro}", "$type": "typography" },
+    "success":     { "color": { "$value": "{color.feedback.success.text}", "$type": "color" } },
+    "failed":      { "color": { "$value": "{color.feedback.error.text}", "$type": "color" } },
+    "pending":     { "color": { "$value": "{color.feedback.info.text}", "$type": "color" } },
+    "unconfirmed": { "color": { "$value": "{color.feedback.warning.text}", "$type": "color" } }
+  },
+  "capture": {
+    "frame": {
+      "border": { "$value": "{color.border.default}", "$type": "color" },
+      "width": { "$value": "{border.hairline}", "$type": "dimension" },
+      "background": { "$value": "{color.surface.default}", "$type": "color" }
+    },
+    "reticle": {
+      "corner-color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "copy": {
+      "typography": { "$value": "{type.dense}", "$type": "typography" },
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "status-icon": {
+      "color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
+  },
+  "shell-header": {
+    "back": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "gap": { "$value": "{space.grouped}", "$type": "dimension" },
+      "icon-size": { "$value": "{size.control-glyph}", "$type": "dimension" },
+      "icon-color": { "$value": "{color.text.secondary}", "$type": "color" },
+      "label": {
+        "typography": { "$value": "{type.dense}", "$type": "typography" },
+        "color": { "$value": "{color.text.secondary}", "$type": "color" }
+      }
+    },
+    "theme-toggle": {
+      "min-height": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "min-width": { "$value": "{size.interactive.min}", "$type": "dimension" },
+      "icon-size": { "$value": "{size.control-glyph}", "$type": "dimension" },
+      "icon-color": { "$value": "{color.text.secondary}", "$type": "color" }
+    }
   }
 }
 ```
@@ -760,9 +892,9 @@ Atomic inventory (Frost 2013 — a composition model, not a file structure):
 
 | Level | Units |
 |-------|-------|
-| Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row |
-| Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list |
-| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form |
+| Atoms | mark glyph · label · badge text · pin toggle · text input · checkbox box · heatmap cell · hairline divider · photo frame · stage row · capture frame · reticle corner · camera status glyph (Phase 4) |
+| Molecules | form field (label + input + error line) · badge (kind formatter + value) · reconciliation row · quick-add (input + add action) · stage list · tag chip (swatch + selection check, Phase 4) · summary row (Phase 5) · UPI transaction row (Ledger row + tag chips + status cue, Phase 5) · tag-management row (swatch + name + rename/recolor/delete, Phase 5) |
+| Organisms | ToolCard · the four dense-frame instances · parse-status block · parse-failure banner + recovery actions · bill edit form · PageHeader (back control + theme toggle, Phase 3) · Capture screen + Confirm-prompt (Phase 4) · UPI manual-entry form + tag-management list (Phase 5) |
 | Templates | page head (mark + H1, then {space.after-page-head}) + stacked module frames — arrangements already specified per page in JOURNEY.md |
 | Pages | JOURNEY.md's seven page specs with real content |
 
@@ -774,6 +906,10 @@ Pattern selections (usability bridge — the principle picks the pattern):
 | Bill edit form | Three chunks (items / adjustments / split), on-blur validation, forgiving amount parsing, reconciliation row | Miller/Cowan ~4±1 · "reward early, punish late" · Postel · Nielsen #5 error prevention |
 | AI-parse feedback | Staged determinate progress over a bare spinner; cancel always present | Nielsen #1 visibility of status · the 1–10s feedback band · Nielsen #3 user control |
 | Parse failure | Plain-language failure surface with exactly two recovery options; photo kept on screen | Nielsen #9 error recovery · Hick (two options) · Nielsen #6 recognition over recall |
+| Capture screen (Phase 4, UPI) | Persistent hairline-frame chrome across all four states; a static icon + text for the wait state, never a spinner | Nielsen #1 visibility of status · §Motion's no-ambient-motion rule · Nielsen #6 (the feed stays visible through error, matching the parse-failure precedent) |
+| Confirm-prompt (Phase 4, UPI) | Two-option response (Success primary CTA / Failed secondary text); no third "unconfirmed" button | Hick–Hyman 1952 · FR-010's non-response default, not a user choice |
+| Filter/group row (Phase 5, UPI) | Bounded three-facet row (tag/status/date), no open query builder | Hick–Hyman (1952) — capped choice set, same convention as the launcher's capped quick-start row |
+| Tag deletion (Phase 5, UPI) | Inline two-option confirm (Confirm delete / Cancel), not a modal | Hick's law (two options) · this system's no-elevation-layer constraint |
 
 #### ToolCard — the launcher organism
 
@@ -796,9 +932,53 @@ One organism renders every tool on the launcher, in both contexts. Adding a tool
 
 **The 7th-tool proof:** a hypothetical "Plants" tool is one new data entry — `{ id: "plants", label: "Plants", mark: "†", route: "/plants", toolType: "checklist", badge: { kind: "count", unit: "to water" }, pinned: false }`. The shelf re-sorts alphabetically (IA's exact scheme), the badge reuses the `count` formatter, the interior reuses the checklist family. No new component, variant, or zone anywhere. The phase mock renders all seven tools — Plants included — from one render function over one data array.
 
+**UPI — the actual 7th tool (Phase 2, 2026-07-20):** the proof above was hypothetical; UPI is HomeBase's real 7th tool and instantiates the same closed props set, no exception — `{ id: "upi-tracker", label: "UPI", mark: "₹", route: "/upi-tracker", toolType: "ledger", badge: { kind: "count", unit: "tracked" }, pinned: false }`. `toolType: "ledger"` because the plan's own constraint adapts UPI's transaction history from the existing Ledger dense-frame family rather than defining a genuine 5th family (§Dense-frame — Ledger (Expenses) interior, extended with this phase's tag chips + status indicator in the data-screens phase). `mark: "₹"` (the rupee sign) — thematically direct for a payment tool, and distinct from every mark already in use (Habits `*`, Movies & TV `"`, Expenses `§`, Food Reviews `‡`, Recipes `¶`, Groceries `&`, the hypothetical Plants `†`): no two tools ever share a mark. `₹` stays typographic per the closed props set's own rule (`icon` is reserved, unused here — the mark IS the icon) — Newsreader Display's currency-symbol glyph coverage is assumed from its broad general-text Unicode range but not yet visually confirmed; flagged for a render-time check at the phase that first builds the launcher shelf with UPI present (the signature-move sizing check above set the same kind of precedent — arithmetic/assumption now, visual confirmation at build). `badge: { kind: "count", unit: "tracked" }` reuses the existing `count` formatter (no new badge kind), matching how Recipes and Food Reviews already badge a running total rather than a streak or balance — UPI's badge counts transactions tracked, not a shared-split balance (that semantic stays Expenses' alone).
+
 **States:** default · pressed ({tool-card.pressed.background} row wash, no transform) · focus-visible (outline in {color.border.input}, offset outside the row) · badge loading ({color.surface.active} skeleton line; mark + label render immediately — they are static data) · badge error (muted inline dash in {tool-card.badge.color}; the card stays fully tappable, per JOURNEY.md's launcher error state) · disabled: not a state this organism has — tools are never disabled or hidden (IA rule: presence is not contingent on data).
 
 **A11y:** the row is a single link (semantic `a`, no ARIA patch needed); accessible name = label + badge text (the mark is `aria-hidden` — it is identity, not information). Pin state is conveyed by glyph shape (filled vs outline) plus presence in the quick-start rail — location and shape cues, never color alone; toggle carries `aria-pressed`.
+
+#### Icon usage — standing system rule (Phase 3, UPI plan, 2026-07-20)
+
+This phase licenses `lucide-react` (already a project dependency — no new install) for real icon glyphs, scoped narrowly. It does **not** reverse ToolCard's "the mark IS the icon" rule above — tool identity marks (Habits `*`, Expenses `§`, UPI `₹`, and every other `ToolCard.mark`) stay typographic, unchanged, no exceptions. The scope test, stated once so any future control can be checked against it: **an icon is licensed only for a functional control that has no existing typographic answer** — a gap-fill, never a stylistic upgrade over working typographic chrome.
+
+Four controls currently pass this test — two from this phase, two from the UPI plan's earlier Phase 2 (`.design-foundations/plans/2026-07-20-upi-shell-nav.md`):
+
+| Control | Licensed by | Why no typographic answer exists |
+|---|---|---|
+| Theme toggle | Phase 3 (below) | No prior control of any kind — nothing to displace, nothing typographic to prefer |
+| Back chevron | Phase 3 (below) | The current `‹` is a bare Unicode character pressed into service, not a mark drawn from this system's own type ladder — the signature Newsreader punctuation (§Signature move) is reserved for page-head identity and was never meant to double as chrome. Replacing it with `ChevronLeft` corrects a placeholder; it doesn't reverse a design decision |
+| Camera controls (scan viewfinder) | Phase 2 | UPI's capture screen has no prior surface at all |
+| Transaction-status glyph | Phase 2 | A 4-state distinction (pending/success/failed/unconfirmed) with no existing typographic device to carry it |
+
+Every other functional glyph already specified in this document — the checklist check mark, the pin toggle's filled/outline shape, the parse-status stage check — is unaffected; this rule doesn't reopen them. It governs new controls only, and any future one must clear the same test before reaching for `lucide-react` instead of type.
+
+#### Shell chrome — PageHeader (Phase 3, `design-systems` + `usability`, 2026-07-20)
+
+The shared `PageHeader` (`packages/web/components/shared/page-header.tsx`) renders on every tool screen and the launcher; this phase gives it a context-aware back control and adds a theme toggle, both app-wide (all 7 tools + launcher) — not UPI-scoped chrome. Same closed-contract discipline as ToolCard above: a new navigational context is a new `back` value handled here, never a bespoke header built beside this one.
+
+**Back control — one contract, three navigational behaviors:**
+
+| `back` value | Behavior | Who uses it |
+|---|---|---|
+| `{ mode: "hub" }` (default) | Renders "‹ HomeBase", links to `/` — unchanged from today's implementation | All 6 pre-UPI tools' single page; UPI's own Scan/landing state (Level 2 of the 3-level IA — JOURNEY.md §Navigation model, UPI's 3-level exception) |
+| `{ mode: "step", onBack }` | Renders "‹ Back" (exact copy: Phase 6), calls `onBack()` instead of navigating — moves the client-side step machine backward one step, no route change | UPI's Amount/Tag/Pay/Confirm steps — the flow is mid-transaction; a "back to hub" tap here would silently abandon it, which is why this is its own mode and not a reuse of `hub` |
+| `{ mode: "parent", href, label }` | Renders "‹ [label]", links to `href` — one level up, not to the hub | UPI's Level-3 sub-pages (`/history`, `/tags`, `/new`) — back goes to the UPI spoke (Scan/landing), matching JOURNEY.md's explicit rule: "a Level-3 page's 'back' goes up to the UPI spoke... not straight to the hub." A second tap from there is an ordinary `hub` back, unchanged |
+| `false` | Renders nothing — no back control at all | The login page's existing exception (a signed-out visitor has no hub to return to); today's `showBackToHub={false}` maps onto this value directly and may stay as a backward-compatible alias at the implementation layer |
+
+Because `{ mode: "hub" }` is the default when the prop is omitted entirely, every existing call site across the other six tools is unaffected — the plan's own no-regression constraint, satisfied by construction rather than a special case. Visual treatment is identical across all three navigational modes (only the label text and the tap destination change): a leading `ChevronLeft` icon at {shell-header.back.icon-size} in {shell-header.back.icon-color}, then the label in {shell-header.back.label.typography} / {shell-header.back.label.color}, gap {shell-header.back.gap} — the same plain-text-and-hairline register as the rest of this system, an icon added only per the rule above, not card or button chrome. Minimum tap height {shell-header.back.min-height} (= {size.interactive.min}, 44px — Fitts's law, Fitts 1954, this project's standing tap-target floor, cited not re-derived).
+
+**Theme toggle:**
+
+An icon-only button, {shell-header.theme-toggle.min-height} × {shell-header.theme-toggle.min-width} minimum (44px square — Fitts 1954, same floor), positioned at the header row's trailing edge, opposite the back control — a two-end row, not centered, per the Never section's standing anti-center-axis rule. Wired to `next-themes`' `setTheme`: on tap, flips the *resolved* theme explicitly (`light` ⇄ `dark`), giving a persistent manual override rather than a one-shot nudge back to `system` — the same `data-theme` mechanism `specs/003-ui-shell-foundation/research.md` §2 already validated for verification-only use, now shipped as a real user control too.
+
+- **Icon states:** `Sun` renders when the resolved theme is light (tapping switches to dark); `Moon` renders when the resolved theme is dark (tapping switches to light) — the glyph reports current state, matching how the pin toggle's filled/outline shape already reports state elsewhere in this system, rather than one static icon that never changes.
+- **`aria-pressed`:** modeled as a two-state toggle (WAI-ARIA toggle-button pattern) — `true` when dark mode is the resolved theme, `false` when light. The accessible name states the action, not the current state ("Switch to dark mode" / "Switch to light mode" — exact copy: Phase 6, matching how every other control in this document defers its words), so the pressed state and the name don't repeat the same fact.
+- **Icon color, both modes (DW-3.2 — no new computation, the already-locked base pairs):** {shell-header.theme-toggle.icon-color} resolves to {color.text.secondary} — the identical ink the back control uses — against {color.background}. This exact ink is already contrast-verified above (§Color tokens' contrast report) against {color.surface.default}: **light 5.65:1, dark 8.79:1**, both clearing the 4.5:1 AA target with real margin. {color.background} is, in both modes, the more extreme of the two neutral surfaces relative to {color.text.secondary}'s mid-tone — lighter than {color.surface.default} in light mode, darker than it in dark mode (see §Color tokens above for the underlying values) — so the already-verified surface pairing is the conservative floor, not an assumption stretched past what was measured. Both icon states (`Sun` and `Moon`) share this one ink token; only the glyph shape changes with mode, not the color — one verified ratio pair covers all four cells (2 icons × 2 modes).
+
+**Regression guard (the plan's dirty case):** the login page's `back={false}` case renders no back control, exactly as today's `showBackToHub={false}` — a rendering omission, not a behavior change, so nothing about the `hub`/`step`/`parent` modes above touches it. The theme toggle is unaffected by `back`'s value and renders regardless of it — dark/light preference isn't gated behind sign-in, unlike the hub link, which needs a hub to point at.
+
+**`specs/003-ui-shell-foundation/research.md` §2 — flagged for correction:** that section's rejection of a visible toggle states: *"A manual visible toggle switch — rejected because no theme-switch control exists anywhere in `JOURNEY.md`'s locked page specs across all 7 pages; inventing one would add UI surface the design system never asked for."* JOURNEY.md's UPI Navigation-model amendment and this section now both specify one, so that sentence is superseded, not merely outdated — it must be corrected, not left standing beside the component spec it now contradicts. A short correction note pointing here has been added directly to that file; a full rewrite of §2 is implementation-phase work, not this phase's.
 
 #### Dense-frame — the shared functional pattern
 
@@ -812,6 +992,7 @@ The four dense-data families are one functional pattern (Kholmatova: shared UI b
 
 - **Heatmap (Habits):** a 7-column calendar grid of square cells, gap {heatmap.cell.gap}; weekday labels in {heatmap.label.typography} / {heatmap.label.color}. Complete cell: {heatmap.cell.complete.fill} — the one licensed solid-accent moment, exactly as locked — carrying an in-cell mark in {heatmap.cell.complete.mark} (v1 glyph: the asterisk, echoing the Habits mark). The mark, not the fill, carries complete/incomplete: the fill's contrast against the light page background is expressive, not informational (verified in the spec-check contrast set). This discharges the Phase 4 redundant-cue rule for the heatmap ahead of Phase 7's numeric-on-tap. Incomplete cell: {heatmap.cell.incomplete.fill}. Streak cap, legend, and full encoding: see §Heatmap streak ramp below.
 - **Ledger (Expenses):** three-column rows — description in {ledger.row.typography}, date/payer meta in {ledger.meta.typography} / {ledger.meta.color}, amount right-aligned in {ledger.amount.typography} / {ledger.amount.color} with `font-variant-numeric: tabular-nums` so columns of figures align. The balance line states "you owe" / "you're owed" in words with an explicit sign as the primary cue; color is secondary reinforcement — see §Ledger balance indicator below.
+  **Extended, not replaced (Phase 5, UPI plan, 2026-07-21):** UPI's transaction row reuses this exact three-column anatomy unchanged (description → payee, meta → timestamp, amount slot untouched) and adds two elements *below* the row rather than altering it — a tag-chip row and Phase 2's status cue. Full spec: §Transaction row — UPI history.
 - **Checklist (Groceries):** rows of checkbox box ({checklist.box.size} square, border {checklist.box.border} at {checklist.box.border-width} — the form-boundary ink, 3:1 verified) + item label. Checked: box fills {checklist.checked.fill} with a check mark in {checklist.checked.mark}, label struck through in {checklist.checked.label} — three redundant cues (fill, mark shape, strikethrough), never color alone.
 - **Photo-card (Movies & TV · Food Reviews):** a 2-column grid, gap {photo-card.gap}; user imagery in original color inside hairline frames ({photo-card.frame.border} at {photo-card.frame.width}) — the frame is §Direction's imagery-containment device, not card chrome: no fill, no radius, no shadow. Caption in {photo-card.caption.typography} / {photo-card.caption.color} and meta in {photo-card.meta.typography} / {photo-card.meta.color} sit below the frame, unboxed.
 
@@ -843,6 +1024,97 @@ The cap reuses the existing complete-cell tokens unchanged — the licensed habi
 **Scale:** when two or more counterparties are shown, every row shares the same zero position and the same scale, sized to the largest balance currently shown (Few's scale-consistency rule) — the track's extent reflects real data, never an arbitrary fixed maximum. With a single counterparty, the marker sits at a fixed directional offset rather than a proportional one, since there is nothing to scale relative to yet — this avoids implying a precision the single value doesn't carry.
 
 **Color choice:** {ledger-balance.marker.negative} deliberately draws from the warning family, not the error family — reusing error/red here would reconstruct the exact green/red pairing Phase 4's standing rule flags, and would overstate the tone (owing a normal split is not an error). {ledger-balance.marker.positive} reuses the accent ink already licensed elsewhere for done-stage markers and progress fill. {ledger-balance.marker.neutral} is a genuinely neutral ink, not a faded version of either extreme — the zero-balance state gets its own true representation, per the edge case.
+
+#### Tag color ramp (Phase 2, `color` + `design-systems`)
+
+**What it's for:** UPI's open-ended, user-defined transaction tags (Groceries, Rent, Dining, ...) need a categorical color aid so the transaction list and filter chips scan quickly — color is a secondary categorization channel here, never the tag's identity: the tag's own text label is always rendered alongside its swatch (chapter-08's actual "Must pass" bar — color is never the SOLE differentiator — is discharged structurally, by construction, not by this ramp's quality).
+
+**Derivation method:** the same Lab/OKLCH-via-`palette.mjs` method the locked accent and functional ramps used (one `palette.mjs` invocation per hue — that hue as the seed, muted chroma, mono harmony), not a new engine. 8 swatches (the DW-2.1 floor) — fewer, more widely-spaced hues, chosen deliberately over the plan's 12-swatch ceiling once the derivation (below) showed that at this muted chroma, adding swatches measurably shrinks the space between them. Fill = each hue's **{tag-chip.swatch.\<name\>.fill}** (`-4` ramp step); text = **{tag-chip.swatch.\<name\>.text}** (`-11` step, the same ink role every other ramp in this system uses for on-tint text).
+
+**Hue selection — distinct from the four functional hues, defensively also the accent:** every candidate hue was required to clear a >=25° circular margin from error (25°), warning (85°), success (145°), info (240°), *and* accent (157.5°) — the plan's own constraint names the four functional hues; accent is added here defensively, since a tag reading as "the app's own accent green" would be a worse collision than reading as e.g. the info blue. That leaves two safe arcs: a narrow teal/cyan gap between success/accent and info (~182.5°-215°) and a wide violet-through-pink gap between info and error (~267°-358°, capped below the hueName "red" bucket). One hue anchors the narrow arc (teal, 196°); the other 7 spread evenly across the wide arc (indigo 274°, violet 287°, orchid 300°, plum 313°, magenta 326°, rose 339°, berry 352°). Verified independently by `.design-foundations/build/upi-tag-ramp-check.mjs` (committed this phase) — PASS, exit 0: all 8 hues clear the >=25° reserved-hue margin, all pairwise >=8° apart, and every fill/text pair clears WCAG AA in both modes (light 4.80:1-5.06:1, dark 7.01:1-7.21:1, target 4.5:1 — see the script's run output for exact per-swatch figures).
+
+**Why `-4`, not `-3`:** the mock's placeholder ramp used each hue's `-3` step. This phase's derivation found `-3`'s worst-case pairwise OKLab distance between adjacent swatches (full color vision, no simulation) was 0.0027-0.0044 — visually close to indistinguishable even before any colorblindness is considered. `-4` roughly doubles that separation (worst case 0.0080, between {tag-chip.swatch.violet.fill} and {tag-chip.swatch.orchid.fill}) while its contrast against `-11` text still clears AA with real margin in both modes — a strict improvement on both axes, not a tradeoff. This is the concrete instance of this phase's brief not rubber-stamping the mock's throwaway choice.
+
+**Disclosed limitation (colorblind simulation):** `upi-tag-ramp-check.mjs` also ran the Viénot/Brettel/Mollon (1999) protanopia/deuteranopia simulation this project already uses (`.design-foundations/build/phase7-dataviz-check.mjs`) across all 28 swatch pairs, both modes. 9 of 112 simulated pairs (8%) fall under a 0.01 OKLab near-identity floor — mostly the tightly-packed middle of the wide arc (violet/orchid, rose/berry). This is a real, disclosed tradeoff of packing 8 hues into ~150° of hue space left over once the 5 reserved hues are excluded: full mutual distinguishability under both a reserved-hue exclusion *and* a colorblindness simulation is not achievable at 8 swatches without either raising chroma past "muted" (ruled out — the Never section's "no vivid/energetic/high-chroma color... throughout" is a whole-system rule, not accent-only) or dropping below the DW-2.1 floor of 8 swatches. Because tag identity's actual accessibility guarantee is the always-rendered text label (never the swatch alone), this is accepted rather than forced — matching how Phase 7 itself treated the CVD check for the heatmap (a secondary usefulness signal, not a redundant-cue requirement) rather than the stricter must-stay-distinguishable bar it used for the ledger's 3-state diverging indicator, where color IS a secondary carrier of a right/wrong answer.
+
+**Cycling rule (the plan's stated edge case):** a 9th+ user-created tag reuses swatches by creation order, `index mod 8` — the 9th tag gets {tag-chip.swatch.teal.fill} again, the 10th gets indigo's, and so on. This is a stated, intentional rule, not a silent break: because the tag's text label is always the primary identity cue, two tags sharing a swatch past the 8th is a cosmetic repeat, not an ambiguity.
+
+**Chip rendering:** {tag-chip.typography} (reuses {type.micro} — 12px, regular weight, matching this ramp's actual on-page size; no new type token minted for an 8-swatch chip). Zero border-radius, per the locked no-radius rule — a tinted rectangle, not a pill.
+
+#### Transaction status indicator (Phase 2, `usability` + `color`)
+
+UPI transactions carry one of 4 states — pending / success / failed / unconfirmed — and this is exactly the case chapter-08's Pattern 2 (Color-Only Status Indicators to Redundant-Cue Indicators) names directly: a status distinction with a real right/wrong reading, so color is never sufficient alone (unlike the tag ramp above, which has no "correct" answer to get wrong).
+
+**Discharge — words + icon glyph, color as reinforcement only:** each state renders its plain-language word (Success / Failed / Pending / Unconfirmed — VOICE.md owns the exact copy, Phase 6) plus a leading icon glyph, both in {transaction-status.\<state\>.color}. Icon choice is licensed by this plan's icon-scope decision (lucide-react, since no existing typographic mark covers a 4-state status): `CheckCircle2` (success), `XCircle` (failed), `Clock` (pending), `HelpCircle` (unconfirmed — a genuinely open, not-yet-known state, not an error). Shape is the redundant cue a colorblind user reads when the color itself doesn't register — four visually distinct silhouettes, not four tinted copies of one glyph.
+
+**Color reuse, not new tokens:** rather than minting a 5th color family, this reuses the four already-locked, already-contrast-verified functional inks 1:1 — success->{transaction-status.success.color} (={color.feedback.success.text}), failed->{transaction-status.failed.color} (={color.feedback.error.text}), pending->{transaction-status.pending.color} (={color.feedback.info.text}), unconfirmed->{transaction-status.unconfirmed.color} (={color.feedback.warning.text}). No new contrast verification is needed for the color layer — Phase 4's functional-ink-on-page-background report (both modes, all four hues) already covers it, and this phase's spec-check pairs additions re-verify the same four inks against {color.background} directly for the record; {transaction-status.typography} reuses {type.micro}, same as the tag chip above.
+
+**Why `pending`->info and `unconfirmed`->warning (not the reverse):** pending is a normal, expected in-flight state (the payment is genuinely being processed) — info's calm blue fits Norman's affordance-signaling better than borrowing warning's amber for a non-problem. Unconfirmed is a real open question (the user tapped confirm and the app never got a definitive answer) — warning's "needs your attention" register fits better than info's fully-routine tone, and it avoids implying outright failure, which error/{color.feedback.error.text} would.
+
+#### Capture screen — Scan step (Phase 4, UPI plan, `journey` + `usability`, 2026-07-21)
+
+The main flow's Level-2 landing state (JOURNEY.md's "UPI (main flow)" page spec, step 1 "Scan") — the first camera-based surface in HomeBase, with no persistent nav beneath it (JOURNEY.md's IA §Navigation model — UPI's 3-level exception). PageHeader renders `{ mode: "hub" }` here (§Shell chrome — PageHeader), unchanged, since this step is the tool's own top level, not mid-transaction; the standing secondary link to History (per the approved mock, `design/mocks/upi-landing.html`, and JOURNEY.md's content-block 1) is the IA amendment's other escape hatch.
+
+Four states, per DW-4.1 — permission-pending, active-scanning, malformed-QR error, camera-denied fallback. All four sit inside the same capture frame ({capture.frame.background} within {capture.frame.border} at {capture.frame.width} — the same hairline-frame device the photo-card family already uses for contained imagery, never a card). Across every state, the shell header, the standing "View transaction history" secondary link, and the tertiary "Can't scan? Enter manually" link stay present and unchanged (Nielsen #1, #3) — no state is ever a dead end.
+
+- **Permission-pending** (before the browser grants or denies access): a static `Camera` glyph (lucide-react, {capture.status-icon.color} — licensed under the already-approved "camera controls" row, §Icon usage) centers in the frame with a one-line status note in {capture.copy.typography}/{capture.copy.color} (exact words: Phase 6). Static, not animated: §Motion's "no ambient or looping motion" rule rules out a spinner here — a fixed icon + text is this system's own existing precedent for a wait state, the same static-placeholder logic the dense-frame families already use for their skeleton loading rows.
+- **Active-scanning** (the mock's rendered state, unchanged): the reticle — four corner brackets in {capture.reticle.corner-color}, `aria-hidden` since the frame's own `role="img"` accessible name already states "scanning for a UPI QR code" — plus the same copy treatment with different words. This phase promotes the mock's ad-hoc CSS into the {capture.*} tokens above; no new visual decision is made here.
+- **Malformed-QR error** (FR-021): an inline banner reusing the existing feedback tokens verbatim — {banner.surface.error}/{banner.text.error}, leading icon + text (§Redundant-cue discharge's "Feedback banners" row — no new color pair) — appears below the still-visible frame (Nielsen #6: the camera feed stays live, matching the AI-parse-failure precedent of keeping the captured photo on screen). Two recovery options, per Hick's law and the Expenses-failure precedent: **Retry scanning** (the banner's own action, resets the reticle, no route change) and the screen's already-standing **"Can't scan? Enter manually"** tertiary link — reused, not duplicated, so the error state doesn't stack a third control alongside two that already exist structurally on the page.
+- **Camera-denied fallback** (FR-022): a *fallback*, not an error state — DW-4.1's own wording ("camera-denied fallback," distinct from "malformed-QR error") and JOURNEY.md's flow ("inline manual payee/amount entry fallback… never a dead end") both name a single, direct path forward, not a two-option recovery menu; Hick's law has nothing to reduce when there is exactly one way forward. The frame shows a static `CameraOff` glyph (same licensing as `Camera` above) plus a one-line note (Phase 6); the manual payee + amount fields render beneath it using the existing {form-field.*} tokens unchanged — the same fields the Details step already uses, so nothing downstream forks on whether a transaction originated from a scan or this fallback.
+
+Step-to-step transitions (Scan → Details → Pay → Confirm) use the already-locked 200-300ms opacity-fade + small-transform budget (§Motion) — no new motion token minted here; `prefers-reduced-motion` collapses every one of them to instant exactly as already specified, not re-derived. Every step past Scan uses Phase 3's `{ mode: "step", onBack }` PageHeader contract (§Shell chrome — PageHeader already names this exact case) — no redundant back element is drawn on any step.
+
+#### Details step — amount + tag (Phase 4, UPI plan, `usability` + `design-systems`; merged 2026-07-22)
+
+One screen, not two sequential ones (resolved 2026-07-22: the separate Amount and Tag steps collapsed into a single Details step, cutting the "Continue" tap that used to sit between them — neither field's value gates the other, so nothing about the original two-step sequencing was load-bearing). The amount field and the tag picker render together on arrival, both already-locked treatments unchanged.
+
+**Amount.** Reuses the form-field molecule unchanged (§Form field + the bill edit form) — no new tokens. Input at {form-field.input.typography} (16px, the already-locked iOS auto-zoom floor), boundary {form-field.input.border}, label {form-field.label.typography}/{form-field.label.color}. Forgiving parsing (Postel's law, already the locked rule for amount inputs system-wide) applies identically here: pre-filled and editable when the QR carried an amount, empty and editable when it didn't (FR-003) — one field, not two variants. Validation now runs on the "Pay" tap rather than a step-local "Continue" (there is no longer a step boundary to validate against): a zero, negative, or non-numeric amount blocks the tap (FR-004) and renders the same three redundant cues every other form-field error already uses — {form-field.error.border}, an icon glyph, and message text in {form-field.error.text} (words: Phase 6) — no bespoke error styling invented.
+
+**Tag.** Existing tags render as tappable chips using Phase 2's ramp unchanged — {tag-chip.swatch.\<hue\>.fill}/{tag-chip.swatch.\<hue\>.text}, {tag-chip.typography} (reuses {type.micro}), zero border-radius (the locked no-radius rule). Every chip always shows its swatch, selected or not — the swatch is identity, not selection (§Tag color ramp: "the tag's own text label is always rendered alongside its swatch"). Selection needs its own cue, not a new color: a selected chip gains a leading check glyph rendered in that same chip's own {tag-chip.swatch.\<hue\>.text} ink — the identical, already-verified pair (all 8 hues, both modes, in the spec-check's contrast gate), zero new tokens and zero new contrast computation — plus `aria-pressed`, mirroring exactly how the ToolCard pin toggle already discharges selection by shape (filled vs. outline) rather than color (§ToolCard "A11y"). Zero, one, or many chips may be selected (FR-007) — no forced single choice.
+
+"Add new tag" is inline (FR-006), matching Groceries' own quick-add molecule (input + add action — no dedicated Tier-3 entry there either, so this stays parity, not a gap): a single {form-field.input.*}-styled entry, submitted without leaving the flow. A newly created tag is auto-assigned the next swatch by the already-stated cycling rule (§Tag color ramp: creation order, `index mod 8`) — no new assignment logic invented here. Zero-tags-yet (first-ever use) still renders the "add new tag" affordance alone, fully usable (JOURNEY.md's Details-step empty state) — no dead end.
+
+#### Pay step + no-UPI-app error (Phase 4, UPI plan, `usability`)
+
+Tapping "Pay" (the flow's one primary CTA, {cta.*} unchanged) constructs the UPI deep link and redirects (FR-008); the transaction is persisted at `pending` status before the redirect fires (SC-004), which is what makes every branch below safe. The handoff itself is brief — JOURNEY.md's own state table calls it "no long-running fetch," below the 1-10s feedback band the staged AI-parse pattern exists for — so it gets a single plain status line in {type.dense}/{color.text.secondary} (words: Phase 6), not the multi-stage {parse-status.*} treatment Expenses uses: that pattern is reserved for genuinely multi-second waits (Nielsen #1's feedback-band distinction), and reusing it for an instant handoff would be theater, not information.
+
+**No UPI app available (FR-020):** the existing feedback tokens again — {banner.surface.error}/{banner.text.error} — state what happened; the already-saved pending transaction (SC-004: no transaction is ever silently lost) is the fix half of Yifrah's shape here, since there's nothing to retry-and-lose. Two recovery options: **Retry** as the primary CTA ({cta.*} unchanged, attempts the redirect again) and a secondary plain-text **"Back to Scan"** at {cta.min-height} tap height, physically separated from the bar — the same "secondary actions are plain text, physically separated" rule already stated under §Primary CTA below, not a new pattern.
+
+#### Confirm-prompt (Phase 4, UPI plan, `usability` + `color`)
+
+Shown on return to the tool (Page Visibility signal, FR-009). Exactly two response options, per DW-4.3 and Hick's law: **Success** as the primary CTA ({cta.*} unchanged — the affirmative/expected path gets the same treatment Expenses' "Confirm as-is" already does) and **Failed** as the secondary plain-text option beside it (the same physically-separated convention as above) — no third button for "unconfirmed": that status is never a user choice, it's what a non-answer resolves to (FR-010) if the user navigates away instead of answering, never a stuck state (JOURNEY.md's Confirm-step spec).
+
+Once resolved — by either answer, or by the no-response default — the transaction's status renders using Phase 2's transaction-status component unchanged: the plain-language word plus its distinct icon glyph, both in {transaction-status.\<state\>.color} (success/failed/pending/unconfirmed — §Transaction status indicator). This is DW-4.3's "status indicator's redundant cue applied" discharged by direct reuse, not a new instance — the confirm-prompt doesn't invent its own color language, it hands off to the one that already exists.
+
+#### Transaction row — UPI history (Phase 5, UPI plan, `design-systems` + `usability`, 2026-07-21)
+
+Extends the Ledger (Expenses) row anatomy above — description / meta / amount, three-column, right-aligned tabular-numeral amount (§Dense-frame — the shared functional pattern, "Ledger (Expenses)," amended above) — unchanged in its base slots: payee name occupies the description slot ({ledger.row.typography}), the timestamp occupies the meta slot ({ledger.meta.typography} / {ledger.meta.color}), the amount slot is untouched ({ledger.amount.typography} / {ledger.amount.color}). Two elements are added below the row, never inside it: Phase 2's transaction-status cue (words + icon, {transaction-status.\<state\>.color}, unchanged) sits beside the meta line, and a wrapped row of Phase 2's tag chips ({tag-chip.swatch.\<hue\>.fill}/.text, unchanged) sits beneath. This is the same "extend the chrome, add rows beneath" discipline the checklist and photo-card interiors already follow — no new row-variant component, one more populated slot on the existing one.
+
+**Multi-tag legibility (the plan's edge case; DW-5.2):** a transaction with two or more tags renders exactly one amount, once, in the amount slot — never divided, apportioned, or annotated per tag. This is the row's own legibility answer to FR-014's full-amount-per-tag rule: because the row shows a single undivided figure regardless of tag count, nothing on the row itself implies a split, so a viewer reading a 3-tag row never misreads it as a 3-way division. The rule's arithmetic lives one level up, in the summary block below — row and summary agree by each showing the true figure at their own level (one full amount per row; that same full amount counted again per tag in the summary), not by the row pre-computing anything.
+
+**Inline edit (FR-015):** a plain-text "Edit" affordance at {size.interactive.min} tap height sits at the row's trailing edge — typographic, not a new icon (the icon-usage standing rule licenses `lucide-react` only where no typographic answer exists; a text link already is that answer, so this isn't a case the rule needs to clear). Tapping it expands the row in place into its editable fields — the same Tag-step chip picker and the same four-state status picker the manual-entry form uses (below) — through {form-field.\*} tokens unchanged; no navigation, no modal (this system has no elevation layer). Save/cancel follow the same physically-separated plain-text convention as every other secondary action in this document.
+
+**Filter/group row (tag/status/date):** a bounded three-facet row, not an open query builder — Hick–Hyman (1952), the same capped-choice-set principle already cited for the launcher's quick-start row (§Component specs pattern-selection table) — reusing {color.border.default} for its rectangular hairline boundary and {color.text.primary} for its label; no new component token minted for a control this simple.
+
+**Shared states:** loading/empty/error/success reuse §Dense-frame's own shared-states convention (skeleton rows in the real chrome, the tool's empty-state message replacing the interior, inline row-level error, populated success) unchanged — no new empty/loading/error primitive invented for History.
+
+#### UPI summary — per-tag/per-period totals (Phase 5, UPI plan, `usability`)
+
+Plain numeric rows, not a chart (§Direction's "a kept notebook, not a productivity dashboard," JOURNEY.md's History page spec) — new component tokens: {summary-row.typography} / {summary-row.color} for each tag/period row, {summary-row.amount.typography} / {summary-row.amount.color} for its right-aligned tabular-numeral figure (reusing the ledger amount's own numeral treatment, not a new number style), separated by {summary-row.divider}; the closing total row steps up to {summary-row.total.typography} — the section-label weight — so the aggregate reads as the heavier line without a rule or fill marking it. All color references are this system's base primary-ink alias, already used by every other dense-frame row — {color.text.primary} on {color.background} is the original locked reading pair; no new contrast computation.
+
+**Full-amount-per-tag rule, stated explicitly (DW-5.2, FR-014):** each tag's summary row totals every transaction carrying that tag at its full recorded amount — a transaction with three tags contributes its whole amount to all three tags' rows, not a third each. No proportional splitting is computed anywhere in this system (spec.md's own stated assumption). Consequence, named so it isn't mistaken for a bug: the period total row sums the underlying transactions once each, so it will not equal the sum of the tag rows above it whenever any transaction carries more than one tag — that gap is the rule working as specified, not an arithmetic error.
+
+#### UPI manual entry — /new (Phase 5, UPI plan, `usability`)
+
+Shares the ledger interior structurally (JOURNEY.md's own framing) by reusing components wholesale, not by inventing a parallel form: payee name and amount are {form-field.\*} inputs identical to the flow's own Details step (forgiving parsing, on-blur validation, the same three redundant error cues — no bespoke manual-entry field style); tags reuse the Details step's chip picker unchanged, including its inline "add new tag" path and cycling rule; date is a native date input styled through the same {form-field.input.\*} tokens (boundary, background, text) — no new date-picker component. Status is the one field the scanned flow never asks the user directly (a scanned transaction gets `pending`, then success/failed/unconfirmed from the Confirm step) — here it's a direct four-way choice, rendered as Phase 2's transaction-status words+icon treatment made tappable: the same leading check-glyph selection cue the Details step already uses (§Details step — amount + tag: "a selected chip gains a leading check glyph... plus `aria-pressed`"), applied to the four status options instead of tag chips — zero new selection mechanic, one existing one reused on new content. "Save" is the page's one primary CTA ({cta.\*} unchanged, per JOURNEY.md's page spec), bottom-fixed per §Primary CTA below.
+
+#### UPI tag management — /tags (Phase 5, UPI plan, `design-systems` + `usability`)
+
+Each row: the tag's own swatch ({tag-chip.swatch.\<hue\>.fill}, unchanged), its name in {tag-management.name.typography} / {tag-management.name.color}, and rename/recolor/delete as plain-text actions — rename and recolor share {tag-management.action.rename-recolor} (the already-verified accent ink, {color.accent.text} against {color.surface.default}: light 5.52:1, dark 8.95:1, target 4.5:1 — §Color tokens' contrast report; {color.background} is the more extreme neutral surface in both modes, the identical conservative-floor reasoning §Shell chrome — PageHeader already used for its own icon color, so this is a restatement of an already-cleared floor, not a new computation), delete gets its own distinct ink, {tag-management.action.delete} (the already-verified error ink, the same functional ink against {color.surface.default}: light 5.91:1, dark 8.49:1 — §Functional colors' contrast report — same floor argument). A destructive action reads differently from the two non-destructive ones by color plus by label wording, never color alone. Rows sit {tag-management.row.min-height} tall, separated by {tag-management.row.divider} — the same dense-frame divider rhythm as every other list in this system, no new row chrome.
+
+**Delete confirmation (DW-5.3; the plan's constraint that deletion never blanks or errors a historical transaction):** tapping Delete does not fire immediately. Hick's law (exactly two options — the same convention the Confirm-prompt and Parse-failure surfaces already use) replaces that row's three actions with an inline **Confirm delete** (the destructive ink again) / **Cancel** (plain secondary text) pair, in place — not a modal, since this system has no elevation layer (the same reason the heatmap's tap-caption stays inline rather than a floating tooltip). Confirming removes the tag from the tag list and from every future tag-selection surface (the Details step's chips, the manual-entry tag picker above); it does not touch a single already-recorded transaction (FR-017).
+
+**Historical-transaction treatment (the plan's edge case — visibly distinct, never blank):** a transaction recorded before its tag was deleted keeps rendering that tag's exact name — the text label is never blanked, replaced, or dropped, discharging FR-017's actual guarantee — but the chip's fill and border switch from the tag's own swatch to a muted, fill-less treatment: {tag-chip.deleted.text} (no separate fill token — the row's own background shows through) inside a dashed {tag-chip.deleted.border} at {tag-chip.deleted.border-width}, replacing the swatch's solid tint. Continuing to show the original vivid swatch would misreport a deleted tag as still active and selectable, which it no longer is; blanking the label would violate FR-017 outright — the dashed, fill-less treatment is the third option: distinct at a glance next to any chip that still carries full color, legible ({tag-chip.deleted.text} is the same secondary ink already verified against {color.background} in §Shell chrome — PageHeader: light 5.65:1, dark 8.79:1), and never broken (nothing is removed, nothing 404s, nothing renders empty).
 
 #### Primary CTA
 
@@ -878,6 +1150,9 @@ Green accent + red error means every state distinction must survive without colo
 | Checklist checked | {checklist.checked.fill} | Check-mark shape + label strikethrough |
 | Parse stages | {parse-status.stage.done.color} | Check glyph + list position |
 | Pin state | {tool-card.pin.active-color} | Glyph shape (filled vs outline) + presence in the rail |
+| Transaction status (Phase 2, UPI) | {transaction-status.success.color} / .failed / .pending / .unconfirmed | Plain-language word (Success/Failed/Pending/Unconfirmed) + a distinct lucide icon glyph per state (CheckCircle2/XCircle/Clock/HelpCircle) — reuses the four already-verified functional inks, no new color |
+| Tag chip selection (Phase 4, UPI) | {tag-chip.swatch.\<hue\>.text} — the identical ink the chip's own label already uses, no new color | Leading check-glyph presence/absence + `aria-pressed` — selection is a shape/ARIA cue, exactly like the ToolCard pin toggle's filled-vs-outline convention, never a new color pairing |
+| Deleted tag on a historical transaction (Phase 5, UPI) | {tag-chip.deleted.text}, no fill | Dashed border + absent fill vs. active tags' solid swatch fill — a shape/fill-presence cue, not a hue distinction; the text label itself is the primary, always-legible cue and is never altered |
 
 <!-- spec-check:prose-end -->
 
@@ -887,3 +1162,7 @@ Green accent + red error means every state distinction must survive without colo
 - ~~Full functional-color set + redundant-cue rule~~ — resolved Phase 4: see Functional colors section. Redundant-cue rule stands as a requirement for Phase 5/Phase 7 to implement, not just document.
 - ~~Component-level token tiers (global/alias/component, W3C DTCG format) and the launcher-card + four dense-data-family specs~~ — resolved Phase 5: see Design system section. Heatmap/ledger encoding detail (streak cap, legend, balance color semantics) remains with Phase 7; microcopy with Phase 6.
 - ~~Heatmap streak ramp (cap + legend) and ledger balance diverging encoding~~ — resolved Phase 7: see §Heatmap streak ramp + legend and §Ledger balance indicator. Both colorblind-verified (`phase7-dataviz-check.mjs`) and checked against the Cairo lie taxonomy (Phase 7 discovery note).
+- ~~UPI's tag color ramp, transaction-status redundant cue, and ToolCard glyph~~ — resolved UPI-plan Phase 2 (2026-07-20): see §Tag color ramp, §Transaction status indicator, and the ToolCard section's new UPI instantiation. Ramp colorblind-verified (`upi-tag-ramp-check.mjs`) with a disclosed limitation (8% of simulated swatch pairs fall under the near-identity floor — accepted because tag color is never the sole identity channel, the text label always is). `mark: "₹"`'s Newsreader glyph coverage is assumed, not yet visually confirmed — flagged for the phase that first renders the launcher shelf with UPI present.
+- ~~PageHeader's back-control behavior for UPI's 3-level exception, a visible theme toggle, and the icon-usage scope~~ — resolved UPI-plan Phase 3 (2026-07-20): see §Icon usage and §Shell chrome — PageHeader. Back control unified into one `hub`/`step`/`parent`/`false` contract (all 6 pre-UPI tools default to `hub`, unaffected); theme toggle wired to `next-themes`, both icon states verified against the already-locked neutral-11/background pairing (light 5.65:1, dark 8.79:1). `specs/003-ui-shell-foundation/research.md` §2's no-visible-toggle rationale is now superseded — a correction note was added directly to that file rather than silently left contradicting this section.
+- ~~UPI's transaction-row tag-chip + status variant, the multi-tag summary rule, manual entry, and tag management (incl. tag deletion's historical-transaction treatment)~~ — resolved UPI-plan Phase 5 (2026-07-21): see §Transaction row — UPI history, §UPI summary — per-tag/per-period totals, §UPI manual entry — /new, and §UPI tag management — /tags. The Ledger dense-frame entry itself gained a one-sentence amendment pointing here (extended, not replaced). Deleted-tag chips get a dashed, fill-less treatment ({tag-chip.deleted.\*}) distinct from active tags' solid swatch fill — the name label itself is never blanked (FR-017). No new hex minted: every new component token (tag-chip.deleted, summary-row, tag-management) resolves to an already-verified alias-tier ink, several restating the same "{color.background} is the more extreme neutral surface" floor argument §Shell chrome — PageHeader established for its own icon color.
+- ~~The flow screens' four capture states, the amount/tag steps' token reuse, and the pay/confirm steps' two-option error and response shapes~~ — resolved UPI-plan Phase 4 (2026-07-21): see §Capture screen — Scan step, §Details step — amount + tag, §Pay step + no-UPI-app error, and §Confirm-prompt. Camera-denied is specified as a *fallback* (a single direct path, per JOURNEY.md's own wording) rather than a Hick's-law two-option error menu; the two-option constraint applies to malformed-QR, no-UPI-app, and the confirm-prompt, each reusing existing {banner.\*}/{cta.\*} tokens with zero new color computation. Tag-chip selection is discharged by shape (a leading check glyph in the swatch's own already-verified ink) plus `aria-pressed`, not a new color pairing. One new component-tier token group (`capture`) was added, every value resolving through the alias tier — no new global color, no new `palette.mjs` run.

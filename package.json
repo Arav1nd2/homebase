@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run db:start && npm run db:migrate:local && npm run build:workers --workspace=web && npm run preview:workers --workspace=web",
+    "dev": "npm run db:start && npm run db:migrate:local && npm run build:workers --workspace=web && concurrently -k -n web,send-email,fake-resend -c blue,magenta,yellow \"npm run preview:workers --workspace=web\" \"npm run dev --workspace=send-email -- --port 8788\" \"npm run dev:fake-resend --workspace=e2e\"",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
@@ -20,6 +20,7 @@
     "test:integration": "npm run db:start && npm run db:reset && npm run db:migrate:local && npm run test:e2e && npm run db:stop"
   },
   "devDependencies": {
+    "concurrently": "^9.1.0",
     "supabase": "^2.109.1"
   }
 }

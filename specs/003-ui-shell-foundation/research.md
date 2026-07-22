@@ -73,6 +73,19 @@ theme-switch control exists anywhere in `JOURNEY.md`'s locked page specs
 across all 7 pages; inventing one would add UI surface the design system
 never asked for.
 
+> **Correction (2026-07-20, UPI + Shell Navigation/Chrome design plan,
+> Phase 3):** the rejection above is superseded, not just outdated.
+> JOURNEY.md's UPI Navigation-model amendment and DESIGN.md's new
+> §Shell chrome — PageHeader section both now specify a visible
+> theme-toggle control, shipped in the shared `PageHeader` app-wide (all 7
+> tools + launcher) — see `.design-foundations/plans/2026-07-20-upi-shell-nav.md`
+> Phase 3. The `next-themes` / `attribute="data-theme"` mechanism decided
+> above is unchanged and now serves double duty: the verification-only
+> override this section originally justified, and the real user-facing
+> toggle. This note flags the correction inline; the alternatives-considered
+> rationale above is left as the historical record of that decision, not
+> rewritten.
+
 **SSR/hydration note**: `next-themes` requires `suppressHydrationWarning`
 on `<html>` in `app/layout.tsx`, since the resolved theme is only known
 client-side on first paint.

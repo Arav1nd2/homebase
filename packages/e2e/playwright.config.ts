@@ -21,6 +21,13 @@ const FAKE_RESEND_PORT = 9999;
 // specs/002-email-otp-auth/research.md §10.
 export default defineConfig({
   testDir: ".",
+  // upi-camera-spike.spec.ts (T007) is a one-time, already-verified
+  // assumption check (research.md §10) — it launches its own bare
+  // Chromium instance against a static fixture page, not this app, and
+  // has no reason to redo that verification (plus this whole webServer
+  // stack's boot cost) on every ordinary test run. Run it directly via
+  // `npx playwright test --config=playwright.spike.config.ts` instead.
+  testIgnore: "upi-camera-spike.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

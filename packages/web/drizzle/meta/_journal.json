@@ -8,6 +8,13 @@
       "when": 1783879200228,
       "tag": "0000_jittery_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784646605377,
+      "tag": "0001_past_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

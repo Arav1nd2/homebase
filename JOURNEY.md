@@ -2,14 +2,14 @@
 
 <!-- The structural and temporal design spec for HomeBase. Pairs with DESIGN.md (visual tokens — locked in a later phase). -->
 
-**Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Phase 7 (Data surfaces, `data-viz`) extends the Habits and Expenses entries with a **Chart encoding** block each — the habit heatmap's streak ramp + legend and the expense ledger's diverging balance indicator. This closes the last section named in the design plan: all 7 page specs are now complete through Phase 7.
+**Status:** Job + Journey + IA + Flows + Page specs complete (Phase 1-2); Phase 6 (Words, `content-design`) extends every page spec below with actual microcopy — see each entry's **Microcopy** block. Phase 7 (Data surfaces, `data-viz`) extends the Habits and Expenses entries with a **Chart encoding** block each — the habit heatmap's streak ramp + legend and the expense ledger's diverging balance indicator. This closes the last section named in the design plan: all 7 page specs are now complete through Phase 7. **UPI addition (2026-07-20):** Phase 1 of a new design plan (`.design-foundations/plans/2026-07-20-upi-shell-nav.md`, doctrine `journey`) adds UPI as this document's 8th Job entry, amends §IA's Navigation model with UPI's 3-level exception — the first tool to exceed the previously-2-level-only hub-and-spoke IA — adds one new branching Flow, and adds 4 Page specs entries (main flow, history, new, tags). UPI's microcopy and chart/redundant-cue encoding are later phases of that same plan, not this one.
 **Doctrine:** `journey` (references/journey/journey.md, journey-stack.md, journey-caveats.md); Phase 6 additions doctrine: `content-design` (references/content-design/content-design.md) — see `design/VOICE.md` for the voice/tone attribute spec and register-split rule the Microcopy blocks below apply; Phase 7 additions doctrine: `data-viz` (skills/data-viz/SKILL.md, references/chart-selection.md, references/viz-principles.md) — see each Chart encoding block and `.design-foundations/build/2026-07-17-homebase-phase-7-discovery.md` for the full citation trail.
 
 ---
 
 ## Job
 
-**JTBD school used for all 7 stories: Moesta's Switch interview** (four forces — push/pull/anxiety/habit), per the project's design plan and `journey`'s own recommendation as the most immediately actionable school for a product team. No other school's vocabulary (Christensen's progress/circumstance, Ulwick's ODI, Klement's job-story-only format) is mixed in, per the school-mixing warning in `journey-caveats.md`.
+**JTBD school used for all 8 stories: Moesta's Switch interview** (four forces — push/pull/anxiety/habit), per the project's design plan and `journey`'s own recommendation as the most immediately actionable school for a product team. No other school's vocabulary (Christensen's progress/circumstance, Ulwick's ODI, Klement's job-story-only format) is mixed in, per the school-mixing warning in `journey-caveats.md`. (UPI, added 2026-07-20 per the UPI + Shell Navigation/Chrome design plan, is the 8th — same school, same self-authored research basis, below.)
 
 **Research basis (stated explicitly, not glossed over):** HomeBase has no external user base — it is built by, and for, its own two users (per the project's CLAUDE.md and design plan). The job stories below are self-authored from firsthand knowledge of those two users' actual life-admin habits, not third-party interview transcripts. That is a legitimate JTBD basis for a "founder is the user" personal app, but it is a hypothesis, not externally validated research — flagged here rather than presented as something it isn't.
 
@@ -118,6 +118,21 @@
 | Anxiety | If adding an item mid-week is slow or inconvenient, the list stops getting maintained and reverts to memory. |
 | Habit | Reflex to wing it at the store from memory, or dump items into a generic Notes-app checklist. |
 
+### UPI
+
+> When I pay someone via UPI in Google Pay or PhonePe and the app has no idea what the payment was for, I want that payment tagged the moment I make it, so I can see later where my money actually went without redoing the bookkeeping from memory or a bank statement.
+
+- **Functional job:** scan a UPI QR code, confirm an amount, tag the payment, and complete it through my own UPI app — with the tag attached the instant the payment happens, not reconstructed afterward.
+- **Emotional job:** feel in control of where money goes, not anxious about a payment silently vanishing into an untagged transaction history.
+- **Social job:** n/a — this is a private, individual record (FR-018), same as Habits.
+
+| Force | UPI |
+|---|---|
+| Push | Google Pay/PhonePe complete the payment but forget it existed the moment it's done — no native UPI app supports tagging, so "what was that ₹450 for" becomes a memory problem days later. |
+| Pull | Tagging happens inside the same motion as paying — scan, confirm, tag, pay — rather than a separate reconciliation chore done later from a bank statement. |
+| Anxiety | Trusting a camera-first flow and a redirect to a separate UPI app with a real payment in progress; not knowing for certain whether a payment "landed" once control leaves this tool (the confirm-prompt/unconfirmed-status design exists specifically to answer this). |
+| Habit | Reflex to just pay directly in Google Pay/PhonePe — it's already the fastest path to *paying*; tagging is the additional step this tool has to make cheap enough to survive that reflex. |
+
 ---
 
 ## Journey
@@ -168,6 +183,26 @@ Two-tier, matching the hub-and-spoke structure:
 - **Quick-starts (top row, pinned):** A small, user-curated subset of tools for the fast/frequent path. Capped deliberately small (not "all six, just reordered") — **Hick's law (Hick–Hyman 1952)** predicts decision time grows with the number of options, so the whole point of this zone is to keep the *daily* launch decision fast regardless of how large the full tool set eventually gets. This is also why quick-starts are a **separate zone** from the shelf (dashboard-with-favorites pattern) rather than the shelf's order simply being "the important ones first" — a single reordered list forces a user to distinguish "pinned" from "just ranked well" by inference; two zones make the distinction structural instead of implied.
 - **Shelf (full list, below):** Every tool, ordered alphabetically by its canonical name. **Hick's law** applies here too, but differently than in the quick-starts row: alphabetical scanning is a low-cost, *familiar* lookup strategy the user already owns (they don't have to re-derive "where does this tool live" as a fresh decision each time), so the shelf stays legible under Hick's law's option-reduction logic even as its option count grows past six or seven. This is also the concrete mechanism for the open-ended shelf requirement — a new tool's shelf position is a deterministic function of its name, never a fresh categorization judgment call.
 
+### Navigation model — UPI's 3-level exception (amendment, 2026-07-20)
+
+Every rule above governs the hub's own navigation and describes a strict **2-level IA** that has held for all six original tools: hub → spoke, full stop — "no spoke-to-spoke navigation... moving from Habits to Groceries means returning to the hub" (§IA above). **UPI is the first tool to exceed that depth**, and this amendment records the exception explicitly, alongside the existing rule, rather than silently redefining it.
+
+**The three levels:**
+
+| Level | What lives here | Reached from |
+|---|---|---|
+| 1 — Hub | The launcher | App entry / back-arrow from any spoke |
+| 2 — UPI spoke | `app/(app)/upi-tracker/page.tsx` — the main scan → amount → tag → pay → confirm flow (one route, a client-side step machine — see the Page specs entry below) | The hub, exactly like any other spoke; still hub-and-spoke at this level, no cross-spoke nav to other tools |
+| 3 — UPI's sub-pages | `/history`, `/tags`, `/new` | Only from within UPI (Level 2 and its own sub-pages) — never directly from the hub |
+
+**Why UPI needs a 3rd level and no other tool does:** every existing tool's landing page *is* its one screen (Habits' heatmap, Groceries' checklist) — 2 levels fully describes it. UPI's landing state is structurally different: the camera opens immediately (FR-001) and occupies the whole screen, so there is no persistent in-tool surface a nav bar, tab strip, or menu could live on — the same "no persistent nav" constraint that shaped the hub's own IA recurs one level down, but now has to route to three additional destinations (History, Tags, the manual-backfill form) that the camera-first surface has no room to list directly.
+
+**The concrete resolution (confirmed this session, not left implicit — matches the approved mock `design/mocks/upi-landing.html`):** the main flow's idle/landing state — the active-scanning screen shown immediately on entry — carries a direct, standing secondary link straight to History, sitting below the viewfinder (not a menu, not a drawer, not a nav bar). This is the fixed answer to "how do you reach history/tags/new without a persistent nav, given the camera opens immediately": **History is one tap from the landing state; Tags and New are one tap from History.** Hick's law (Hick–Hyman 1952) still governs each individual hop — the landing state surfaces exactly one link (History), not three, keeping the camera-first screen's decision load at the same one-option scale as everywhere else in this IA.
+
+**Back-control implication (flagged for Phase 3, not resolved here):** a Level-3 page's "back" goes up to the UPI spoke (Level 2 — the Scan/landing state), not straight to the hub — a second back-tap from there reaches the hub, exactly as it always has from any spoke. This is a navigation-model fact fixed at this IA level; the shared `PageHeader` component's context-aware back-control mechanics that implement it are the later shell-chrome phase's job.
+
+**Scope of the exception:** this 3-level structure is UPI-specific. The other six tools remain 2-level (hub → spoke) exactly as before — this is a documented exception alongside the existing rule, not a generalization of it. A future tool with no persistent in-tool surface would need to make (and document) its own version of this call; it does not inherit UPI's specific routing automatically.
+
 ### Canonical labeling (fixes the mock-review finding)
 
 The mock checkpoint surfaced that the same tool was labeled inconsistently across surfaces ("Habit tracker" on the shelf vs. "Habits" as a quick-start pin; "Groceries" vs. "Grocery tracking"; "Movies & TV" vs. "Movie & TV tracker") — a Nielsen #4 consistency violation and a Jakob's-Law mismatch with the user's own mental model of "this is one destination, not two." This phase sets **one canonical name per tool**, used identically on the shelf card, the quick-start pin (when pinned), and the tool's own page title/H1 — no surface improvises its own phrasing:
@@ -204,7 +239,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 
 ## Flows
 
-**Notation:** Steps use the universal flow notation from `journey-stack.md` (circle = entry/exit, rectangle = action/screen, diamond = decision, arrow = direction), rendered as ordered steps with explicit "Decision" markers rather than a drawn diagram — matching the JOURNEY.md template's own "Decision → yes: path A / no: path B" convention. Six flows below are **task flows** (linear — one per tool's single named linear job, per the design plan's scope split); one (Expenses) is the plan's one genuinely **branching user flow**; one (Launcher) is the app's one customization interaction, named as its own task flow per the plan's edge cases, with a single bounded decision inside it.
+**Notation:** Steps use the universal flow notation from `journey-stack.md` (circle = entry/exit, rectangle = action/screen, diamond = decision, arrow = direction), rendered as ordered steps with explicit "Decision" markers rather than a drawn diagram — matching the JOURNEY.md template's own "Decision → yes: path A / no: path B" convention. Six flows below are **task flows** (linear — one per tool's single named linear job, per the design plan's scope split); one (Expenses) is a genuinely **branching user flow**; one (Launcher) is the app's one customization interaction, named as its own task flow with a single bounded decision inside it. **UPI (added 2026-07-20)** is the second genuinely branching user flow, and the first with multiple first-class error branches named at the flow level (camera-denied, malformed QR, no-UPI-app) rather than one — per that phase's explicit edge-case scope.
 
 ### Log a habit (Habits)
 **Type:** Task flow (linear)
@@ -298,6 +333,28 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 4. The quick-starts row updates immediately; the shelf itself is unaffected — a tool is never removed from the shelf by unpinning it (Phase 1 IA: tools are never hidden for lack of pin status either).
 **Error states:** Pin/unpin state fails to persist — the toggle reverts to its prior state with an inline indicator, rather than showing a false pinned/unpinned state that doesn't survive a reload.
 **Success state:** Quick-starts row reflects the user's current curated set; the shelf remains the full, unaffected source of truth for every tool.
+
+### Scan, tag, and pay (UPI)
+**Type:** User flow (branching — the second genuinely branching flow in this document, alongside Expenses; per the UPI phase's edge-case scope, camera-denied and malformed-QR are each first-class branches, not error afterthoughts)
+**Entry:** Launcher quick-start pin or shelf card → UPI's main flow (camera opens immediately, FR-001)
+**Goal:** Turn a scanned UPI QR code into a tagged, paid, status-recorded transaction, with no manual math and no separate reconciliation step to remember what a payment was for.
+**Steps:**
+1. Land on the main flow; camera opens immediately in QR-scan mode (FR-001) — no tap required, every time the tool is opened, not only on first use.
+2. **Decision — is camera permission granted?** (FR-022; a first-class branch, not an error afterthought, per the UPI phase's explicit edge case)
+   - **Denied →** inline manual payee/amount entry fallback on the same screen (never a dead end) → proceed to step 4 once payee + amount are entered.
+   - **Granted →** continue to step 3.
+3. **Decision — does the scanned code parse as a valid UPI QR?** (FR-002, FR-021; Hick's law, Hick–Hyman 1952 — exactly two outcomes at this branch)
+   - **Malformed / not a UPI code →** inline error, retry scanning without restarting the flow (FR-021) → back to step 3.
+   - **Valid →** payee VPA, payee name, and amount (if present) extracted → continue to step 4.
+4. Details step (amount + tag, one screen — resolved 2026-07-22: merged from separate Amount and Tag steps to cut the "Continue" tap between them, since neither depends on the other's outcome): amount shown pre-filled and editable if the QR carried one, empty and editable if not (FR-003); existing tags shown as tappable chips alongside it (FR-005); "add new tag" creates one inline without leaving the flow (FR-006); zero, one, or multiple tags may be selected (FR-007) — a tag is never required to proceed. **Decision — is the amount positive?** (FR-004) — checked on the "Pay" tap; zero/negative/non-numeric blocks proceeding, the field stays editable, no silent failure.
+5. Tap "Pay" — **primary CTA** (Fitts's law, Fitts 1954: large, bottom-fixed action — this flow's single commit point). The tool constructs a standard UPI deep link (payee VPA, amount, note/reference) and redirects to the device's UPI app (FR-008); the transaction row is persisted at this instant, before the redirect fires (status: pending) — the mechanism that makes step 7 safe even if the user never returns.
+   - **Decision — is a UPI app available to handle the redirect?** (FR-020) — **No →** a clear, actionable message replaces a silent/dead redirect; the pending transaction stays available for retry, not lost. **Yes →** redirect proceeds.
+6. User completes (or abandons) payment inside their own UPI app, then returns to the tool (app resume / tab-visibility change).
+7. **Decision — does the user answer the return-confirmation prompt?** (FR-009, FR-010)
+   - **Answers success or failed →** transaction status updated accordingly.
+   - **Does not answer, navigates away instead →** status resolves to "unconfirmed" — never a stuck or lost state (SC-004).
+**Error states:** camera permission denied (step 2, first-class branch to manual entry, FR-022); malformed/invalid QR (step 3, first-class branch to retry, FR-021); zero/negative amount (step 4, blocks proceeding, FR-004); no UPI app installed (step 5, clear message, transaction preserved for retry, FR-020).
+**Success state:** a transaction row exists with payee, amount, tag(s), timestamp, and a definite status (success/failed/unconfirmed) — never silently lost (SC-004); the user lands back at the Scan step, ready for the next transaction, with the standing link to History available (IA §Navigation model — UPI's 3-level exception, above).
 
 ---
 
@@ -491,3 +548,109 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 
 **Primary CTA:** Quick-add control, button labeled "Add" (the one deliberate exception to full verb+object CTA copy, licensed by `microcopy-patterns.md`'s own carve-out — "acceptable only when the next step is already visible in context," true here since the button sits directly beside its own input field) (Fitts's law, Fitts 1954: persistent, large, single-field input + add button, always in the same reachable position — the Job section's anxiety force names "slow to add mid-week" as the adoption killer, so the add action must be the fastest, most reachable thing on the page).
 **Exit / next:** Back-arrow to the launcher hub.
+
+### UPI (main flow)
+<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/page.tsx — one route, a client-side step machine with 4 named steps (resolved 2026-07-22: Amount and Tag collapsed into one Details step, cutting the "Continue" tap between two fields that never depended on each other's outcome). This is a Level-2 page in the 3-level IA (IA §Navigation model — UPI's 3-level exception, above). -->
+**Purpose:** Turn a scanned UPI QR code into a tagged, paid, status-recorded transaction in one continuous flow — camera-first, no persistent nav.
+**Entry points:** Launcher quick-start pin or shelf card. Camera opens immediately on arrival (FR-001), every time the tool is opened, not only on first use.
+**Content blocks (the 4 named steps of the client-side step machine — one page, not 4 routes):**
+1. **Scan** — camera viewfinder in QR-scan mode with a scan reticle overlay (per the approved mock, `design/mocks/upi-landing.html`); a standing secondary link to History (the IA amendment's fixed answer to "how do you reach history without a nav") and a tertiary "Can't scan? Enter manually" fallback.
+2. **Details** — amount field (extracted or empty, editable, pre-filled from the QR when present, FR-003) and existing tags as tappable chips + inline "add new tag" (FR-005, FR-006; zero, one, or multiple tags selectable, FR-007) on one screen, reached immediately after Scan or manual entry — no intermediate "Continue" tap, since amount and tag entry don't gate each other.
+3. **Pay** — "Pay" primary CTA; validates the amount (FR-004) before constructing the UPI deep link and redirecting to the device's UPI app (FR-008).
+4. **Confirm** — shown on return to the tool (app resume / tab-visibility change); prompts success/failed, defaulting to "unconfirmed" if unanswered (FR-009, FR-010).
+
+**States (step-scoped — this page's states track the step machine, not one page-global set; every step still names all four explicitly, per this phase's format constraint):**
+
+| Step | Empty | Loading | Error | Success |
+|---|---|---|---|---|
+| Scan | n/a — the viewfinder is the step's default content, never blank | Camera permission-pending (before the browser grants/denies) shows a neutral pending state, not a blank screen | **Camera denied** (FR-022): inline manual payee/amount fallback, never a dead end. **Malformed/invalid QR** (FR-021): inline error, retry without restarting the flow | Valid UPI QR decoded → payee VPA, name, amount extracted; advances to Details |
+| Details | Amount is always pre-filled or empty-but-present, never absent; a signed-in user with zero existing tags yet sees the chip row show only the "add new tag" affordance, still fully usable (no dead end on a first-ever use) | Amount is local state only, no fetch; existing tags fetching → skeleton chip placeholders | Zero/negative/non-numeric amount (FR-004) blocks the "Pay" tap; inline validation message, field stays editable. Tag creation fails to save → inline error at the "add new tag" control; entry preserved for retry | Positive amount plus zero, one, or more tags selected/created → advances to Pay on "Pay" tap |
+| Pay | n/a | Deep-link construction + redirect handoff — brief, no long-running fetch | No UPI app installed (FR-020) → clear, actionable message; transaction preserved at its pre-redirect (pending) state for retry, never silent | Redirect proceeds; transaction persisted (status: pending) before the redirect fires (SC-004) → advances to Confirm on return |
+| Confirm | n/a | n/a — the prompt is instant on return (Page Visibility signal) | Status update fails to save → inline error; retry is the same tap; no data lost | User answers success/failed → status saved. No answer + navigates away → status resolves to "unconfirmed" (FR-010), never a stuck state |
+
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, Scan step before any payment scanned — literary register at `--text-lg`, bracket-framed):* "No transaction yet. Scan a UPI code or enter one by hand — it takes just a moment."
+- *Error — camera denied (FR-022; Yifrah: what → why → fix; routes to manual entry as the real solution, not an apology):* "Camera access is blocked. Your device requires permission to use the camera. Grant it to scan, or enter the payee and amount below."
+- *Error — malformed/invalid QR (FR-021; Yifrah what→why→fix, zero blame toward the code or user's photo quality — matches the Expenses AI-parse precedent, `VOICE.md` §Worked example):* "The code didn't scan as a UPI QR. It might be a different kind of code, or the photo was unclear or tilted. Try scanning again, or enter the payee and amount manually."
+- *Error — no UPI app installed (FR-020; Yifrah what→why→fix; plainly names the cause, offers a live path forward):* "No UPI app was found. Your device doesn't have Google Pay, PhonePe, or another UPI app installed. Install one and try again, or enter this transaction manually."
+- *Loading — camera permission-pending (screen-reader only; visual stays neutral pending state):* "Requesting camera access."
+- *Loading — tags fetching (screen-reader only; visual stays skeleton chips):* "Loading your tags."
+- *Success (screen-reader only):* "Scanned. [Payee name] · [amount] detected." / "[Tag] created." / "[Tag] selected." / "Redirecting to your UPI app." / "Payment recorded: [status]."
+- *Dense-data labels (plain register, Inter — `type.dense`/`type.body`):* form field "Amount" (pre-filled or empty, as appropriate); tag-chip section is "Tag this payment (optional)"; "Pay" CTA button on step 3; "Confirm payment" on step 4 with radio options "Success" and "Failed"; secondary links "Enter manually" (Scan step) and "History" (standing link from Scan step).
+
+**Primary CTA:** Step-scoped, not one page-level CTA (Fitts's law, Fitts 1954: each step's own dominant action is the largest target for that step) — "Pay" (step 3) is the flow's single commit point and its highest-stakes CTA.
+**Exit / next:** After Confirm resolves (any outcome), the user remains at the Scan step, ready for the next transaction (matching FR-001's "every time," not just first use). The standing secondary link to History (from Scan) is the flow's other exit — see the Flows entry "Scan, tag, and pay (UPI)" above for the full branching path.
+
+### UPI — History
+<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/history/page.tsx. A Level-3 page in the 3-level IA — reached only from within UPI, never directly from the hub. -->
+**Purpose:** List, filter/group by tag/status/date, and summarize UPI transactions — the payoff view for having tagged anything (FR-012, FR-013, FR-014).
+**Entry points:** The main flow's standing secondary link from the Scan step (IA §Navigation model — UPI's 3-level exception, above); returning from `/tags` or `/new`.
+**Content blocks:**
+1. Filter/group row — tag / status / date (Hick's law, Hick–Hyman 1952: three bounded facets, not an open filter builder).
+2. Summary — per-tag/per-period totals as plain numeric rows, not a chart (§Direction: "a kept notebook, not a productivity dashboard"); a transaction carrying multiple tags counts its full amount toward each tag's total (FR-014, no proportional splitting).
+3. Transaction list — the Ledger dense-frame family extended with tag chips + a 4-value status cue (visual/token detail: a later phase of this plan); newest first; inline edit affordance per transaction (FR-015).
+4. "+ Add manually" — secondary link to `/new`.
+5. "Manage tags" — secondary link to `/tags` (resolved 2026-07-21: a standing secondary link alongside "+ Add manually," not folded into the filter row's Tag control — keeps that row a pure filter, no mixed actions).
+
+**States:**
+- **Empty (an IA-level answer, not just a visual one):** First-ever use — zero transactions recorded yet. Because History is reachable only from within UPI (never listed on the hub), an empty History must not read as a dead end: the filter row, the "+ Add manually" link, and the page's own back control all stay present and usable — there is nothing yet to summarize or list, so the summary and transaction-list blocks are replaced by an empty-state message, but the page itself is never orphaned. This extends Phase 1's original zero-data-tool IA rule (presence is never contingent on data) one level deeper than it has applied before.
+- **Loading:** Transaction list and summary fetching — skeleton rows inside the real dense-frame chrome (the frame itself stays static, per the shared dense-frame pattern).
+- **Error:** A filter/group action or an inline edit fails to save — inline error at the affected row/control; the list keeps its last-known-good state, never blanked.
+- **Success:** Filtered/grouped transaction list populated; summary totals reflect the current filter; newest transactions first.
+
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, History page before any transactions — literary register at `--text-lg`, bracket-framed):* "Nothing tracked yet. Every payment you tag builds this record."
+- *Error — filter/edit fails to save (Yifrah: what → why → fix; no data lost, state reverts, reassurance):* "That change didn't save. The list stayed as it was. Try again."
+- *Loading (screen-reader only; visual stays skeleton rows inside the dense-frame chrome):* "Loading your transaction history."
+- *Success (screen-reader only):* "History updated."
+- *Dense-data labels (plain register, Inter):* filter/group row labels "By tag" / "By status" / "By date"; summary-row label "Subtotal" (plain concrete noun, followed by the tag or period name); transaction-row anatomy (inherited from Ledger, extended with tag chips + status cue — see Phase 5 spec for the full row design): payee name + amount + tag chips + status cue + date/time + inline edit affordance; edit row affordance label "Edit" (the control itself, not a separate row, per the Phase 5 structure); "+ Add manually" secondary link label.
+
+**Primary CTA:** None page-dominant — filter/group controls and "+ Add manually" are secondary affordances, matching Expenses' own non-owning history/ledger pattern.
+**Exit / next:** Back control to the UPI spoke (the Scan/landing step) — this page's "up" level in the 3-level IA, not straight to the hub (IA §Navigation model — UPI's 3-level exception, above; the shared PageHeader's context-aware back-control mechanics that implement this are a later shell-chrome phase's job).
+
+### UPI — Add manually
+<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/new/page.tsx. A Level-3 page, reached only from History. -->
+**Purpose:** Record a UPI payment made outside the tool — before installing it, or otherwise never scanned — with the same structure as a scanned transaction (FR-016).
+**Entry points:** History's "+ Add manually" secondary link.
+**Content blocks:**
+1. Manual entry form — payee name (VPA optional; a backfilled payment has no live QR to source it from), amount, tag(s) (reuses the flow's Tag-step chip picker), date (any past date, not defaulted to "now" the way a scanned transaction is), status (a direct choice — success/failed/unconfirmed/pending — since there is no redirect here to infer it from).
+2. Save action.
+
+**States:**
+- **Empty:** n/a as a list-emptiness case — this page is a single blank form on entry, not a list. Its "empty" is the form's own untouched starting state, distinct from an error.
+- **Loading:** No data fetch on entry beyond the existing tag list — same treatment as the main flow's Details step (skeleton chip placeholders while tags fetch).
+- **Error:** Save fails — draft content (payee/amount/tag(s)/date/status entered so far) is preserved, never wiped, matching the transcription-effort-to-lost-work protection already established for Recipes' page spec.
+- **Success:** Transaction created, identical in structure to a scanned one (FR-016); user returns to History, where it now appears in the list.
+
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Error — save fails (Yifrah: what → why → fix; protects against lost-work anxiety, matching Recipes' own pattern):* "That transaction didn't save. Check your connection and try again. Everything you've entered is still here."
+- *Loading (screen-reader only; visual stays skeleton chip placeholders):* "Loading your tags."
+- *Success (screen-reader only):* "Saved. Transaction added to your history."
+- *Dense-data labels (plain register, Inter):* form fields "Payee name," "Amount," "Tag(s) (optional)," "Date," "Status"; status radio options "Success" / "Failed" / "Pending" / "Unconfirmed"; "Save" button.
+
+**Primary CTA:** "Save" (Fitts's law, Fitts 1954: large, bottom-fixed action on the entry form).
+**Exit / next:** Back to History on save, or via a back control to History if abandoned without saving — this page is a Level-3 sub-page of History, not its peer (IA §Navigation model — UPI's 3-level exception, above).
+
+### UPI — Tags
+<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/tags/page.tsx. A Level-3 page, reached only from History. -->
+**Purpose:** Create, rename, recolor, and delete tags; keep the tag list tidy over time (FR-017).
+**Entry points:** History's "Manage tags" secondary link (resolved 2026-07-21 — a standing link alongside "+ Add manually," not folded into the filter row's Tag control), per the IA amendment's fixed chain landing → History → {Tags, New}.
+**Content blocks:**
+1. Tag list — each row: name, color swatch, rename/recolor/delete affordances.
+2. "Add a tag" entry (secondary to the flow's own inline tag creation, FR-006 — this is the full-management surface, not the fast path).
+
+**States:**
+- **Empty:** Zero tags created yet — the page invites creating the first tag rather than showing a blank list, matching the same zero-data-tool IA rule as every other tool: the page stays reachable and usable regardless of data.
+- **Loading:** Tag list fetching — skeleton row placeholders.
+- **Error:** Rename/recolor/delete fails to save — the affected row reverts to its prior state with an inline error, never a false-success display (matching the Launcher pin-toggle's own revert-on-failure pattern).
+- **Success:** Tag list reflects the current set. A rename/recolor is immediately visible on every transaction that already carries the tag, since the tag is a reference, not a copy (FR-017). A delete removes the tag from future selection while every historical transaction keeps its label — visibly distinct but never blank (FR-017's other half; the full visual treatment for "visibly distinct" is a later phase's job — this phase fixes only that the label must survive, never blank or error).
+
+**Microcopy (Phase 6, `content-design` — see `design/VOICE.md`):**
+- *Empty (first-ever-use, Tags page before any tags created — literary register at `--text-lg`, bracket-framed):* "No tags yet. The first one shapes how you'll track everything."
+- *Error — rename/recolor/delete fails (Yifrah: what → why → fix; row reverts to prior state, no false success):* "That change didn't stick. The tag stayed as it was. Try again."
+- *Loading (screen-reader only; visual stays skeleton rows):* "Loading your tags."
+- *Success (screen-reader only):* "Tag added." / "Tag renamed." / "Tag recolored." / "Tag deleted."
+- *Dense-data labels (plain register, Inter):* tag-row anatomy: tag name + color swatch + affordance buttons/icons; affordance labels "Rename," "Change color," "Delete"; delete confirmation dialog prompt "Delete [tag name]?" with "Delete" (primary, destructive intent) and "Cancel" (secondary); "Add a tag" form field and button label.
+
+**Primary CTA:** "Add a tag" (Fitts's law, Fitts 1954: standard-size, single-thumb-reachable — a lower-frequency administrative action per the Job section's forces, so it does not need the flow's bottom-fixed-bar treatment).
+**Exit / next:** Back to History — this page is a Level-3 sub-page of History (IA §Navigation model — UPI's 3-level exception, above).
