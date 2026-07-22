@@ -26,7 +26,7 @@ cp .env.example .env
 npm run db:start   # then fill in SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY from `npx supabase status`
 ```
 
-Dev: `npm run dev` — starts local Supabase, migrates, builds `packages/web`, and serves it through a **real Cloudflare Workers preview** (Wrangler/Miniflare), not `next dev`. This is deliberate (see Environment Parity below); the tradeoff is no hot reload. To sign in locally you also need the send-email worker running: `npm run dev --workspace=send-email -- --port 8788`.
+Dev: `npm run dev` — starts local Supabase, migrates, builds `packages/web`, then runs three servers concurrently (via `concurrently`, root devDependency): the main app through a **real Cloudflare Workers preview** (Wrangler/Miniflare), not `next dev` (port 8787); the send-email worker (port 8788); and the fake Resend capture server from `packages/e2e` (port 9999), so local sign-in works without any real email provider. This is deliberate (see Environment Parity below); the tradeoff is no hot reload. `Ctrl-C` stops all three. To sign in locally, use one of the addresses in `packages/web/.dev.vars`'s `ALLOWED_EMAILS` (e.g. `test@example.com`) and read the OTP back with `curl "http://localhost:9999/emails?to=test@example.com"`.
 
 Lint / typecheck: `npm run lint`, `npm run typecheck`
 
