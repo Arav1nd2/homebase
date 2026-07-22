@@ -7,7 +7,7 @@
 
 **Four complete entries**, added to `JOURNEY.md`'s `## Page specs` section:
 
-- **"UPI (main flow)"** — `JOURNEY.md:553-586`. Route `app/(app)/upi-tracker/page.tsx`, one route, a client-side step machine with 5 named steps (Scan/Amount/Tag/Pay/Confirm), each with all four states (empty/loading/error/success) named explicitly.
+- **"UPI (main flow)"** — `JOURNEY.md:553-586`. Route `app/(app)/upi-tracker/page.tsx`, one route, a client-side step machine with 4 named steps (Scan/Details/Pay/Confirm — resolved 2026-07-22: Amount and Tag merged into one Details step), each with all four states (empty/loading/error/success) named explicitly.
 - **"UPI — History"** — `JOURNEY.md:587-611`. Route `/upi-tracker/history`.
 - **"UPI — Add manually"** — `JOURNEY.md:613-634`. Route `/upi-tracker/new`.
 - **"UPI — Tags"** — `JOURNEY.md:636-658`. Route `/upi-tracker/tags`.
@@ -25,7 +25,7 @@ All in `DESIGN.md`, additive to the locked Phase 4-7 token set — no locked val
 - **Shell chrome — PageHeader** (`DESIGN.md:956-981`): the shared `PageHeader` (`packages/web/components/shared/page-header.tsx`) gets one `back` contract with 4 values — `{mode:"hub"}` (default, unchanged for the other 6 tools), `{mode:"step", onBack}` (UPI's mid-flow steps), `{mode:"parent", href, label}` (UPI's Level-3 sub-pages), `false` (login's existing exception). Plus a theme-toggle control (`Sun`/`Moon`, wired to `next-themes`). **App-wide — not UPI-scoped.**
 - **Tag color ramp** (`DESIGN.md:1028-1042`): 8 swatches (teal, indigo, violet, orchid, plum, magenta, rose, berry), fill = each hue's `-4` step, text = `-11` step, all pairs WCAG AA both modes (light 4.80-5.06:1, dark 7.01-7.21:1). Verified distinct from the 4 functional hues + accent (≥25° margin).
 - **Transaction status indicator** (`DESIGN.md:1044-1052`): 4-state (pending/success/failed/unconfirmed), words + `lucide-react` icon (`Clock`/`CheckCircle2`/`XCircle`/`HelpCircle`), reusing the 4 already-verified functional inks 1:1 — no new color tokens.
-- **Flow-screen specs** (`DESIGN.md:1054-1087`): Capture screen — Scan step (4 states; camera-denied is a single fallback path, not a 2-option error), Amount step (reuses `{form-field.*}` unchanged), Tag step (chips + inline-create, reuses the tag ramp), Pay step + no-UPI-app error, Confirm-prompt (reuses the status indicator unchanged).
+- **Flow-screen specs** (`DESIGN.md:1054-1087`): Capture screen — Scan step (4 states; camera-denied is a single fallback path, not a 2-option error), Details step — amount + tag (merged 2026-07-22; amount reuses `{form-field.*}` unchanged, tags render as chips + inline-create reusing the tag ramp, both on one screen), Pay step + no-UPI-app error, Confirm-prompt (reuses the status indicator unchanged).
 - **Data-screen specs** (`DESIGN.md:989-995`, `1089-1118`): the Ledger (Expenses) dense-frame is **extended, not replaced** (`DESIGN.md:994-995`) with a tag-chip row + status cue added *below* the existing row, never inside it. Summary totals as plain numeric rows (full-amount-per-tag rule stated explicitly, no chart). Manual-entry form and tag management (delete confirmation, deleted-tag dashed/fill-less treatment) fully specified.
 
 ## Voice & copy

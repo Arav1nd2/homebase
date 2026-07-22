@@ -43,17 +43,16 @@ test("zero or negative amount blocks proceeding until a positive amount is enter
   await fillManualPayeeAndContinue(page, "merchant@upi");
 
   await page.getByLabel("Amount").fill("0");
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Pay" }).click();
   await expect(page.getByText("Enter an amount greater than zero.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Pay" })).not.toBeVisible();
 
   await page.getByLabel("Amount").fill("-5");
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Pay" }).click();
   await expect(page.getByText("Enter an amount greater than zero.")).toBeVisible();
 
   await page.getByLabel("Amount").fill("10.50");
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByRole("button", { name: "Pay" })).toBeVisible();
+  await page.getByRole("button", { name: "Pay" }).click();
+  await expect(page.getByText("Redirecting to your UPI app.")).toBeVisible();
 });
 
 test("no UPI app installed shows a clear message; the pending transaction is preserved (FR-020, SC-004)", async ({
@@ -63,7 +62,6 @@ test("no UPI app installed shows a clear message; the pending transaction is pre
   await goToManualEntry(page);
   await fillManualPayeeAndContinue(page, "merchant@upi");
   await page.getByLabel("Amount").fill("25.00");
-  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Pay" }).click();
 
   // No real UPI app handler exists in this test browser, so the
@@ -85,7 +83,6 @@ test("abandoning the confirm prompt resolves to unconfirmed, never lost (FR-010,
   await goToManualEntry(page);
   await fillManualPayeeAndContinue(page, "abandoned@upi");
   await page.getByLabel("Amount").fill("15.00");
-  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Pay" }).click();
 
   // Wait until the app has actually reached its post-redirect,
@@ -110,7 +107,6 @@ test("full manual-entry journey: pay, return, confirm success (US1 happy path)",
   await goToManualEntry(page);
   await fillManualPayeeAndContinue(page, "success@upi");
   await page.getByLabel("Amount").fill("45.00");
-  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Pay" }).click();
 
   await expect(page.getByText("Redirecting to your UPI app.")).toBeVisible();

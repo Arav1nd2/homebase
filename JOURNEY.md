@@ -346,15 +346,14 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 3. **Decision — does the scanned code parse as a valid UPI QR?** (FR-002, FR-021; Hick's law, Hick–Hyman 1952 — exactly two outcomes at this branch)
    - **Malformed / not a UPI code →** inline error, retry scanning without restarting the flow (FR-021) → back to step 3.
    - **Valid →** payee VPA, payee name, and amount (if present) extracted → continue to step 4.
-4. Amount step: amount shown pre-filled and editable if the QR carried one, empty and editable if not (FR-003). **Decision — is the amount positive?** (FR-004) — zero/negative/non-numeric blocks proceeding; the field stays editable, no silent failure.
-5. Tag step: existing tags shown as tappable chips (FR-005); "add new tag" creates one inline without leaving the flow (FR-006); zero, one, or multiple tags may be selected (FR-007) — a tag is never required to proceed.
-6. Tap "Pay" — **primary CTA** (Fitts's law, Fitts 1954: large, bottom-fixed action — this flow's single commit point). The tool constructs a standard UPI deep link (payee VPA, amount, note/reference) and redirects to the device's UPI app (FR-008); the transaction row is persisted at this instant, before the redirect fires (status: pending) — the mechanism that makes step 8 safe even if the user never returns.
+4. Details step (amount + tag, one screen — resolved 2026-07-22: merged from separate Amount and Tag steps to cut the "Continue" tap between them, since neither depends on the other's outcome): amount shown pre-filled and editable if the QR carried one, empty and editable if not (FR-003); existing tags shown as tappable chips alongside it (FR-005); "add new tag" creates one inline without leaving the flow (FR-006); zero, one, or multiple tags may be selected (FR-007) — a tag is never required to proceed. **Decision — is the amount positive?** (FR-004) — checked on the "Pay" tap; zero/negative/non-numeric blocks proceeding, the field stays editable, no silent failure.
+5. Tap "Pay" — **primary CTA** (Fitts's law, Fitts 1954: large, bottom-fixed action — this flow's single commit point). The tool constructs a standard UPI deep link (payee VPA, amount, note/reference) and redirects to the device's UPI app (FR-008); the transaction row is persisted at this instant, before the redirect fires (status: pending) — the mechanism that makes step 7 safe even if the user never returns.
    - **Decision — is a UPI app available to handle the redirect?** (FR-020) — **No →** a clear, actionable message replaces a silent/dead redirect; the pending transaction stays available for retry, not lost. **Yes →** redirect proceeds.
-7. User completes (or abandons) payment inside their own UPI app, then returns to the tool (app resume / tab-visibility change).
-8. **Decision — does the user answer the return-confirmation prompt?** (FR-009, FR-010)
+6. User completes (or abandons) payment inside their own UPI app, then returns to the tool (app resume / tab-visibility change).
+7. **Decision — does the user answer the return-confirmation prompt?** (FR-009, FR-010)
    - **Answers success or failed →** transaction status updated accordingly.
    - **Does not answer, navigates away instead →** status resolves to "unconfirmed" — never a stuck or lost state (SC-004).
-**Error states:** camera permission denied (step 2, first-class branch to manual entry, FR-022); malformed/invalid QR (step 3, first-class branch to retry, FR-021); zero/negative amount (step 4, blocks proceeding, FR-004); no UPI app installed (step 6, clear message, transaction preserved for retry, FR-020).
+**Error states:** camera permission denied (step 2, first-class branch to manual entry, FR-022); malformed/invalid QR (step 3, first-class branch to retry, FR-021); zero/negative amount (step 4, blocks proceeding, FR-004); no UPI app installed (step 5, clear message, transaction preserved for retry, FR-020).
 **Success state:** a transaction row exists with payee, amount, tag(s), timestamp, and a definite status (success/failed/unconfirmed) — never silently lost (SC-004); the user lands back at the Scan step, ready for the next transaction, with the standing link to History available (IA §Navigation model — UPI's 3-level exception, above).
 
 ---
@@ -551,23 +550,21 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 **Exit / next:** Back-arrow to the launcher hub.
 
 ### UPI (main flow)
-<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/page.tsx — one route, a client-side step machine with 5 named steps. This is a Level-2 page in the 3-level IA (IA §Navigation model — UPI's 3-level exception, above). -->
+<!-- Added 2026-07-20, UPI + Shell Navigation/Chrome design plan, Phase 1. Route: app/(app)/upi-tracker/page.tsx — one route, a client-side step machine with 4 named steps (resolved 2026-07-22: Amount and Tag collapsed into one Details step, cutting the "Continue" tap between two fields that never depended on each other's outcome). This is a Level-2 page in the 3-level IA (IA §Navigation model — UPI's 3-level exception, above). -->
 **Purpose:** Turn a scanned UPI QR code into a tagged, paid, status-recorded transaction in one continuous flow — camera-first, no persistent nav.
 **Entry points:** Launcher quick-start pin or shelf card. Camera opens immediately on arrival (FR-001), every time the tool is opened, not only on first use.
-**Content blocks (the 5 named steps of the client-side step machine — one page, not 5 routes):**
+**Content blocks (the 4 named steps of the client-side step machine — one page, not 4 routes):**
 1. **Scan** — camera viewfinder in QR-scan mode with a scan reticle overlay (per the approved mock, `design/mocks/upi-landing.html`); a standing secondary link to History (the IA amendment's fixed answer to "how do you reach history without a nav") and a tertiary "Can't scan? Enter manually" fallback.
-2. **Amount** — extracted (or empty) amount field, editable, pre-filled from the QR when present (FR-003).
-3. **Tag** — existing tags as tappable chips + inline "add new tag" (FR-005, FR-006); zero, one, or multiple tags selectable (FR-007).
-4. **Pay** — "Pay" primary CTA; constructs the UPI deep link and redirects to the device's UPI app (FR-008).
-5. **Confirm** — shown on return to the tool (app resume / tab-visibility change); prompts success/failed, defaulting to "unconfirmed" if unanswered (FR-009, FR-010).
+2. **Details** — amount field (extracted or empty, editable, pre-filled from the QR when present, FR-003) and existing tags as tappable chips + inline "add new tag" (FR-005, FR-006; zero, one, or multiple tags selectable, FR-007) on one screen, reached immediately after Scan or manual entry — no intermediate "Continue" tap, since amount and tag entry don't gate each other.
+3. **Pay** — "Pay" primary CTA; validates the amount (FR-004) before constructing the UPI deep link and redirecting to the device's UPI app (FR-008).
+4. **Confirm** — shown on return to the tool (app resume / tab-visibility change); prompts success/failed, defaulting to "unconfirmed" if unanswered (FR-009, FR-010).
 
 **States (step-scoped — this page's states track the step machine, not one page-global set; every step still names all four explicitly, per this phase's format constraint):**
 
 | Step | Empty | Loading | Error | Success |
 |---|---|---|---|---|
-| Scan | n/a — the viewfinder is the step's default content, never blank | Camera permission-pending (before the browser grants/denies) shows a neutral pending state, not a blank screen | **Camera denied** (FR-022): inline manual payee/amount fallback, never a dead end. **Malformed/invalid QR** (FR-021): inline error, retry without restarting the flow | Valid UPI QR decoded → payee VPA, name, amount extracted; advances to Amount |
-| Amount | n/a — always pre-filled or empty-but-present, never absent | n/a — local state only, no fetch | Zero/negative/non-numeric amount (FR-004) blocks proceeding; inline validation message; field stays editable | Positive amount confirmed → advances to Tag |
-| Tag | Signed-in user has zero existing tags yet → chip row shows only the "add new tag" affordance, still fully usable (no dead end on a first-ever use) | Existing tags fetching → skeleton chip placeholders | Tag creation fails to save → inline error at the "add new tag" control; entry preserved for retry | Zero, one, or more tags selected/created → advances to Pay |
+| Scan | n/a — the viewfinder is the step's default content, never blank | Camera permission-pending (before the browser grants/denies) shows a neutral pending state, not a blank screen | **Camera denied** (FR-022): inline manual payee/amount fallback, never a dead end. **Malformed/invalid QR** (FR-021): inline error, retry without restarting the flow | Valid UPI QR decoded → payee VPA, name, amount extracted; advances to Details |
+| Details | Amount is always pre-filled or empty-but-present, never absent; a signed-in user with zero existing tags yet sees the chip row show only the "add new tag" affordance, still fully usable (no dead end on a first-ever use) | Amount is local state only, no fetch; existing tags fetching → skeleton chip placeholders | Zero/negative/non-numeric amount (FR-004) blocks the "Pay" tap; inline validation message, field stays editable. Tag creation fails to save → inline error at the "add new tag" control; entry preserved for retry | Positive amount plus zero, one, or more tags selected/created → advances to Pay on "Pay" tap |
 | Pay | n/a | Deep-link construction + redirect handoff — brief, no long-running fetch | No UPI app installed (FR-020) → clear, actionable message; transaction preserved at its pre-redirect (pending) state for retry, never silent | Redirect proceeds; transaction persisted (status: pending) before the redirect fires (SC-004) → advances to Confirm on return |
 | Confirm | n/a | n/a — the prompt is instant on return (Page Visibility signal) | Status update fails to save → inline error; retry is the same tap; no data lost | User answers success/failed → status saved. No answer + navigates away → status resolves to "unconfirmed" (FR-010), never a stuck state |
 
@@ -579,9 +576,9 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 - *Loading — camera permission-pending (screen-reader only; visual stays neutral pending state):* "Requesting camera access."
 - *Loading — tags fetching (screen-reader only; visual stays skeleton chips):* "Loading your tags."
 - *Success (screen-reader only):* "Scanned. [Payee name] · [amount] detected." / "[Tag] created." / "[Tag] selected." / "Redirecting to your UPI app." / "Payment recorded: [status]."
-- *Dense-data labels (plain register, Inter — `type.dense`/`type.body`):* form field "Amount" (pre-filled or empty, as appropriate); tag-chip section is "Tag this payment (optional)"; "Pay" CTA button on step 4; "Confirm payment" on step 5 with radio options "Success" and "Failed"; secondary links "Enter manually" (Scan step) and "History" (standing link from Scan step).
+- *Dense-data labels (plain register, Inter — `type.dense`/`type.body`):* form field "Amount" (pre-filled or empty, as appropriate); tag-chip section is "Tag this payment (optional)"; "Pay" CTA button on step 3; "Confirm payment" on step 4 with radio options "Success" and "Failed"; secondary links "Enter manually" (Scan step) and "History" (standing link from Scan step).
 
-**Primary CTA:** Step-scoped, not one page-level CTA (Fitts's law, Fitts 1954: each step's own dominant action is the largest target for that step) — "Pay" (step 4) is the flow's single commit point and its highest-stakes CTA.
+**Primary CTA:** Step-scoped, not one page-level CTA (Fitts's law, Fitts 1954: each step's own dominant action is the largest target for that step) — "Pay" (step 3) is the flow's single commit point and its highest-stakes CTA.
 **Exit / next:** After Confirm resolves (any outcome), the user remains at the Scan step, ready for the next transaction (matching FR-001's "every time," not just first use). The standing secondary link to History (from Scan) is the flow's other exit — see the Flows entry "Scan, tag, and pay (UPI)" above for the full branching path.
 
 ### UPI — History
@@ -621,7 +618,7 @@ No card sort or tree test has been run (Rosenfeld/Morville's recommended validat
 
 **States:**
 - **Empty:** n/a as a list-emptiness case — this page is a single blank form on entry, not a list. Its "empty" is the form's own untouched starting state, distinct from an error.
-- **Loading:** No data fetch on entry beyond the existing tag list — same treatment as the main flow's Tag step (skeleton chip placeholders while tags fetch).
+- **Loading:** No data fetch on entry beyond the existing tag list — same treatment as the main flow's Details step (skeleton chip placeholders while tags fetch).
 - **Error:** Save fails — draft content (payee/amount/tag(s)/date/status entered so far) is preserved, never wiped, matching the transcription-effort-to-lost-work protection already established for Recipes' page spec.
 - **Success:** Transaction created, identical in structure to a scanned one (FR-016); user returns to History, where it now appears in the list.
 

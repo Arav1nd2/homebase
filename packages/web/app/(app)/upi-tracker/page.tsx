@@ -18,12 +18,11 @@ import { buildUpiDeepLink, parseUpiDeepLink } from "@/lib/upi-tracker/deep-link"
 import { useAppReturnDetection } from "@/lib/upi-tracker/use-app-return";
 import type { TransactionOrigin } from "@/lib/validation/upi-tracker";
 
-type FlowStep = "scan" | "amount" | "tag" | "awaiting-return" | "confirm";
+type FlowStep = "scan" | "details" | "awaiting-return" | "confirm";
 
 type Draft = {
   payeeVpa: string;
   payeeName: string | null;
-  amountPaise: number | null;
   origin: TransactionOrigin;
   tagIds: string[];
 };
@@ -31,7 +30,6 @@ type Draft = {
 const EMPTY_DRAFT: Draft = {
   payeeVpa: "",
   payeeName: null,
-  amountPaise: null,
   origin: "scanned",
   tagIds: [],
 };
@@ -55,11 +53,9 @@ export default function UpiTrackerPage() {
   const [manualPayeeName, setManualPayeeName] = useState("");
   const [manualError, setManualError] = useState<string | null>(null);
 
-  // Amount step
+  // Details step (amount + tags, one screen)
   const [amountInput, setAmountInput] = useState("");
   const [amountError, setAmountError] = useState<string | null>(null);
-
-  // Tag step
   const [creatingTag, setCreatingTag] = useState(false);
   const [tagError, setTagError] = useState<string | null>(null);
 
@@ -104,12 +100,11 @@ export default function UpiTrackerPage() {
     setDraft({
       payeeVpa: result.data.payeeVpa,
       payeeName: result.data.payeeName,
-      amountPaise: result.data.amountPaise,
       origin: "scanned",
       tagIds: [],
     });
     setAmountInput(result.data.amountPaise !== null ? (result.data.amountPaise / 100).toFixed(2) : "");
-    setStep("amount");
+    setStep("details");
   }
 
   function handleRetryScan() {
@@ -126,23 +121,11 @@ export default function UpiTrackerPage() {
     setDraft({
       payeeVpa: vpa,
       payeeName: manualPayeeName.trim() || null,
-      amountPaise: null,
       origin: "manual",
       tagIds: [],
     });
     setAmountInput("");
-    setStep("amount");
-  }
-
-  function handleAmountContinue() {
-    const value = Number(amountInput.replace(/[^0-9.-]/g, ""));
-    if (!Number.isFinite(value) || value <= 0) {
-      setAmountError("Enter an amount greater than zero.");
-      return;
-    }
-    setDraft((prev) => ({ ...prev, amountPaise: Math.round(value * 100) }));
-    setAmountError(null);
-    setStep("tag");
+    setStep("details");
   }
 
   function toggleTag(id: string) {
@@ -194,9 +177,13 @@ export default function UpiTrackerPage() {
   }
 
   async function handlePay() {
-    if (draft.amountPaise === null) {
+    const value = Number(amountInput.replace(/[^0-9.-]/g, ""));
+    if (!Number.isFinite(value) || value <= 0) {
+      setAmountError("Enter an amount greater than zero.");
       return;
     }
+    setAmountError(null);
+
     setPaying(true);
     setPayError(null);
     try {
@@ -205,7 +192,7 @@ export default function UpiTrackerPage() {
         body: JSON.stringify({
           payeeVpa: draft.payeeVpa,
           payeeName: draft.payeeName,
-          amountPaise: draft.amountPaise,
+          amountPaise: Math.round(value * 100),
           origin: draft.origin,
           tagIds: draft.tagIds,
         }),
@@ -277,11 +264,9 @@ export default function UpiTrackerPage() {
   const stepBack =
     step === "scan"
       ? ({ mode: "hub" } as const)
-      : step === "amount"
+      : step === "details"
         ? ({ mode: "step" as const, onBack: () => setStep("scan") })
-        : step === "tag"
-          ? ({ mode: "step" as const, onBack: () => setStep("amount") })
-          : ({ mode: "step" as const, onBack: handleDismissConfirm });
+        : ({ mode: "step" as const, onBack: handleDismissConfirm });
 
   return (
     <>
@@ -352,8 +337,8 @@ export default function UpiTrackerPage() {
           </div>
         ) : null}
 
-        {step === "amount" ? (
-          <div className="flex flex-col gap-related">
+        {step === "details" ? (
+          <div className="flex flex-col gap-between-group">
             <FormField
               id="amount"
               label="Amount"
@@ -362,18 +347,7 @@ export default function UpiTrackerPage() {
               onChange={(event) => setAmountInput(event.target.value)}
               error={amountError ?? undefined}
             />
-            <Button
-              type="button"
-              onClick={handleAmountContinue}
-              className="min-h-tap-target w-full bg-accent-bg-subtle text-base leading-base font-semibold text-accent-text hover:bg-accent-bg-subtle-active active:bg-accent-bg-subtle-active"
-            >
-              Continue
-            </Button>
-          </div>
-        ) : null}
 
-        {step === "tag" ? (
-          <div className="flex flex-col gap-between-group">
             {tagsQuery.isLoading ? (
               <LoadingState label="Loading your tags." />
             ) : tagsQuery.isError ? (
@@ -391,6 +365,7 @@ export default function UpiTrackerPage() {
                 createError={tagError}
               />
             )}
+
             {payError ? <ErrorState message={payError} /> : null}
             <Button
               type="button"
