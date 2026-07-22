@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ApiResponse } from "@/lib/api-client";
 import { AUTH_API_PATHS, type SignOutResponse } from "@/lib/auth/api";
@@ -91,6 +92,10 @@ export default function SmokeTestPage() {
         </button>
       </div>
       <p>Proves browser → API → database → browser works end-to-end.</p>
+
+      <p>
+        <Link href="/upi-tracker">UPI tracker →</Link>
+      </p>
 
       {error && (
         <p role="alert" style={{ color: "crimson" }}>
