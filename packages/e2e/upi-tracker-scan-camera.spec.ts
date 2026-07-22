@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 const fixturesDir = path.join(import.meta.dirname, "fixtures");
 

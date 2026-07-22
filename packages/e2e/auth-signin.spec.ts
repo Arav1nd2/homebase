@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { signInAs } from "./auth-helper";
 import { getLatestOtpCodeFor } from "./fake-resend";
 
 // Allow-listed in .dev.vars (ALLOWED_EMAILS) for local/CI runs. Each
@@ -15,6 +16,13 @@ test("signed-out visitor is sent to /login instead of the main page (FR-001)", a
   await expect(page).toHaveURL(/\/login$/);
 });
 
+// This test and the disallowed-email one below are the only two in the
+// whole e2e suite that go through the real send-email-hook Worker +
+// Resend/fake-capture pipeline (via getLatestOtpCodeFor) — they're the
+// ones actually testing OTP delivery (and its FR-003/FR-014 non-delivery
+// counterpart). Every other spec signs in as setup only, via
+// auth-helper.ts's signInAs, which mints the code directly through
+// Supabase's Admin API and skips the email hop entirely.
 test("sign in with an allowed email's emailed code reaches the main app (US1)", async ({ page }) => {
   await page.goto("/login");
 
@@ -49,13 +57,7 @@ test("a disallowed email produces the identical UI outcome and sends no email (F
 });
 
 test("already-signed-in visitor hitting /login is redirected to the main app (FR-013)", async ({ page }) => {
-  await page.goto("/login");
-  await page.getByLabel("Email address").fill(RELOGIN_EMAIL);
-  await page.getByRole("button", { name: "Send me a code" }).click();
-  const code = await getLatestOtpCodeFor(RELOGIN_EMAIL);
-  await page.getByLabel("Enter the code").fill(code);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await signInAs(page, RELOGIN_EMAIL);
 
   await page.goto("/login");
   await expect(page).toHaveURL(/\/$/);
