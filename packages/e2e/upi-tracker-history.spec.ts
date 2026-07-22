@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 // quickstart.md Scenario 4 (User Story 2): seed transactions via the API
 // (this feature has no import tool — the API is the fastest, most direct

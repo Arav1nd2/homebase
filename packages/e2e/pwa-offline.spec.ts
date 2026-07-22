@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { getLatestOtpCodeFor } from "./fake-resend";
+import { signInAs } from "./auth-helper";
 
 // Own dedicated emails per test — see auth-signin.spec.ts for why
 // (Supabase's 60s per-email resend cooldown vs. parallel test workers).
@@ -9,13 +9,7 @@ const WRITE_EMAIL = "test-pwa-write@example.com";
 const NO_SW_EMAIL = "test-pwa-no-sw@example.com";
 
 async function signIn(page: Page, email: string) {
-  await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
-  await page.getByRole("button", { name: "Send me a code" }).click();
-  const code = await getLatestOtpCodeFor(email);
-  await page.getByLabel("Enter the code").fill(code);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await signInAs(page, email);
   await expect(page.getByRole("heading", { name: "HomeBase smoke test" })).toBeVisible();
 }
 

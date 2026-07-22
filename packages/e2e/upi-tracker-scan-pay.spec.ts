@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInAs } from "./upi-auth-helper";
+import { signInAs } from "./auth-helper";
 
 // quickstart.md Scenarios 1-3 (User Story 1). These tests run under the
 // default browser context, which has no camera permission granted and no
